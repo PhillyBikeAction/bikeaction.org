@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Signup for our Bi-Weekly Newsletter</h1>
+<form action="{% url 'newsletter_signup' %}" method="post">
+  {% csrf_token %}
+
+  {{ form.non_field_errors }}
+
+  {% for hidden_field in form.hidden_fields %}
+    {{ hidden_field.errors }}
+    {{ hidden_field }}
+  {% endfor %}
+
+  {% for field in form.visible_fields %}
+    <p>
+      {{ field.label_tag }}
+      {{ field.errors }}
+      {{ field }}
+      {% if field.help_text %}<span class="helptext">{{ field.help_text }}</span>{% endif %}
+    </p>
+  {% endfor %}
+
+  <div class="button-holder">
+    <input class="submit-button submit-button-smol" type="submit" value="Signup">
+  </div>
+</form>
+{% endblock %}

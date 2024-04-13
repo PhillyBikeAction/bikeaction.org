@@ -5,8 +5,8 @@ from django.urls import reverse
 from django.views.generic import CreateView, DeleteView, DetailView, UpdateView
 from djstripe.models import Customer
 
-from profiles.forms import ProfileUpdateForm
-from profiles.models import Profile, ShirtInterest
+from profiles.forms import NewsletterSignupForm, ProfileUpdateForm
+from profiles.models import NewsletterSignup, Profile, ShirtInterest
 
 
 class ProfileDetailView(LoginRequiredMixin, DetailView):
@@ -41,6 +41,20 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
 
     def get_object(self):
         return Profile.objects.get(user=self.request.user)
+
+
+class NewsletterSignupView(CreateView):
+    model = NewsletterSignup
+    form_class = NewsletterSignupForm
+
+    def form_valid(self, form):
+        obj = form.save(commit=False)
+        obj.save()
+        messages.add_message(self.request, messages.INFO, "Newsletter signup received!")
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return reverse("index")
 
 
 class ShirtInterestView(LoginRequiredMixin, CreateView):

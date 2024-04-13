@@ -119,6 +119,8 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "pbaabp.context_processors.recaptcha_site_key",
+                "profiles.context_processors.newsletter_form",
             ],
         },
     },
@@ -275,6 +277,12 @@ SESAME_MAX_AGE = 7 * 24 * 3600
 # django-recaptcha
 if DEBUG:
     SILENCED_SYSTEM_CHECKS = ["django_recaptcha.recaptcha_test_key_error"]
+    RECAPTCHA_PUBLIC_KEY = env(
+        "RECAPTCHA_PUBLIC_KEY", default="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+    )
+    RECAPTCHA_PRIVATE_KEY = env(
+        "RECAPTCHA_PRIVATE_KEY", default="6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
+    )
 else:
     RECAPTCHA_PUBLIC_KEY = env("RECAPTCHA_PUBLIC_KEY", default=None)
     RECAPTCHA_PRIVATE_KEY = env("RECAPTCHA_PRIVATE_KEY", default=None)
@@ -303,9 +311,9 @@ NEIGHBORHOOD_SELECTION_NOTIFICATION_DISCORD_CHANNEL_ID = env(
 
 # django-admin-csvexport
 CSV_EXPORT_FORMAT_FORM = False
-CSV_EXPORT_DELIMITER = ','
+CSV_EXPORT_DELIMITER = ","
 CSV_EXPORT_ESCAPECHAR = '"'
 CSV_EXPORT_QUOTECHAR = '"'
 CSV_EXPORT_DOUBLEQUOTE = True
-CSV_EXPORT_LINETERMINATOR = r'\n'
-CSV_EXPORT_QUOTING = 'QUOTE_ALL'
+CSV_EXPORT_LINETERMINATOR = r"\n"
+CSV_EXPORT_QUOTING = "QUOTE_ALL"

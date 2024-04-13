@@ -21,7 +21,7 @@
     {% block header %}
     <div class="header">
       <div class="img-header">
-        <a href="https://bikeaction.org/"><img src="{% static 'images/pba-letters.svg' %}"></img></a>
+        <a href="https://bikeaction.org/"><img src="{% static 'images/pba-letters.svg' %}"></a>
       </div>
       <div class="nav-header">
         {% sitetree_menu from "header" include "trunk,topmenu" %}
@@ -60,33 +60,32 @@
               <span><a style="text-decoration: none; color: white;" href="mailto:info@bikeaction.org"><box-icon name='envelope' color="white" style="position: relative; top: .4em;"></box-icon> info@bikeaction.org</a></span>
             </div>
           </div>
-          <!--
           <div class="footer-column">
-            <h3>Subscribe to our Newsletter</h3>
-            <form>
-              <div class="form-fields">
+            <h3>Subscribe to our Bi-Weekly Newsletter</h3>
+            <form action="{% url 'newsletter_signup' %}" method="post">
+              {% csrf_token %}
+
+              {{ newsletter_form.non_field_errors }}
+
+              {% for hidden_field in newsletter_form.hidden_fields %}
+                {{ hidden_field.errors }}
+                {{ hidden_field }}
+              {% endfor %}
+
+              {% for field in newsletter_form.visible_fields %}
                 <p>
-                  <label for="id_first_name">First name:</label>
-                  <input type="text" name="first_name" maxlength="64" required="" id="id_first_name">
-                  <span class="helptext"></span>
+                  {{ field.label_tag }}
+                  {{ field.errors }}
+                  {{ field }}
+                  {% if field.help_text %}<span class="helptext">{{ field.help_text }}</span>{% endif %}
                 </p>
-                <p>
-                  <label for="id_last_name">Last name:</label>
-                  <input type="text" name="last_name" maxlength="64" required="" id="id_last_name">
-                  <span class="helptext"></span>
-                </p>
-                <p>
-                  <label for="id_email">Email:</label>
-                  <input type="email" name="email" maxlength="254" required="" id="id_email">
-                  <span class="helptext"></span>
-                </p>
-              </div>
+              {% endfor %}
+
               <div class="button-holder">
-                <input class="submit-button" type="submit" value="Submit">
+                <input class="submit-button submit-button-smol" type="submit" value="Signup">
               </div>
             </form>
           </div>
-          -->
           <div class="footer-column">
             <h3>Find us on Social Media</h3>
               <a class="social-icon" href="https://twitter.com/phlbikeaction"><box-icon color="white" size="md" type='logo' name='twitter'></box-icon></a>
@@ -95,6 +94,13 @@
             <h3>Join our Discord</h3>
               <a class="social-icon" href="https://discord.gg/FNYfjzjWnB"><box-icon color="white" size="lg" type='logo' name='discord'></box-icon></a>
           </div>
+        </div>
+        <div class="recaptcha">
+           <span>
+               This site is protected by reCAPTCHA and the Google
+               <a href="https://policies.google.com/privacy">Privacy Policy</a> and
+               <a href="https://policies.google.com/terms">Terms of Service</a>
+           </span>
         </div>
         <div class="copyright"><span>©️ 2024 Philly Bike Action. All rights reserved.</span></div>
     </div>
@@ -114,5 +120,21 @@
             }
         }
     </script>
+    <script type="text/javascript">
+    var onloadCallback = function() {
+      [].forEach.call(document.querySelectorAll('.g-recaptcha-explicit'), function(el){
+        var renderCaptcha = grecaptcha.render(el, {
+          sitekey: '{{ recaptcha_site_key }}',
+          callback: function(token) {
+            el.parentNode.querySelector('input[type=hidden]').value = token;
+            return false;
+          }
+        });
+        grecaptcha.execute(renderCaptcha);
+      });
+    };
+    </script>
+
+    <script src='https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit&hl=en-gb' async defer></script>
   </body>
 </html>

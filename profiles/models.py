@@ -47,6 +47,19 @@ class Profile(models.Model):
         return f"{self.user.first_name} {self.user.last_name} - {self.user.email}"
 
 
+class NewsletterSignup(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    mailchimp_contact_id = models.CharField(max_length=64, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    first_name = models.CharField("first name", max_length=150, blank=True)
+    last_name = models.CharField("last name", max_length=150, blank=True)
+    email = models.EmailField("email address", blank=True)
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name} - {self.email}"
+
+
 class ShirtInterest(models.Model):
     class Fit(models.IntegerChoices):
         ALTERNATIVE_01070C = 0, 'Unisex Classic Fit - "Go-To T-Shirt"'

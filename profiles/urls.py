@@ -14,4 +14,5 @@ urlpatterns = [
     path(
         "tshirt/<pk>/delete", views.ShirtInterestDeleteView.as_view(), name="shirt_interest_delete"
     ),
+    path("newsletter_signup", views.NewsletterSignupView.as_view(), name="newsletter_signup"),
 ]

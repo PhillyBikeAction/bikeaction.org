@@ -2,9 +2,9 @@ import copy
 
 from django import forms
 from django_recaptcha.fields import ReCaptchaField
-from django_recaptcha.widgets import ReCaptchaV2Invisible
 
 from campaigns.models import Petition, PetitionSignature
+from pbaabp.widgets import ReCaptchaV2Explicit
 
 
 class PetitionSignatureForm(forms.ModelForm):
@@ -20,7 +20,7 @@ class PetitionSignatureForm(forms.ModelForm):
         initial=True,
         help_text="Check this box to send an email when submitting your signature",
     )
-    captcha = ReCaptchaField(widget=ReCaptchaV2Invisible)
+    captcha = ReCaptchaField(widget=ReCaptchaV2Explicit)
 
     def __init__(self, *args, **kwargs):
         self.petition = kwargs.pop("petition", None)

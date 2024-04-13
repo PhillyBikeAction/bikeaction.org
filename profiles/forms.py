@@ -4,7 +4,8 @@ from django.core.validators import RegexValidator
 from django.utils.html import mark_safe
 from django_recaptcha.fields import ReCaptchaField
 
-from profiles.models import Profile
+from pbaabp.widgets import ReCaptchaV2Explicit
+from profiles.models import NewsletterSignup, Profile
 
 
 class BaseProfileSignupForm(BaseSignupForm):
@@ -87,3 +88,30 @@ class ProfileUpdateForm(forms.ModelForm):
         required=True,
         help_text=mark_safe('Update your email address <a href="/accounts/email/">here</a>'),
     )
+
+
+class NewsletterSignupForm(forms.ModelForm):
+    class Meta:
+        model = NewsletterSignup
+        fields = ["first_name", "last_name", "email"]
+
+    first_name = forms.CharField(
+        label="",
+        help_text="",
+        required=True,
+        widget=forms.TextInput(attrs={"placeholder": "First Name"}),
+    )
+    last_name = forms.CharField(
+        label="",
+        help_text="",
+        required=True,
+        widget=forms.TextInput(attrs={"placeholder": "Last Name"}),
+    )
+    email = forms.EmailField(
+        label="",
+        help_text="",
+        required=True,
+        widget=forms.TextInput(attrs={"placeholder": "Email"}),
+    )
+
+    newsletter_captcha = ReCaptchaField(widget=ReCaptchaV2Explicit())

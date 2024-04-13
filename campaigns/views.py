@@ -81,6 +81,7 @@ def sign_petition(request, petition_slug_or_id):
                 return redirect("campaign", slug=petition.campaign.slug)
             else:
                 return redirect("index")
+
     else:
         form = PetitionSignatureForm(petition=petition)
 

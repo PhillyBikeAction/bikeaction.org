@@ -275,6 +275,7 @@ box-icon {
   display: flex;
   flex-flow: row wrap;
   justify-content: center;
+  padding-bottom: 1em;
 }
 
 .footer .footer-row .footer-column {
@@ -283,9 +284,19 @@ box-icon {
   width: 25%;
 }
 
+.footer .recaptcha {
+  font-size: .5em;
+  padding-bottom: 1em;
+  color: #cccccc;
+}
+
 .footer .copyright {
   padding: 1em;
   background-color: #70bf44;
+}
+
+.grecaptcha-badge {
+  visibility: hidden;
 }
 
 /* Forms */
@@ -325,6 +336,9 @@ form textarea {
   width: 90%;
 }
 form label[for=id_captcha] {
+  display: none;
+}
+form label[for=id_newsletter_captcha] {
   display: none;
 }
 form .helptext {
@@ -425,6 +439,11 @@ form .g-recaptcha {
     font-size: 1.25em;
     padding: 7px 25px;
   }
+}
+
+.submit-button-smol {
+  font-size: 1em;
+  padding: 6px 15px;
 }
 
 body {
