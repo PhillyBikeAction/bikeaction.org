@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.core.validators import RegexValidator
 from django.db import models, transaction
 
-from profiles.tasks import sync_to_mailchimp
+from profiles.tasks import create_mailchimp_subscriber, sync_to_mailchimp
 
 
 class Profile(models.Model):
@@ -73,6 +73,11 @@ class NewsletterSignup(models.Model):
     first_name = models.CharField("first name", max_length=150, blank=True)
     last_name = models.CharField("last name", max_length=150, blank=True)
     email = models.EmailField("email address", blank=True)
+
+    def save(self, *args, **kwargs):
+        if self._state.adding:
+            transaction.on_commit(lambda: create_mailchimp_subscriber.delay(self.id))
+        super(NewsletterSignup, self).save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.first_name} {self.last_name} - {self.email}"

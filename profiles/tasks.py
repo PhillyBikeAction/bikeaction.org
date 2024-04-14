@@ -7,6 +7,44 @@ from mailchimp3.mailchimpclient import MailChimpError
 
 
 @shared_task
+def create_mailchimp_subscriber(newsletter_signup_id):
+    time.sleep(1)  # Wait for txn that initiated this task to settle
+    from profiles.models import NewsletterSignup
+
+    mailchimp = MailChimp(mc_api=settings.MAILCHIMP_API_KEY)
+    newsletter_signup = NewsletterSignup.objects.get(id=newsletter_signup_id)
+
+    print("creating contact...")
+    response = mailchimp.lists.members.create_or_update(
+        settings.MAILCHIMP_AUDIENCE_ID,
+        helpers.get_subscriber_hash(newsletter_signup.email),
+        {
+            "email_address": newsletter_signup.email,
+            "status_if_new": "subscribed",
+            "status": "subscribed",
+            "merge_fields": {
+                "FNAME": newsletter_signup.first_name,
+                "LNAME": newsletter_signup.last_name,
+            },
+        },
+    )
+    newsletter_signup.mailchimp_contact_id = response["id"]
+    newsletter_signup.save()
+
+    print("updating tags...")
+    mailchimp.lists.members.tags.update(
+        settings.MAILCHIMP_AUDIENCE_ID,
+        helpers.get_subscriber_hash(newsletter_signup.email),
+        data={
+            "tags": [
+                {"name": "apps_form", "status": "active"},
+                {"name": "apps_opt_out", "status": "inactive"},
+            ]
+        },
+    )
+
+
+@shared_task
 def sync_to_mailchimp(profile_id):
     time.sleep(1)  # Wait for txn that initiated this task to settle
 
