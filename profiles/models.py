@@ -2,7 +2,9 @@ import uuid
 
 from django.contrib.auth.models import User
 from django.core.validators import RegexValidator
-from django.db import models
+from django.db import models, transaction
+
+from profiles.tasks import sync_to_mailchimp
 
 
 class Profile(models.Model):
@@ -42,6 +44,22 @@ class Profile(models.Model):
     @property
     def discord(self):
         return self.user.socialaccount_set.filter(provider="discord").first()
+
+    def save(self, *args, **kwargs):
+        if not self._state.adding:
+            old_model = Profile.objects.get(pk=self.pk)
+            change_fields = [
+                f.name for f in Profile._meta._get_fields() if f.name in ["newsletter_opt_in"]
+            ]
+            modified = False
+            for i in change_fields:
+                if getattr(old_model, i, None) != getattr(self, i, None):
+                    modified = True
+            if modified:
+                transaction.on_commit(lambda: sync_to_mailchimp.delay(self.id))
+        else:
+            transaction.on_commit(lambda: sync_to_mailchimp.delay(self.id))
+        super(Profile, self).save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name} - {self.user.email}"
