@@ -9,5 +9,5 @@ class ReCaptchaV2Explicit(ReCaptchaBase):
         attrs = super().build_attrs(base_attrs, extra_attrs)
         del attrs["data-callback"]
         attrs["data-size"] = "invisible"
-        attrs["class"] = "g-recaptcha g-recaptcha-explicit"
+        attrs["class"] = "g-recaptcha-explicit"
         return attrs

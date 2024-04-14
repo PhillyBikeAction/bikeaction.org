@@ -403,6 +403,19 @@ form .g-recaptcha {
   white-space: nowrap;
 }
 
+.submit-button:disabled, submit-button[disabled], button:disabled, button[disabled] {
+  pointer-events: none;
+  background-color: grey;
+}
+
+.button-holder:has(>.submit-button:disabled)::after, submit-button[disabled]::after, button:disabled::after, button[disabled]::after {
+  content: 'Checking reCaptcha before allowing submit...';
+  font-size: smaller;
+  display: block;
+  position: relative;
+  color: grey;
+}
+
 .submit-button:focus, button:focus {
   text-decoration: none;
 }

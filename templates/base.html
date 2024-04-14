@@ -82,7 +82,7 @@
               {% endfor %}
 
               <div class="button-holder">
-                <input class="submit-button submit-button-smol" type="submit" value="Signup">
+                <input class="submit-button submit-button-smol" disabled=true type="submit" value="Signup">
               </div>
             </form>
           </div>
@@ -121,18 +121,26 @@
         }
     </script>
     <script type="text/javascript">
-    var onloadCallback = function() {
-      [].forEach.call(document.querySelectorAll('.g-recaptcha-explicit'), function(el){
-        var renderCaptcha = grecaptcha.render(el, {
-          sitekey: '{{ recaptcha_site_key }}',
-          callback: function(token) {
-            el.parentNode.querySelector('input[type=hidden]').value = token;
-            return false;
+      var onloadCallback = function() {
+        [].forEach.call(document.querySelectorAll('.g-recaptcha-explicit'), function(el){
+          try {
+            var renderCaptcha = grecaptcha.render(el, {
+              sitekey: '{{ recaptcha_site_key }}',
+              callback: function(token) {
+                el.closest('form').querySelectorAll('input[type=submit]').disabled = false;
+                [].forEach.call(el.closest('form').querySelectorAll('input[type=submit]'), function(submitButton){
+                  submitButton.disabled = false;
+                });
+                el.parentNode.querySelector('input[type=hidden]').value = token;
+                return false;
+              }
+            });
+            grecaptcha.execute(renderCaptcha);
+          } catch (error) {
+            console.log(error);
           }
         });
-        grecaptcha.execute(renderCaptcha);
-      });
-    };
+      };
     </script>
 
     <script src='https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit&hl=en-gb' async defer></script>
