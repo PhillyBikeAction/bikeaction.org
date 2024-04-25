@@ -410,7 +410,7 @@ form .g-recaptcha {
 
 .button-holder:has(>.submit-button:disabled)::after, submit-button[disabled]::after, button:disabled::after, button[disabled]::after {
   content: 'Checking reCaptcha before allowing submit...';
-  font-size: smaller;
+  font-size: .5em;
   display: block;
   position: relative;
   color: grey;
