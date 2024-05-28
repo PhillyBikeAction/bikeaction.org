@@ -25,3 +25,8 @@ make migrate
 make serve
 ```
 Now the site should be running locally at [localhost:8000](localhost:8000)!
+
+## Limitations running locally
+* Any of the donation stuff won't work because we don't
+have our actual API key locally
+* The navigation header doesn't show up either
