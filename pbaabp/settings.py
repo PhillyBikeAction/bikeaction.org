@@ -237,17 +237,17 @@ DEFAULT_FROM_EMAIL = env(
 SERVER_EMAIL = env("DJANGO_SERVER_EMAIL", default=DEFAULT_FROM_EMAIL)
 
 # Discord
-DISCORD_BOT_TOKEN = env("DISCORD_BOT_TOKEN")
+DISCORD_BOT_TOKEN = env("DISCORD_BOT_TOKEN", default=None)
 
 # Wordpress
 WP_URL = env("WP_URL", default="https://bikeaction.org")
-WP_LOGIN_EMAIL = env("WP_LOGIN_EMAIL")
-WP_LOGIN_PASS = env("WP_LOGIN_PASS")
+WP_LOGIN_EMAIL = env("WP_LOGIN_EMAIL", default=None)
+WP_LOGIN_PASS = env("WP_LOGIN_PASS", default=None)
 WP_CAMPAIGN_PAGE_ID = env("WP_CAMPAIGN_PAGE_ID", default=5877)
 
 # Mailchimp
-MAILCHIMP_API_KEY = env("MAILCHIMP_API_KEY")
-MAILCHIMP_AUDIENCE_ID = env("MAILCHIMP_AUDIENCE_ID")
+MAILCHIMP_API_KEY = env("MAILCHIMP_API_KEY", default=None)
+MAILCHIMP_AUDIENCE_ID = env("MAILCHIMP_AUDIENCE_ID", default=None)
 
 # django-allauth
 ACCOUNT_FORMS = {
@@ -262,8 +262,8 @@ SOCIALACCOUNT_PROVIDERS = {
     "discord": {
         "APPS": [
             {
-                "client_id": env("DISCORD_OAUTH_CLIENT_ID"),
-                "secret": env("DISCORD_OAUTH_CLIENT_SECRET"),
+                "client_id": env("DISCORD_OAUTH_CLIENT_ID", default=None),
+                "secret": env("DISCORD_OAUTH_CLIENT_SECRET", default=None),
                 "key": "",
             }
         ],
@@ -277,8 +277,8 @@ SESAME_MAX_AGE = 7 * 24 * 3600
 if DEBUG:
     SILENCED_SYSTEM_CHECKS = ["django_recaptcha.recaptcha_test_key_error"]
 else:
-    RECAPTCHA_PUBLIC_KEY = env("RECAPTCHA_PUBLIC_KEY", default=None)
-    RECAPTCHA_PRIVATE_KEY = env("RECAPTCHA_PRIVATE_KEY", default=None)
+    RECAPTCHA_PUBLIC_KEY = env("RECAPTCHA_PUBLIC_KEY", default="")
+    RECAPTCHA_PRIVATE_KEY = env("RECAPTCHA_PRIVATE_KEY", default="")
 
 # dj-stripe
 STRIPE_LIVE_SECRET_KEY = env("STRIPE_LIVE_SECRET_KEY", default=None)
@@ -287,6 +287,7 @@ STRIPE_TEST_SECRET_KEY = env("STRIPE_TEST_SECRET_KEY", default=None)
 STRIPE_TEST_PUBLIC_KEY = env("STRIPE_TEST_PUBLIC_KEY", default=None)
 STRIPE_SECRET_KEY = STRIPE_TEST_SECRET_KEY if DEBUG else STRIPE_LIVE_SECRET_KEY
 STRIPE_PUBLIC_KEY = STRIPE_TEST_PUBLIC_KEY if DEBUG else STRIPE_LIVE_PUBLIC_KEY
+STRIPE_API_HOST = env("STRIPE_API_HOST", default=None)
 STRIPE_LIVE_MODE = not DEBUG
 DJSTRIPE_USE_NATIVE_JSONFIELD = True
 DJSTRIPE_FOREIGN_KEY_TO_FIELD = "id"
