@@ -72,6 +72,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "allauth.socialaccount.providers.discord",
     "django_htmx",
+    "django_jsonform",
     "django_recaptcha",
     "djstripe",
     "email_log",

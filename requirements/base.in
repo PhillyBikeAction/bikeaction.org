@@ -13,6 +13,7 @@ django-dotenv
 django-email-log
 django-environ
 django-htmx
+django-jsonform
 django-markdownfield
 django-multi-email-field
 django-ordered-model

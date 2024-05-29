@@ -4,6 +4,7 @@ from django.core.validators import RegexValidator
 from django.db import models
 from django.utils import timezone
 from django.utils.text import slugify
+from django_jsonform.models.fields import JSONField
 from markdownfield.models import RenderedMarkdownField
 from markdownfield.validators import VALIDATOR_NULL
 from multi_email_field.fields import MultiEmailField
@@ -35,6 +36,8 @@ class Campaign(models.Model):
         DISTRICT_10 = 10, "District 10"
         ALL_CITY = 99, "All of Philadelphia"
 
+    TAGS_SCHEMA = {"type": "array", "items": {"type": "string"}}
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=512)
     slug = models.SlugField(null=True, blank=True)
@@ -44,6 +47,10 @@ class Campaign(models.Model):
 
     donation_action = models.BooleanField(default=False)
     subscription_action = models.BooleanField(default=False)
+
+    newsletter_action = models.BooleanField(default=False)
+    newsletter_cta = models.TextField(null=True, blank=True)
+    newsletter_tags = JSONField(schema=TAGS_SCHEMA, null=True, blank=True)
 
     content = MarkdownField(rendered_field="content_rendered", validator=VALIDATOR_NULL)
     content_rendered = RenderedMarkdownField()
