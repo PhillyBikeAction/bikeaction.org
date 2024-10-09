@@ -9,6 +9,8 @@
 {% block content %}
 <h1>{{ rco.name }}</h1>
 
+{% if request.user.is_staff %}<a href="{% url 'rco_staff_detail' rco_id=rco.id %}">View Organizer Page</a>{% endif %}
+
 <script>
 function map_init (map, options) {
   var rcoExtent = L.geoJSON({{ rco.mpoly.json|safe }});

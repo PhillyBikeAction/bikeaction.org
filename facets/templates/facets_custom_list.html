@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Custom Facets</h1>
+
+<ul>
+  {% for custom_facet in custom|dictsort:"name" %}
+  <li><a target="_blank" href="{% url 'custom_staff_detail' custom_facet.id %}">{{ custom_facet }}</a></li>
+  {% endfor %}
+</ul>
+
+{% endblock %}

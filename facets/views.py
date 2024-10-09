@@ -1,6 +1,7 @@
 import json
 import pathlib
 
+from django.contrib.admin.views.decorators import staff_member_required
 from django.conf import settings
 from django.db import transaction
 from django.db.models import Count
@@ -9,7 +10,7 @@ from django.shortcuts import render
 from django.utils.html import mark_safe
 from shapely.geometry import Point, shape
 
-from facets.models import District, RegisteredCommunityOrganization
+from facets.models import District, RegisteredCommunityOrganization, Custom
 from facets.utils import geocode_address
 
 with open(pathlib.Path(__file__).parent / "data" / "Zoning_RCO-2.geojson") as f:
@@ -127,3 +128,21 @@ def rco(request, rco_id):
     rco = RegisteredCommunityOrganization.objects.get(id=rco_id)
     context = {"rco": rco}
     return render(request, "facets_rco.html", context=context)
+
+@staff_member_required
+def rco_detail(request, rco_id):
+    rco = RegisteredCommunityOrganization.objects.get(id=rco_id)
+    context = {"rco": rco}
+    return render(request, "facets_rco_detail.html", context=context)
+
+
+@staff_member_required
+def custom_list(request):
+    custom = Custom.objects.all
+    return render(request, "facets_custom_list.html", context={"custom": custom})
+
+@staff_member_required
+def custom_detail(request, custom_id):
+    custom = Custom.objects.get(id=custom_id)
+    context = {"custom": custom}
+    return render(request, "facets_custom_detail.html", context=context)

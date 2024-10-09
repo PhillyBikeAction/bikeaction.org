@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load leaflet_tags %}
+
+{% block extra_head %}
+{% leaflet_js %}
+{% leaflet_css %}
+{% endblock %}
+
+{% block content %}
+<h1>{{ rco.name }}</h1>
+
+<script>
+function map_init (map, options) {
+  var rcoExtent = L.geoJSON({{ rco.mpoly.json|safe }});
+  var group = new L.featureGroup([rcoExtent]);
+  map.addLayer(group);
+  map.fitBounds(group.getBounds());
+
+  {% for profile in rco.contained_profiles.all %}
+  L.marker([{{ profile.location.y }}, {{ profile.location.x }}]).bindPopup("{{ profile }}").addTo(map);
+  {% endfor %}
+}
+</script>
+
+{% leaflet_map "rco_boundaries" callback="window.map_init" %}
+<br>
+<br>
+<div class="table-container">
+  <table>
+    <tr>
+      <th>Name</th>
+      <th>discord</th>
+      <th>Email</th>
+    </tr>
+    {% for profile in rco.contained_profiles.all %}
+    <tr>
+      <td>{{ profile.user.first_name }} {{ profile.user.last_name }}</td>
+      <td>{{ profile.discord.extra_data.username }}</td>
+      <td>{{ profile.user.email }}</td>
+    {% endfor %}
+  </table>
+</div>
+
+{% endblock %}

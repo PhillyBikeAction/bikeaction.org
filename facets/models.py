@@ -24,6 +24,10 @@ class Facet(models.Model):
         return self.name
 
 
+class Custom(Facet):
+    properties = models.JSONField(null=True, blank=True)
+
+
 class District(Facet):
     targetable = models.BooleanField(default=True)
 
