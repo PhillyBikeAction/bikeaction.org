@@ -12,6 +12,7 @@ from shapely.geometry import Point, shape
 
 from facets.models import District, RegisteredCommunityOrganization, Custom
 from facets.utils import geocode_address
+from profiles.models import Profile
 
 with open(pathlib.Path(__file__).parent / "data" / "Zoning_RCO-2.geojson") as f:
     RCOS = json.load(f)
@@ -146,3 +147,9 @@ def custom_detail(request, custom_id):
     custom = Custom.objects.get(id=custom_id)
     context = {"custom": custom}
     return render(request, "facets_custom_detail.html", context=context)
+
+@staff_member_required
+def all_profiles(request):
+    profiles = Profile.objects.exclude(location__isnull=True)
+    context = {"profiles": profiles}
+    return render(request, "facets_all.html", context=context)

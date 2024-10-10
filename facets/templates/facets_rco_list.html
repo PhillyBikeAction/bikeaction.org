@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 
+
 {% block content %}
+
+{% if request.user.is_staff %}<p><a href="{% url 'custom_list' %}">Custom Facets</a></p>{% endif %}
+
 <h1>Philly RCOs</h1>
 
 <ul>
