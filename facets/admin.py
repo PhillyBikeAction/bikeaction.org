@@ -25,6 +25,7 @@ class FacetAdmin(ReadOnlyLeafletGeoAdminMixin, admin.ModelAdmin):
 
 class DistrictAdmin(FacetAdmin):
     list_display = ["name"]
+    autocomplete_fields = ["organizers"]
 
 
 class RegisteredCommunityOrganizationAdmin(FacetAdmin):

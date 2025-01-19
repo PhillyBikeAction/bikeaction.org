@@ -14,3 +14,16 @@ for model in app_models:
         admin.site.unregister(model)
     except NotRegistered:
         pass
+
+
+class OrganizerAdminSite(admin.AdminSite):
+    site_header = "PBA Organizer Admin"
+    site_title = "PBA Organzier Admin"
+    index_title = "Welcome to the PBA Organizer Admin"
+
+    def has_permission(self, request):
+        return request.user.profile.is_organizer
+
+
+organizer_admin = OrganizerAdminSite(name="organizer_admin")
+organizer_admin.disable_action("delete_selected")

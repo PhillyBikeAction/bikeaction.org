@@ -25,12 +25,22 @@ class Facet(models.Model):
 
 
 class District(Facet):
+    intersecting_rcos = Relationship(
+        to="facets.registeredcommunityorganization", predicate=Q(mpoly__intersects=L("mpoly"))
+    )
+
     targetable = models.BooleanField(default=True)
+    organizers = models.ManyToManyField(
+        "profiles.Profile", related_name="organized_districts", blank=True
+    )
 
 
 class RegisteredCommunityOrganization(Facet):
     intersecting_zips = Relationship(
         to="facets.zipcode", predicate=Q(mpoly__intersects=L("mpoly"))
+    )
+    intersecting_districts = Relationship(
+        to="facets.district", predicate=Q(mpoly__intersects=L("mpoly"))
     )
 
     @property
