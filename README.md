@@ -27,18 +27,18 @@ git clone https://github.com/<your github username>/abp.git
 We will be using WSL for this. Experimentation to get the Makefile to run natively on windows
 failed. In part because the Makefile runs unix only shell commands such as `id -u`
 
-First you will need to install WSL on windows. If you do not have that already microsoft has 
-handy page to walk you through it [link](https://learn.microsoft.com/en-us/windows/wsl/install#prerequisites).
-We will be using Ubuntu for this installation process but you may use any distro
+First you will need to install WSL on windows. If you do not have that already microsoft has a
+handy page to walk you through the process ([link](https://learn.microsoft.com/en-us/windows/wsl/install#prerequisites)).
+We will be using Ubuntu for this installation process but you may use any other distro
 
-The only dependency that you will need to install is make. Run this command in WSL to install it
+Once you have WSL installed the only dependency that you will need to install is "make". Run this command in WSL to install it
 ```shell
 sudo apt-get install make
 ```
 
-Great you now you should be ready to start this service. There is two common ways to do this.
+Great you now should be ready to start this service. There is two common ways to do this.
 The first is to open this project in VScode and open a new wsl terminal in VScode. This should open 
-WSL in the directory where your repo is. From there just run
+WSL in the directory where your repo is. From there just run to start abp
 ```shell
 make serve
 ```
