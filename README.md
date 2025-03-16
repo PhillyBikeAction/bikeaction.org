@@ -3,7 +3,7 @@
 ## Getting Started
 
 First you'll want to ensure that you have created a
-[fork](https://github.com/PhillyBikeAction/abp/fork)
+[fork](https://github.com/PhillyBikeAction/apps/fork)
 of this repo in your own GitHub account.
 This will allow you to push your changes to GitHub so that they can be shared with the main
 repository via Pull Request.
@@ -19,7 +19,7 @@ and orchestrated with [make](https://www.gnu.org/software/make/).
 Clone you fork of the repo:
 
 ```shell
-git clone https://github.com/<your github username>/abp.git
+git clone https://github.com/<your github username>/apps.git
 ```
 
 ### Windows Specific Instruction
@@ -38,7 +38,7 @@ sudo apt-get install make
 
 Great you now should be ready to start this service. There is two common ways to do this.
 The first is to open this project in VScode and open a new wsl terminal in VScode. This should open 
-WSL in the directory where your repo is. From there just run to start abp
+WSL in the directory where your repo is. From there just run this command to start the service
 ```shell
 make serve
 ```
@@ -46,7 +46,7 @@ make serve
 If you do not want to use VScode you may also open WSL and run this command to get WSL to access 
 your repo directory in the windows filesystem
 ```shell
-cd /mnt/<path to abp repo in window>
+cd /mnt/<path to repo in windows>
 ```
 
 Now to address some potential problems that might not be universal
