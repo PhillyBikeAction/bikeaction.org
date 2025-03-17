@@ -58,7 +58,7 @@ with `\n` this can be done by running these three commands in your command line
 
 ```shell
 git config core.auto crlf false
-git rm --cached -r
+git rm --cached -r .
 git reset --hard
 ```
 
