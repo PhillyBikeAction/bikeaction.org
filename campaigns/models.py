@@ -10,6 +10,7 @@ from markdownfield.validators import VALIDATOR_NULL
 from ordered_model.models import OrderedModel
 
 from events.models import ScheduledEvent
+from facets.models import District, RegisteredCommunityOrganization
 from lib.slugify import unique_slugify
 from membership.models import Donation, DonationProduct
 from pbaabp.models import ChoiceArrayField, MarkdownField
@@ -24,20 +25,6 @@ class Campaign(OrderedModel):
         CANCELED = "canceled"
         SUSPENDED = "suspended"
         UNKNOWN = "unknown"
-
-    class District(models.IntegerChoices):
-        NO_DISTRICT = 0, "N/A - Not Philadelphia"
-        DISTRICT_1 = 1, "District 1"
-        DISTRICT_2 = 2, "District 2"
-        DISTRICT_3 = 3, "District 3"
-        DISTRICT_4 = 4, "District 4"
-        DISTRICT_5 = 5, "District 5"
-        DISTRICT_6 = 6, "District 6"
-        DISTRICT_7 = 7, "District 7"
-        DISTRICT_8 = 8, "District 8"
-        DISTRICT_9 = 9, "District 9"
-        DISTRICT_10 = 10, "District 10"
-        ALL_CITY = 99, "All of Philadelphia"
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -74,6 +61,11 @@ class Campaign(OrderedModel):
     wordpress_id = models.CharField(max_length=64, null=True, blank=True)
 
     events = models.ManyToManyField(ScheduledEvent, blank=True, null=True)
+
+    districts = models.ManyToManyField(District, related_name="+", null=True, blank=True)
+    registered_community_organizations = models.ManyToManyField(
+        RegisteredCommunityOrganization, related_name="+", null=True, blank=True
+    )
 
     @property
     def has_actions(self):

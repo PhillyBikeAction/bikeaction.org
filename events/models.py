@@ -9,6 +9,7 @@ from icalendar import Calendar, Event
 from interactions.models.discord.enums import ScheduledEventStatus
 
 from events.tasks import sync_to_mailchimp
+from facets.models import District, RegisteredCommunityOrganization
 from lib.slugify import unique_slugify
 
 
@@ -45,6 +46,11 @@ class ScheduledEvent(models.Model):
     location = models.CharField(max_length=512, null=True, blank=True)
     start_datetime = models.DateTimeField()
     end_datetime = models.DateTimeField(null=True, blank=True)
+
+    districts = models.ManyToManyField(District, related_name="+", null=True, blank=True)
+    registered_community_organizations = models.ManyToManyField(
+        RegisteredCommunityOrganization, related_name="+", null=True, blank=True
+    )
 
     def ics(self):
         _calendar = Calendar()

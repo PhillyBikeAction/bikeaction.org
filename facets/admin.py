@@ -7,7 +7,7 @@ from facets.models import (
     StateSenateDistrict,
     ZipCode,
 )
-from pbaabp.admin import ReadOnlyLeafletGeoAdminMixin
+from pbaabp.admin import ReadOnlyLeafletGeoAdminMixin, organizer_admin
 
 
 class FacetAdmin(ReadOnlyLeafletGeoAdminMixin, admin.ModelAdmin):
@@ -26,6 +26,7 @@ class FacetAdmin(ReadOnlyLeafletGeoAdminMixin, admin.ModelAdmin):
 class DistrictAdmin(FacetAdmin):
     list_display = ["name"]
     autocomplete_fields = ["organizers"]
+    search_fields = ["name"]
 
 
 class RegisteredCommunityOrganizationAdmin(FacetAdmin):
@@ -67,3 +68,5 @@ admin.site.register(RegisteredCommunityOrganization, RegisteredCommunityOrganiza
 admin.site.register(ZipCode, ZipCodeAdmin)
 admin.site.register(StateHouseDistrict, StateHouseDistrictAdmin)
 admin.site.register(StateSenateDistrict, StateSenateDistrictAdmin)
+organizer_admin.register(District, DistrictAdmin)
+organizer_admin.register(RegisteredCommunityOrganization, RegisteredCommunityOrganizationAdmin)

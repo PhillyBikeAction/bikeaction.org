@@ -372,27 +372,5 @@ class UserAdmin(BaseUserAdmin):
     ] + list(BaseUserAdmin.list_filter)
 
 
-class OrganizerUserAdmin(UserAdmin):
-    list_display = ["email", "first_name", "last_name"]
-
-    def has_add_permission(self, request):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return False
-
-    def has_delete_permission(self, request, obj=None):
-        return False
-
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        q_objects = Q()
-        for district in request.user.profile.organized_districts.all():
-            q_objects |= Q(profile__location__within=district.mpoly)
-        qs = qs.filter(q_objects)
-        return qs
-
-
 admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
-organizer_admin.register(User, OrganizerUserAdmin)
