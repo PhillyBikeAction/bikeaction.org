@@ -1,19 +1,23 @@
 from csvexport.actions import csvexport
 from django.contrib import admin
+from django.db.models import Q
 from ordered_model.admin import OrderedModelAdmin
 
 from campaigns.models import Campaign, Petition, PetitionSignature
 from campaigns.tasks import geocode_signature
 from facets.models import District, RegisteredCommunityOrganization
-from pbaabp.admin import ReadOnlyLeafletGeoAdminMixin
+from pbaabp.admin import ReadOnlyLeafletGeoAdminMixin, organizer_admin
 
 
 class CampaignAdmin(OrderedModelAdmin):
     readonly_fields = ["wordpress_id", "donation_total"]
-    autocomplete_fields = ["events"]
-    list_display = ("__str__", "status", "visible", "move_up_down_links")
+    autocomplete_fields = ["events", "districts", "registered_community_organizations"]
+    list_display = ("__str__", "status", "visible", "get_districts", "move_up_down_links")
     list_filter = ["status", "visible"]
     ordering = ("status", "order")
+
+    def get_districts(self, obj):
+        return ", ".join(d.name.lstrip("District ") for d in obj.districts.all())
 
     def get_form(self, *args, **kwargs):
         help_texts = {
@@ -22,6 +26,22 @@ class CampaignAdmin(OrderedModelAdmin):
         }
         kwargs.update({"help_texts": help_texts})
         return super().get_form(*args, **kwargs)
+
+
+class OrganizerCampaignAdmin(CampaignAdmin):
+
+    def has_add_permission(self, request):
+        return True
+
+    def has_change_permission(self, request, obj=None):
+        if obj:
+            return set(request.user.profile.organized_districts.all()).intersection(
+                set(obj.districts.all())
+            )
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 class PetitionAdmin(admin.ModelAdmin):
@@ -45,6 +65,30 @@ class PetitionAdmin(admin.ModelAdmin):
             cnt = obj.signatures.filter(location__within=rco.mpoly).count()
             report += f"{rco.name}: {cnt}\n"
         return report
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        q_objects = Q()
+        for district in request.user.profile.organized_districts.all():
+            q_objects |= Q(campaign__districts__in=[district])
+        qs = qs.filter(q_objects)
+        return qs
+
+
+class OrganizerPetitionAdmin(admin.ModelAdmin):
+
+    def has_add_permission(self, request):
+        return True
+
+    def has_change_permission(self, request, obj=None):
+        if obj:
+            return set(request.user.profile.organized_districts.all()).intersection(
+                set(obj.campaign.districts.all())
+            )
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 def geocode(modeladmin, request, queryset):
@@ -110,6 +154,29 @@ class PetitionSignatureAdmin(admin.ModelAdmin, ReadOnlyLeafletGeoAdminMixin):
     has_comment.boolean = True
 
 
+class OrganizerPetitionSignatureAdmin(PetitionSignatureAdmin):
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        q_objects = Q()
+        for district in request.user.profile.organized_districts.all():
+            q_objects |= Q(petition__campaign__districts__in=[district])
+        qs = qs.filter(q_objects)
+        return qs
+
+
 admin.site.register(Campaign, CampaignAdmin)
 admin.site.register(Petition, PetitionAdmin)
 admin.site.register(PetitionSignature, PetitionSignatureAdmin)
+organizer_admin.register(Campaign, OrganizerCampaignAdmin)
+organizer_admin.register(Petition, OrganizerPetitionAdmin)
+organizer_admin.register(PetitionSignature, OrganizerPetitionSignatureAdmin)

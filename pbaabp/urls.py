@@ -11,6 +11,7 @@ from wagtail.documents import urls as wagtaildocs_urls
 
 from campaigns.sitemap import CampaignSitemap
 from events.sitemap import ScheduledEventSitemap
+from pbaabp.admin import organizer_admin
 from pbaabp.views import (
     EmailLoginView,
     _newsletter_signup_partial,
@@ -40,6 +41,7 @@ urlpatterns = [
     ),
     path("", include("pages.urls")),
     path("admin/", admin.site.urls),
+    path("organizer/", organizer_admin.urls),
     path("cms/", include(wagtailadmin_urls)),
     path("documents/", include(wagtaildocs_urls)),
     path(f"mailjet/{settings.MAILJET_SECRET_SIGNUP_URL}/", newsletter_bridge),
