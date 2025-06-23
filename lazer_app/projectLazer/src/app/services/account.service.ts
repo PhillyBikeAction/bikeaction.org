@@ -147,7 +147,7 @@ export class AccountService {
     private platform: Platform,
   ) {
     if (platform.is('hybrid')) {
-      this.urlRoot = 'https://bikeaction.ngrok.io';
+      this.urlRoot = 'https://bikeaction.org';
     }
   }
 }

@@ -286,7 +286,7 @@ export class ViolationDetailPage implements OnInit {
 
   ngOnInit() {
     if (this.platform.is('hybrid')) {
-      this.rootUrl = 'https://bikeaction.ngrok.io';
+      this.rootUrl = 'https://bikeaction.org';
     }
     this.location = window.location.pathname + window.location.search;
     this.violationId = this.route.snapshot.queryParams['violationId'];

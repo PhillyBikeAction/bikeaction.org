@@ -335,7 +335,7 @@ export class ConfirmViolationDetailsModalComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.platform.is('hybrid')) {
-      this.rootUrl = 'https://bikeaction.ngrok.io';
+      this.rootUrl = 'https://bikeaction.org';
     }
     const parsedAddress = parseAddress(this.violation.address);
     this.blockNumber = parsedAddress.streetNumber as string;
