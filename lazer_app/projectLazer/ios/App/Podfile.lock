@@ -1,0 +1,105 @@
+PODS:
+  - Capacitor (7.0.1):
+    - CapacitorCordova
+  - CapacitorApp (7.0.1):
+    - Capacitor
+  - CapacitorBrowser (7.0.1):
+    - Capacitor
+  - CapacitorCamera (7.0.1):
+    - Capacitor
+  - CapacitorCordova (7.0.1)
+  - CapacitorDevice (7.0.1):
+    - Capacitor
+  - CapacitorFilesystem (7.1.1):
+    - Capacitor
+    - IONFilesystemLib (~> 1.0)
+  - CapacitorGeolocation (7.1.2):
+    - Capacitor
+    - IONGeolocationLib (~> 1.0)
+  - CapacitorHaptics (7.0.1):
+    - Capacitor
+  - CapacitorKeyboard (7.0.1):
+    - Capacitor
+  - CapacitorNetwork (7.0.1):
+    - Capacitor
+  - CapacitorPreferences (7.0.1):
+    - Capacitor
+  - CapacitorStatusBar (7.0.1):
+    - Capacitor
+  - CordovaPlugins (7.2.0):
+    - CapacitorCordova
+  - IONFilesystemLib (1.0.0)
+  - IONGeolocationLib (1.0.0)
+
+DEPENDENCIES:
+  - "Capacitor (from `../../node_modules/@capacitor/ios`)"
+  - "CapacitorApp (from `../../node_modules/@capacitor/app`)"
+  - "CapacitorBrowser (from `../../node_modules/@capacitor/browser`)"
+  - "CapacitorCamera (from `../../node_modules/@capacitor/camera`)"
+  - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
+  - "CapacitorDevice (from `../../node_modules/@capacitor/device`)"
+  - "CapacitorFilesystem (from `../../node_modules/@capacitor/filesystem`)"
+  - "CapacitorGeolocation (from `../../node_modules/@capacitor/geolocation`)"
+  - "CapacitorHaptics (from `../../node_modules/@capacitor/haptics`)"
+  - "CapacitorKeyboard (from `../../node_modules/@capacitor/keyboard`)"
+  - "CapacitorNetwork (from `../../node_modules/@capacitor/network`)"
+  - "CapacitorPreferences (from `../../node_modules/@capacitor/preferences`)"
+  - "CapacitorStatusBar (from `../../node_modules/@capacitor/status-bar`)"
+  - CordovaPlugins (from `../capacitor-cordova-ios-plugins`)
+
+SPEC REPOS:
+  trunk:
+    - IONFilesystemLib
+    - IONGeolocationLib
+
+EXTERNAL SOURCES:
+  Capacitor:
+    :path: "../../node_modules/@capacitor/ios"
+  CapacitorApp:
+    :path: "../../node_modules/@capacitor/app"
+  CapacitorBrowser:
+    :path: "../../node_modules/@capacitor/browser"
+  CapacitorCamera:
+    :path: "../../node_modules/@capacitor/camera"
+  CapacitorCordova:
+    :path: "../../node_modules/@capacitor/ios"
+  CapacitorDevice:
+    :path: "../../node_modules/@capacitor/device"
+  CapacitorFilesystem:
+    :path: "../../node_modules/@capacitor/filesystem"
+  CapacitorGeolocation:
+    :path: "../../node_modules/@capacitor/geolocation"
+  CapacitorHaptics:
+    :path: "../../node_modules/@capacitor/haptics"
+  CapacitorKeyboard:
+    :path: "../../node_modules/@capacitor/keyboard"
+  CapacitorNetwork:
+    :path: "../../node_modules/@capacitor/network"
+  CapacitorPreferences:
+    :path: "../../node_modules/@capacitor/preferences"
+  CapacitorStatusBar:
+    :path: "../../node_modules/@capacitor/status-bar"
+  CordovaPlugins:
+    :path: "../capacitor-cordova-ios-plugins"
+
+SPEC CHECKSUMS:
+  Capacitor: de199cba6c8b20995428ad0b7cb0bc6ca625ffd4
+  CapacitorApp: febecbb9582cb353aed037e18ec765141f880fe9
+  CapacitorBrowser: 6299776d496e968505464884d565992faa20444a
+  CapacitorCamera: 6e73f1fc6c629a672658705a02409b60854bc0f1
+  CapacitorCordova: 63d476958d5022d76f197031e8b7ea3519988c64
+  CapacitorDevice: c6f6d587dd310527f8a48bf09c4e7b4a4cf14329
+  CapacitorFilesystem: 39173fe5a0e77851119998d0d8c61c70551a412a
+  CapacitorGeolocation: b005744861676af9abd19a0682f0b1af32cc2c99
+  CapacitorHaptics: 1f1e17041f435d8ead9ff2a34edd592c6aa6a8d6
+  CapacitorKeyboard: 09fd91dcde4f8a37313e7f11bde553ad1ed52036
+  CapacitorNetwork: 15cb4385f0913a8ceb5e9a4d7af1ec554bdb8de8
+  CapacitorPreferences: 6c98117d4d7508034a4af9db64d6b26fc75d7b94
+  CapacitorStatusBar: 6e7af040d8fc4dd655999819625cae9c2d74c36f
+  CordovaPlugins: be68e3a329c1f58ec4461ab75ba0c73191495188
+  IONFilesystemLib: ceacae793975039530458eabab0c495c70515a0d
+  IONGeolocationLib: 81f33f88d025846946de2cf63b0c7628e7c6bc9d
+
+PODFILE CHECKSUM: 67bd539fb13848cdd993f566ea749a85277c6836
+
+COCOAPODS: 1.16.2
