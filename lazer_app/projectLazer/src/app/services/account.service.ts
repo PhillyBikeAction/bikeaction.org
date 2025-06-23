@@ -144,10 +144,10 @@ export class AccountService {
   constructor(
     private storage: Storage,
     private toastController: ToastController,
-    private platform: Platform
+    private platform: Platform,
   ) {
     if (platform.is('hybrid')) {
-      this.urlRoot = 'https://bikeaction.org';
+      this.urlRoot = 'https://bikeaction.ngrok.io';
     }
   }
 }

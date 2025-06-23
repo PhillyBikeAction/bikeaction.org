@@ -14,6 +14,6 @@ export class AccountPage {
   constructor(
     public accountService: AccountService,
     public onlineStatus: OnlineStatusService,
-    public updateService: UpdateService
+    public updateService: UpdateService,
   ) {}
 }

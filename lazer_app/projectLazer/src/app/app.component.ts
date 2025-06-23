@@ -67,7 +67,7 @@ export class AppComponent implements OnInit {
     public onlineStatus: OnlineStatusService,
     public updateService: UpdateService,
     public versionService: VersionService,
-    public accountService: AccountService
+    public accountService: AccountService,
   ) {
     this.storage.create();
     document.addEventListener('touchstart', this.handleTouchStart, {

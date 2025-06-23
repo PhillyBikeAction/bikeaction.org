@@ -15,7 +15,7 @@ export class UpdateService implements OnDestroy {
   constructor(
     private swUpdate: SwUpdate,
     private zone: NgZone,
-    private locationStrategy: LocationStrategy
+    private locationStrategy: LocationStrategy,
   ) {
     this.checkForUpdate();
   }
@@ -29,7 +29,7 @@ export class UpdateService implements OnDestroy {
       console.log(
         this.isNewVersionAvailable
           ? 'A new version is available.'
-          : 'Already on the latest version.'
+          : 'Already on the latest version.',
       );
     } catch (error) {
       console.error('Failed to check for updates:', error);
@@ -54,7 +54,7 @@ export class UpdateService implements OnDestroy {
     this.swUpdate
       .activateUpdate()
       .then(
-        () => (document.location.href = this.locationStrategy.getBaseHref())
+        () => (document.location.href = this.locationStrategy.getBaseHref()),
       )
       .catch((error) => console.error('Failed to apply updates:', error));
   }

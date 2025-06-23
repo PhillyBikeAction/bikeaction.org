@@ -28,7 +28,7 @@ export class LoginPage implements OnInit {
     public onlineStatus: OnlineStatusService,
     public updateService: UpdateService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
   ) {}
 
   async onLogin(form: NgForm) {

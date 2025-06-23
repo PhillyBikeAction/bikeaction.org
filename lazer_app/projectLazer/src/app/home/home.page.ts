@@ -44,7 +44,7 @@ export class HomePage implements OnInit {
     private photos: PhotoService,
     private storage: Storage,
     private violations: ViolationService,
-    public platform: Platform
+    public platform: Platform,
   ) {}
 
   async getCurrentPosition() {
@@ -61,7 +61,7 @@ export class HomePage implements OnInit {
             Geolocation.clearWatch({ id: this.geoWatchId });
           }
         }
-      }
+      },
     );
     //this.violationPosition = {
     //  timestamp: 123,
@@ -95,17 +95,17 @@ export class HomePage implements OnInit {
     console.log(imageId);
     const savedImage = await this.photos.savePictureFromBase64(
       image.base64String as string,
-      `${imageId}.jpg`
+      `${imageId}.jpg`,
     );
     fromURL(savedImage.webviewPath as string, 0.5, 480, 'auto', 'jpeg').then(
       (thumbnail) => {
         blobToURL(thumbnail).then((thumbnailUrl) => {
           const savedThumbnail = this.photos.savePictureFromBase64(
             thumbnailUrl as string,
-            `thumb-${imageId}.jpg`
+            `thumb-${imageId}.jpg`,
           );
         });
-      }
+      },
     );
     this.violationImage = savedImage.webviewPath;
     this.violationTime = new Date();
@@ -159,7 +159,7 @@ export class HomePage implements OnInit {
                       .get('violation-' + dis.violationId)
                       .then((data: any) => {
                         data.position = JSON.parse(
-                          JSON.stringify(dis.violationPosition)
+                          JSON.stringify(dis.violationPosition),
                         );
                         dis.storage
                           .set('violation-' + dis.violationId, data)

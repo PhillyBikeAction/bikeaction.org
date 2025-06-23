@@ -33,7 +33,7 @@ export class ChooseAddressModalComponent implements OnInit {
       (address: string) =>
         (address as string).split(',').length >= 4 &&
         address.match(/^\d/) &&
-        !(address as string).split(',')[0].includes(' & ')
+        !(address as string).split(',')[0].includes(' & '),
     );
   }
 }

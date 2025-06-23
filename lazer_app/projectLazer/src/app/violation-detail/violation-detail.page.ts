@@ -40,7 +40,7 @@ export class ViolationDetailPage implements OnInit {
     public onlineStatus: OnlineStatusService,
     public updateService: UpdateService,
     public accountService: AccountService,
-    private platform: Platform
+    private platform: Platform,
   ) {}
 
   async selectVehicle(index: number) {
@@ -142,7 +142,7 @@ export class ViolationDetailPage implements OnInit {
       long: number,
       dt: Date,
       img: string,
-      headers: any
+      headers: any,
     ): Promise<any> {
       return new Promise((resolve, reject) => {
         fromURL(img, 0.3, 'auto', 'auto', 'jpeg').then((resizedBlob) => {
@@ -188,13 +188,13 @@ export class ViolationDetailPage implements OnInit {
             this.violationData.position!.coords!.longitude,
             violationTime,
             photo.webviewPath,
-            this.accountService.headers()
+            this.accountService.headers(),
           )
             .then((data: any) => {
               this.violationData.raw = data;
               this.storage.set(
                 'violation-' + this.violationId,
-                this.violationData
+                this.violationData,
               );
               if (data.vehicles.length == 1) {
                 this.selectVehicle(0);
@@ -286,7 +286,7 @@ export class ViolationDetailPage implements OnInit {
 
   ngOnInit() {
     if (this.platform.is('hybrid')) {
-      this.rootUrl = 'https://bikeaction.org';
+      this.rootUrl = 'https://bikeaction.ngrok.io';
     }
     this.location = window.location.pathname + window.location.search;
     this.violationId = this.route.snapshot.queryParams['violationId'];

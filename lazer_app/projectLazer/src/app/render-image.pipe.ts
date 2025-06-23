@@ -6,7 +6,7 @@ function cropDataUrl(
   x: number,
   y: number,
   width: number,
-  height: number
+  height: number,
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     const image = new Image();
@@ -40,7 +40,7 @@ export class RenderImagePipe implements PipeTransform {
     xmin?: number,
     ymin?: number,
     xmax?: number,
-    ymax?: number
+    ymax?: number,
   ): any {
     return Filesystem.readFile({
       path: filename,
@@ -56,7 +56,7 @@ export class RenderImagePipe implements PipeTransform {
         return cropDataUrl(dataUrl, xmin, ymin, xmax - xmin, ymax - ymin).then(
           (newDataUrl) => {
             return newDataUrl;
-          }
+          },
         );
       } else {
         return dataUrl;

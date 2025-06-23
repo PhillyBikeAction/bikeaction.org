@@ -19,15 +19,15 @@
 
 <ion-content color="light" class="ion-padding">
   <ion-list id="modal-list" [inset]="true">
-    @for (item of filteredItems; track item.get('value')) {
-    <ion-item>
-      <ion-checkbox
-        [value]="item.get('value')"
-        [checked]="isChecked(item.get('value'))"
-        (ionChange)="checkboxChange($event)"
-        >{{ item.get("text") }}</ion-checkbox
-      >
-    </ion-item>
+    @for (item of filteredItems; track item.get("value")) {
+      <ion-item>
+        <ion-checkbox
+          [value]="item.get('value')"
+          [checked]="isChecked(item.get('value'))"
+          (ionChange)="checkboxChange($event)"
+          >{{ item.get("text") }}</ion-checkbox
+        >
+      </ion-item>
     }
   </ion-list>
 </ion-content>

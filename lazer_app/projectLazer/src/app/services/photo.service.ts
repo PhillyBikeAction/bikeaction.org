@@ -12,7 +12,10 @@ export class PhotoService {
   public photos: UserPhoto[] = [];
   private PHOTO_STORAGE: string = 'photos';
 
-  constructor(private platform: Platform, private storage: Storage) {}
+  constructor(
+    private platform: Platform,
+    private storage: Storage,
+  ) {}
 
   public async savePicture(photo: Photo) {
     const base64Data = await this.readAsBase64(photo);

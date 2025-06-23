@@ -19,7 +19,7 @@ export default defineConfig([
 
     extends: compat.extends(
       "plugin:@angular-eslint/recommended",
-      "plugin:@angular-eslint/template/process-inline-templates"
+      "plugin:@angular-eslint/template/process-inline-templates",
     ),
 
     languageOptions: {

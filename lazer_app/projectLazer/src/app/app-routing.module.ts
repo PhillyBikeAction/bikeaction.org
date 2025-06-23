@@ -21,7 +21,7 @@ const routes: Routes = [
     path: 'violation-detail',
     loadChildren: () =>
       import('./violation-detail/violation-detail.module').then(
-        (m) => m.ViolationDetailPageModule
+        (m) => m.ViolationDetailPageModule,
       ),
   },
   {

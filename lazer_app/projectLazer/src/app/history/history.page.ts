@@ -23,7 +23,7 @@ export class HistoryPage {
     private violations: ViolationService,
     public photos: PhotoService,
     public changeDetectorRef: ChangeDetectorRef,
-    public updateService: UpdateService
+    public updateService: UpdateService,
   ) {}
 
   async renderPhoto(filename: string): Promise<UserPhoto> {
@@ -44,7 +44,7 @@ export class HistoryPage {
   deleteViolation(violationId: number) {
     this.violations.deleteViolation(violationId);
     this.violationHistory = this.violationHistory.filter(
-      (item) => item.id !== violationId
+      (item) => item.id !== violationId,
     );
     this.changeDetectorRef.detectChanges();
   }

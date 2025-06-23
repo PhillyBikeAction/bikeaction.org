@@ -7,7 +7,7 @@ export function get_fields() {
 
 export function get_options(field: string) {
   return Object.entries(PPAFormData).find(
-    ([key]) => key === field
+    ([key]) => key === field,
   )?.[1] as readonly string[];
 }
 

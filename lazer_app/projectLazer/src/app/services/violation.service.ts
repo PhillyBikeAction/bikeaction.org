@@ -11,7 +11,10 @@ import { PhotoService } from './photo.service';
   providedIn: 'root',
 })
 export class ViolationService {
-  constructor(private photos: PhotoService, private storage: Storage) {}
+  constructor(
+    private photos: PhotoService,
+    private storage: Storage,
+  ) {}
 
   sortViolations(): Promise<any[]> {
     return this.history().then((history) => {
