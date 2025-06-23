@@ -32,7 +32,7 @@
 
 <ion-content [fullscreen]="true">
   <ion-card
-    *ngIf="(platform.is('android') || platform.is('ios') || platform.is('iphone')) && !platform.is('pwa')"
+    *ngIf="(platform.is('android') || platform.is('ios') || platform.is('iphone')) && !(platform.is('pwa') || platform.is('hybrid'))"
   >
     <ion-card-header>
       <ion-card-title>Install Laser Vision</ion-card-title>
@@ -59,6 +59,7 @@
       </div>
     </ion-card-content>
   </ion-card>
+
   <ion-card *ngIf="!geoPerms">
     <ion-card-header>
       <ion-card-title>GeoLocation</ion-card-title>
