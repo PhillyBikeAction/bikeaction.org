@@ -9,6 +9,8 @@ import { Device, DeviceInfo } from '@capacitor/device';
 import { Geolocation, Position } from '@capacitor/geolocation';
 import { Storage } from '@ionic/storage-angular';
 
+import { v4 as uuidv4 } from 'uuid';
+
 import { fromURL, blobToURL } from 'image-resize-compress';
 
 import { OnlineStatusService } from '../services/online.service';
@@ -83,18 +85,24 @@ export class HomePage implements OnInit {
 
     const image = await Camera.getPhoto({
       quality: 60,
-      resultType: CameraResultType.Uri,
+      resultType: CameraResultType.Base64,
       source: CameraSource.Camera,
       webUseInput: true,
+      saveToGallery: true,
     });
 
-    const savedImage = await this.photos.savePicture(image);
+    const imageId = uuidv4();
+    console.log(imageId);
+    const savedImage = await this.photos.savePictureFromBase64(
+      image.base64String as string,
+      `${imageId}.jpg`
+    );
     fromURL(savedImage.webviewPath as string, 0.5, 480, 'auto', 'jpeg').then(
       (thumbnail) => {
         blobToURL(thumbnail).then((thumbnailUrl) => {
           const savedThumbnail = this.photos.savePictureFromBase64(
             thumbnailUrl as string,
-            `thumb-${savedImage.filepath}`
+            `thumb-${imageId}.jpg`
           );
         });
       }

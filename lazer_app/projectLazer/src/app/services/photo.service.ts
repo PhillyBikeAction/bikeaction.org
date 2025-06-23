@@ -14,29 +14,23 @@ export class PhotoService {
 
   constructor(private platform: Platform, private storage: Storage) {}
 
-  // Save picture to file on device
   public async savePicture(photo: Photo) {
-    // Convert photo to base64 format, required by Filesystem API to save
     const base64Data = await this.readAsBase64(photo);
 
-    // Write the file to the data directory
     const fileName = new Date().getTime() + '.jpeg';
     const savedFile = await Filesystem.writeFile({
       path: fileName,
       data: base64Data,
       directory: Directory.External,
+      recursive: true,
     });
 
     if (this.platform.is('hybrid')) {
-      // Display the new image by rewriting the 'file://' path to HTTP
-      // Details: https://ionicframework.com/docs/building/webview#file-protocol
       return {
-        filepath: savedFile.uri,
+        filepath: fileName,
         webviewPath: Capacitor.convertFileSrc(savedFile.uri),
       };
     } else {
-      // Use webPath to display the new image instead of base64 since it's
-      // already loaded into memory
       return {
         filepath: fileName,
         webviewPath: photo.webPath,
@@ -52,18 +46,15 @@ export class PhotoService {
       path: fileName,
       data: base64Data,
       directory: Directory.External,
+      recursive: true,
     });
 
     if (this.platform.is('hybrid')) {
-      // Display the new image by rewriting the 'file://' path to HTTP
-      // Details: https://ionicframework.com/docs/building/webview#file-protocol
       return {
-        filepath: savedFile.uri,
+        filepath: fileName,
         webviewPath: Capacitor.convertFileSrc(savedFile.uri),
       };
     } else {
-      // Use webPath to display the new image instead of base64 since it's
-      // already loaded into memory
       return {
         filepath: fileName,
         webviewPath: `data:image/jpeg;base64,${base64Data}`,
@@ -77,33 +68,22 @@ export class PhotoService {
       directory: Directory.External,
     }).then((readFile) => {
       return new Promise((resolve, reject) => {
-        if (this.platform.is('hybrid')) {
-          resolve({
-            filepath: filename,
-            webviewPath: '',
-          });
-        } else {
-          resolve({
-            filepath: filename,
-            webviewPath: `data:image/jpeg;base64,${readFile.data}`,
-          });
-        }
+        resolve({
+          filepath: filename,
+          webviewPath: `data:image/jpeg;base64,${readFile.data}`,
+        });
       });
     });
   }
 
-  // Read camera photo into base64 format based on the platform the app is running on
   public async readAsBase64(photo: Photo) {
-    // "hybrid" will detect Cordova or Capacitor
     if (this.platform.is('hybrid')) {
-      // Read the file into base64 format
       const file = await Filesystem.readFile({
         path: photo.path!,
       });
 
       return file.data;
     } else {
-      // Fetch the photo, read as a blob, then convert to base64 format
       const response = await fetch(photo.webPath!);
       const blob = await response.blob();
 
@@ -111,7 +91,6 @@ export class PhotoService {
     }
   }
 
-  // Delete picture by removing it from reference data and the filesystem
   public async deletePicture(filename: string) {
     await Filesystem.deleteFile({
       path: filename,
