@@ -69,8 +69,41 @@
               ],
               "outputHashing": "all"
             },
+            "productionApp": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "2mb",
+                  "maximumError": "5mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "2kb",
+                  "maximumError": "4kb"
+                }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/version.ts",
+                  "with": "src/environments/version.prod.ts"
+                },
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
+              ],
+              "outputHashing": "all"
+            },
             "development": {
               "baseHref": "/laser/",
+              "buildOptimizer": false,
+              "optimization": false,
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true
+            },
+            "developmentApp": {
               "buildOptimizer": false,
               "optimization": false,
               "vendorChunk": true,
@@ -90,8 +123,14 @@
             "production": {
               "buildTarget": "app:build:production"
             },
+            "productionApp": {
+              "buildTarget": "app:build:productionApp"
+            },
             "development": {
               "buildTarget": "app:build:development"
+            },
+            "developmentApp": {
+              "buildTarget": "app:build:developmentApp"
             },
             "ci": {
               "progress": false

@@ -13,7 +13,7 @@ const compat = new FlatCompat({
 });
 
 export default defineConfig([
-  globalIgnores(["projects/**/*"]),
+  globalIgnores(["projects/**/*", "ios", "android", "www"]),
   {
     files: ["**/*.ts"],
 
