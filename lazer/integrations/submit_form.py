@@ -386,7 +386,10 @@ async def submit_form_with_playwright(
                         "screenshot-before-submit.png", f, save=False
                     )
 
-            if not settings.DEBUG:
+            if not settings.DEBUG and violation_report.submission.created_by.email not in (
+                "playstore@bikeaction.org",
+                "appstore@bikeaction.org",
+            ):
                 async with page.expect_request(
                     lambda request: request.url == SUBMIT_SMARTSHEET_URL
                     and request.method.lower() == "post"
@@ -405,7 +408,10 @@ async def submit_form_with_playwright(
             # make sure there is a POST to the form URL and it returned 200
             # also, the submission page should have an h1 element with specific
             await page.wait_for_load_state("networkidle")
-            if not settings.DEBUG:
+            if not settings.DEBUG and violation_report.submission.created_by.email not in (
+                "playstore@bikeaction.org",
+                "appstore@bikeaction.org",
+            ):
                 # validate the submission page
                 success_text = page.get_by_role(
                     "heading",
