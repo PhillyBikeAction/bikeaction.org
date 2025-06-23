@@ -197,10 +197,9 @@ export class HomePage implements OnInit {
     if (Capacitor.isNativePlatform()) {
       try {
         const status = await Geolocation.checkPermissions();
-        if (status) {
+        if (status.location == 'granted') {
           this.geoPerms = true;
         }
-        this.geoPerms = false;
       } catch (e) {
         console.log(e);
         this.geoPerms = false;
