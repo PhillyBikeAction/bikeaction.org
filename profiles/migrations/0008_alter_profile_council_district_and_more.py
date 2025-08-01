@@ -37,7 +37,7 @@ class Migration(migrations.Migration):
             name="newsletter_opt_in",
             field=models.BooleanField(
                 default=False,
-                help_text="Subscribe to Philly Bike Actions monthly newsletter.",
+                help_text="Subscribe to Philly Bike Action’s monthly newsletter.",
                 verbose_name="Newsletter",
             ),
         ),
