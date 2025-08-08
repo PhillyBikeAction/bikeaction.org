@@ -1,0 +1,20 @@
+<small><i>Thank you for RSVPing to <a href="https://bikeaction.org/">our</a> <a href="https://bikeaction.org/events/11th-street-bike-lan-clean-up/">11th Street Bike Lane Clean-up</a>!</i></small>
+
+Good Morning {{ first_name }},
+
+Looking forward to meeting all of you tomorrow and cleaning 11th Street!
+
+We will begin at 9am and plan to end at 12pm. Feel free to join us for all or part of the cleanup.
+
+We will set up a table with a Philly Bike Action banner, hopefully in a shady spot, near 1101 Washington Ave. Organizers will be wearing Philly Bike Action shirts: black with green or pink text. 
+
+Expected weather is sunny and mid 70s, perfect for being outdoors for a few hours. Please bring water, hat, sunscreen, and clothes you wouldn’t mind getting dirty. We have a collection of brooms, shovels, gloves, and weeding tools for you to use, but if you have your own gloves or weeding tools, please bring those!
+
+Limited coffee and bagels will be provided by Bart’s Bagels, as well as iced tea and pastries from Guzo Cafe. 
+
+Following the cleanup, Two Robbers Lodge on Fitzwater is hosting us for a little afterparty. Volunteers are welcome to a complimentary vodka soda or draft, and kids are welcome to a free glass of orange juice.
+
+These weeds don’t stand a chance!
+
+Ben & Jacob  
+*Philly Bike Action*
