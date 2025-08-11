@@ -2,19 +2,17 @@
 
 Good Morning {{ first_name }},
 
-Looking forward to meeting all of you tomorrow and cleaning 11th Street!
+Thank you for helping out with our 11th street clean-up. The street is looking so nice and weed free! 
 
-We will begin at 9am and plan to end at 12pm. Feel free to join us for all or part of the cleanup.
+<b>One of our volunteers lost a black backpack with a white Nike logo after the clean-up</b>. If anyone picked it up by accident please let us know so we can help get it back to him.
 
-We will set up a table with a Philly Bike Action banner, hopefully in a shady spot, near 1101 Washington Ave. Organizers will be wearing Philly Bike Action shirts: black with green or pink text. 
+You can stay up to date about future PBA projects and volunteer opportunities by signing up for a [PBA account](https://bikeaction.org/accounts/signup/) and attending one of our [monthly district meetings](https://bikeaction.org/events/).
 
-Expected weather is sunny and mid 70s, perfect for being outdoors for a few hours. Please bring water, hat, sunscreen, and clothes you wouldn’t mind getting dirty. We have a collection of brooms, shovels, gloves, and weeding tools for you to use, but if you have your own gloves or weeding tools, please bring those!
+See you at the next clean-up!
 
-Limited coffee and bagels will be provided by Bart’s Bagels, as well as iced tea and pastries from Guzo Cafe. 
-
-Following the cleanup, Two Robbers Lodge on Fitzwater is hosting us for a little afterparty. Volunteers are welcome to a complimentary vodka soda or draft, and kids are welcome to a free glass of orange juice.
-
-These weeds don’t stand a chance!
+<div style="width: 100%; text-align: center;">
+  <img style="width: 66%;" src="templates/email/11st-cleanup/group.jpg">
+</div>
 
 Ben & Jacob  
 *Philly Bike Action*
