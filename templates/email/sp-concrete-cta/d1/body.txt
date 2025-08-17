@@ -1,0 +1,44 @@
+Hello {{first_name}},
+
+<i><small>You are receiving this email from [Philly Bike Action](https://bikeaction.org/) because you have a PBA account.</small></i>
+
+**Concrete bike lane protection for ALL of Spruce and Pine is in jeopardy.** We need YOU to take two important actions *(scroll down for instructions\!)*:
+
+* **Email Councilmember Squilla** to reject the proposed half-measure:
+
+<div style="display: flex; justify-content: center;">
+  <a class="submit-button" href="https://bikeaction.org/maillink/view/cta-concrete-d1/?{{maillinks_params}}">Send Email to Squilla</a>
+</div>
+
+* **Save the date** for a ride demanding concrete now, every block on Sept 5\!
+
+*What could concrete protection look like?*
+
+<span style="width: 80%; text-align: center;"><img style="width: 100%; border-radius: 5px; border: solid grey;" src="templates/email/sp-concrete-cta/pills-render.jpeg"></span>
+<div style="width: 100%; text-align: center;"><i>Sample rendering by Philly Bike Action</i></div>
+
+The anti-bike opposition group suing the City has **leaked** an [internal city memo](https://prod.cdn.bikeaction.org/images/20250605_spruce_pine_plan_otis_recco_leak.original.jpg) revealing OTIS’ recommendation to **install concrete curb protection** on **ONLY HALF of the Spruce and Pine** **bike lanes**\--compromising everyone’s safety for the convenience of a vocal minority.
+
+**This is a preliminary plan**. Council President Johnson and Councilmember Squilla still need to review and approve the plan before it’s finalized. *This is their opportunity to prioritize safety over people parking in the bike lane.* **We need YOU to ask your representative, Councilmember Mark Squilla, to reject this recommendation and insist on protecting every block.** 
+
+Here is a **pre-filled sample email** you can add your comment: 
+
+<div style="display: flex; justify-content: center;">
+  <a class="submit-button" href="https://bikeaction.org/maillink/view/cta-concrete-d1/?{{maillinks_params}}">Send Email to Squilla</a>
+</div>
+
+Optional talking points:
+
+* Unprotected blocks will **continue to have serious or fatal crashes.**  
+* Impatient drivers will use the unprotected bike lane to pass other cars.  
+* Leaving some blocks unprotected will not create the **"protected bike network" that is crucial for safe routes**, especially for children.  
+* Concrete curb separation is a proven, data-backed safety measure **that does not require "testing**".  
+* Support is not evenly divided. 7,000 people signed our [two petitions](https://bikeaction.org/documents/66/Bike_Lane_Petition_Cover_Pages_03_11_25_2.pdf), 668 people filled out [supportive postcards](https://bikeaction.org/campaign/spruce-pine-postcards/), and 368 respondents at the public open house [supported the plan](http://instagram.com/p/DFq29HPR7Qv/?hl=en&img_index=1) by a margin of **5:1.**
+
+<i>**SAVE THE DATE:** We're hitting the streets to ride for CONCRETE NOW, EVERY BLOCK on **Friday September 5**. Start: Art Museum steps, meet 5:45pm. End: City Hall (North). [Please RSVP](https://bikeaction.org/events/ride-concrete-now-every-block/).</i>
+
+<span style="width: 80%; text-align: center;"><img style="width: 100%; border-radius: 5px; border: solid grey;" src="templates/email/sp-concrete-cta/bf-angel-bike.jpeg"></span>
+<div style="width: 100%; text-align: center;"><i><small>Protesters cycle past the street where cyclist Dr. Barbara Friedes was struck and killed. (Nick Kariuki/Billy Penn)</small></i></div>
+
+Thank you,  
+**Philly Bike Action**

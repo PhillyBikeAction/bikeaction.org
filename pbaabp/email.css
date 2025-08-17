@@ -57,7 +57,7 @@ p {
 /* CSS */
 .submit-button {
   appearance: button;
-  background-color: rgb(131, 189, 86);
+  background-color: #70bf44;
   background-image: none;
   border: none;
   border-radius: .5em;
