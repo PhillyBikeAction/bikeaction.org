@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static markdownify %}
 
 {% block content %}
 
@@ -7,7 +7,7 @@
 <h1>{{ maillink.title }}</h1>
 
 {% if maillink.description%}
-<p style="font-size: larger;">{{ maillink.description|safe }}</p>
+<div style="font-size: larger;">{{ maillink.description|markdownify }}</div>
 {% endif %}
 
 <p style="width: 100%; text-align: center;">
