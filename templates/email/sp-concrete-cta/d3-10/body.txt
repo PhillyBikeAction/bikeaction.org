@@ -10,7 +10,7 @@ Hello {{first_name}},
   <a class="submit-button" href="https://bikeaction.org/maillink/view/cta-concrete/?{{maillinks_params}}">Send Email to Johnson</a>
 </div>
 
-* **Save the date** for a ride demanding concrete now, every block on Sept 5\!
+* **SAVE THE DATE:** We're hitting the streets to ride for CONCRETE NOW, EVERY BLOCK on **Friday September 5**. Start: Art Museum steps, meet 5:45pm. End: City Hall (North). [Please RSVP](https://bikeaction.org/events/ride-concrete-now-every-block/).
 
 *What could concrete protection look like?*
 
@@ -34,8 +34,6 @@ Optional talking points:
 * Leaving some blocks unprotected will not create the **"protected bike network" that is crucial for safe routes**, especially for children.  
 * Concrete curb separation is a proven, data-backed safety measure **that does not require "testing**".  
 * Support is not evenly divided. 7,000 people signed our [two petitions](https://bikeaction.org/documents/66/Bike_Lane_Petition_Cover_Pages_03_11_25_2.pdf), 668 people filled out [supportive postcards](https://bikeaction.org/campaign/spruce-pine-postcards/), and 368 respondents at the public open house [supported the plan](http://instagram.com/p/DFq29HPR7Qv/?hl=en&img_index=1) by a margin of **5:1.**
-
-<i>**SAVE THE DATE:** We're hitting the streets to ride for CONCRETE NOW, EVERY BLOCK on **Friday September 5**. Start: Art Museum steps, meet 5:45pm. End: City Hall (North). [Please RSVP](https://bikeaction.org/events/ride-concrete-now-every-block/).</i>
 
 <span style="width: 80%; text-align: center;"><img style="width: 100%; border-radius: 5px; border: solid grey;" src="templates/email/sp-concrete-cta/bf-angel-bike.jpeg"></span>
 <div style="width: 100%; text-align: center;"><i><small>Protesters cycle past the street where cyclist Dr. Barbara Friedes was struck and killed. (Nick Kariuki/Billy Penn)</small></i></div>
