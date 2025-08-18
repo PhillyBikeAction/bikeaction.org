@@ -10,8 +10,9 @@
 <div>{{ maillink.description|markdownify }}</div>
 {% endif %}
 
-<p style="width: 100%; text-align: center;">
+<p style="width: 33%; margin: 1em auto; text-align: center;">
   <a class="cta-button submit-button" href="{{ mail_link }}">Send Now!</a>
+  <br><small>This will open your email client with a draft email for you to edit and send.</small>
 </p>
 
 <table class="email">
@@ -25,8 +26,9 @@
 {% endif %}</td></tr>
 </table>
 
-<p style="width: 100%; text-align: center;">
+<p style="width: 33%; margin: 1em auto; text-align: center;">
   <a class="cta-button submit-button" href="{{ mail_link }}">Send Now!</a>
+  <br><small>This will open your email client with a draft email for you to edit and send.</small>
 </p>
 </div>
 {% endblock %}
