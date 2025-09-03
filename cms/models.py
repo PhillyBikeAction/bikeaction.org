@@ -292,7 +292,7 @@ class PostPage(Page):
                 PostPage.objects.live()
                 .filter(date__lte=self.date)
                 .exclude(slug=self.slug)
-                .order_by("pk")
+                .order_by("-pk")
                 .first()
             )
         return None
