@@ -1,0 +1,24 @@
+Hello {{ first_name }},
+
+<small><i>Thank you for RSVPing to <a href="https://bikeaction.org/">our</a></i></small>
+
+<div style="width: 100%; text-align: center;">
+  <a href="https://bikeaction.org/events/ride-concrete-now-every-block/"><b>Ride to Protect ALL of Spruce and Pine</b></a>
+
+Date: <b>Friday, September 5</b> | Time: <b>5:45pm</b> (rally), roll <b>6pm</b>.   <br>
+Start: Philadelphia Museum of Art <a href="https://maps.app.goo.gl/kz8nHJz9ZM4Yo8b39">map</a>) | End: City Hall  <br>
+Ride length: 30-45 mins Pace: Easy<br>
+
+</div>
+
+This week, Harry Fenton—a regular attendee at PBA District 1 meetings and a Washington Square West resident—was [struck and killed by a driver](https://www.nbcphiladelphia.com/news/local/man-hit-killed-car-crash-fairmount-park-west-philadelphia-tuesday/4262851/) while riding his bike in Fairmount Park. **These crashes are preventable** and are a tragic reminder of the need for protected bicycle infrastructure across all of Philadelphia. 
+
+Tell city leaders: no half measures, carve-outs, or exceptions along the Spruce and Pine bike lanes. **Every block of Spruce and Pine, and every Philadelphian, deserves protection.** 
+
+**Join us Friday, September 5th on the Art Museum Steps at 5:45 PM for a brief rally followed by a ride to City Hall**. We will take a moment of silence to honor Harry before the ride. 
+
+Feel free to bring signs for your bike or show up early to make one with our supplies. Indego stations are available near the [start](https://maps.app.goo.gl/97Jx6KuzkxWxSkYC8) and [end](https://maps.app.goo.gl/ek8XDNo4cNsLBPZ7A) of the ride. The Art Museum is easily accessible via the Schuylkill River Trail.
+
+Please share the ride information with family, friends, and neighbors. 
+
+**Philly Bike Action**
