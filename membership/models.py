@@ -51,9 +51,14 @@ class Donation(models.Model):
     donation_product = models.ForeignKey(
         DonationProduct, blank=True, null=True, on_delete=models.SET_NULL, related_name="donations"
     )
+    comment = models.CharField(max_length=256, blank=True, null=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2, null=False, blank=False)
 
     def __str__(self):
+        if self.comment and not self.donation_product:
+            return f'Donation of ${self.amount} - "{self.comment}"'
+        if self.comment and self.donation_product:
+            return '"Donation of ${self.amount} to {self.donation_product.name} - "{self.comment}"'
         return f"Donation of ${self.amount} to {self.donation_product.name}"
 
 
