@@ -29,8 +29,8 @@ class DonationProductAdmin(admin.ModelAdmin):
 
 
 class DonationAdmin(admin.ModelAdmin):
-    pass
-
+    list_filter = ("donation_product",)
+    search_fields = ("comment",)
 
 admin.site.register(Membership, MembershipAdmin)
 admin.site.register(Donation, DonationAdmin)
