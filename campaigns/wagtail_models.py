@@ -430,6 +430,13 @@ class CampaignsIndexPage(Page):
     subpage_types = ["campaigns.CampaignPage"]  # Can only have CampaignPage children
     max_count = 1  # Only one campaigns index page should exist
 
+    def get_children(self):
+        """Override to return campaigns ordered by status then default page tree order"""
+        # Get the default children queryset which already has page tree ordering
+        children = super().get_children()
+        # Add status ordering first, keeping the default page tree order as secondary
+        return children.type(CampaignPage).order_by("campaignpage__status")
+
     def get_context(self, request):
         context = super().get_context(request)
         campaigns = CampaignPage.objects.live().descendant_of(self)
