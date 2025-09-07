@@ -1,0 +1,212 @@
+{% load i18n %}
+{% load pba_tags %}
+
+{# Determine the actual petition ID to use #}
+{% if value.use_existing_petition and value.existing_petition_id %}
+    {% with petition_id=value.existing_petition_id %}
+{% else %}
+    {% with petition_id=value.petition_id %}
+{% endif %}
+
+<div class="petition-block" id="petition-{{ petition_id }}">
+    {% if value.display_on_campaign_page %}
+        {% if value.call_to_action_header %}
+            <h3>{{ value.call_to_action }}</h3>
+        {% endif %}
+        
+        {# Only show form if campaign is not completed #}
+        {% if page.status != "completed" %}
+        <div class="form-container">
+            {% if value.letter %}
+                <div class="petition-letter">{{ value.letter|linebreaks }}</div>
+            {% endif %}
+            
+            <form method="post" action="{{ page.url }}petition/{{ petition_id }}/sign/" class="petition-form">
+                {% csrf_token %}
+                
+                {# Hidden field to identify which petition #}
+                <input type="hidden" name="petition_id" value="{{ petition_id }}">
+                
+                {# Dynamic form fields based on configuration #}
+                {% for field_name in value.signature_fields.enabled_fields %}
+                    <p>
+                        {% if field_name == 'first_name' %}
+                            <label for="id_first_name">First Name</label>
+                            <input type="text" name="first_name" id="id_first_name" required>
+                        {% elif field_name == 'last_name' %}
+                            <label for="id_last_name">Last Name</label>
+                            <input type="text" name="last_name" id="id_last_name" required>
+                        {% elif field_name == 'email' %}
+                            <label for="id_email">Email</label>
+                            <input type="email" name="email" id="id_email" required>
+                        {% elif field_name == 'phone_number' %}
+                            <label for="id_phone_number">Phone Number</label>
+                            <input type="tel" name="phone_number" id="id_phone_number">
+                        {% elif field_name == 'postal_address_line_1' %}
+                            <label for="id_postal_address_line_1">Street Address</label>
+                            <input type="text" name="postal_address_line_1" id="id_postal_address_line_1">
+                        {% elif field_name == 'postal_address_line_2' %}
+                            <label for="id_postal_address_line_2">Address Line 2</label>
+                            <input type="text" name="postal_address_line_2" id="id_postal_address_line_2">
+                        {% elif field_name == 'city' %}
+                            <label for="id_city">City</label>
+                            <input type="text" name="city" id="id_city">
+                        {% elif field_name == 'state' %}
+                            <label for="id_state">State</label>
+                            <input type="text" name="state" id="id_state">
+                        {% elif field_name == 'zip_code' %}
+                            <label for="id_zip_code">Zip Code</label>
+                            <input type="text" name="zip_code" id="id_zip_code">
+                        {% elif field_name == 'comment' %}
+                            <label for="id_comment">Comment</label>
+                            <textarea name="comment" id="id_comment" rows="4"></textarea>
+                            <span class="helptext">Your comment, which will be displayed on the campaign page{% if value.email_settings.email_include_comment and not value.email_settings.mailto_send %} and will be included if you choose to send an email along with your signature{% endif %}</span>
+                        {% endif %}
+                    </p>
+                {% endfor %}
+                
+                {# Newsletter opt-in #}
+                <p>
+                    <label for="id_newsletter_opt_in">
+                        <input type="checkbox" name="newsletter_opt_in" id="id_newsletter_opt_in" checked>
+                        Subscribe to Philly Bike Action's monthly newsletter.
+                    </label>
+                </p>
+                
+                {# Account creation opt-in if enabled #}
+                {% if value.create_account_opt_in %}
+                    <p>
+                        <label for="id_create_account_opt_in">
+                            <input type="checkbox" name="create_account_opt_in" id="id_create_account_opt_in">
+                            Create PBA Account
+                        </label>
+                        <span class="helptext">
+                            By creating a PBA account, you agree that you have read the 
+                            <a target="_blank" href="https://apps.bikeaction.org/policies/code-of-conduct/">Philly Bike Action Code of Conduct</a>
+                            and 
+                            <a target="_blank" href="https://apps.bikeaction.org/policies/privacy-and-data/">Privacy and Data Statement</a>.
+                        </span>
+                    </p>
+                {% endif %}
+                
+                {# Send email checkbox if email is configured #}
+                {% if value.email_settings.send_email %}
+                    <p>
+                        <label for="id_send_email">
+                            <input type="checkbox" name="send_email" id="id_send_email" checked>
+                            Check this box to send an email when submitting your signature
+                        </label>
+                    </p>
+                {% endif %}
+                
+                <div class="button-holder">
+                    <input class="submit-button" type="submit" value="{{ value.call_to_action|default:'Add your signature!' }}">
+                </div>
+                
+                {# Email preview if configured #}
+                {% if value.email_settings.mailto_send or value.email_settings.send_email %}
+                    <div class="petition-preview-email" {% if value.email_settings.send_email %}style="display: none;"{% endif %}>
+                        <p>{% translate "This is a preview of the email that will be sent when you submit:" %}</p><br>
+                        <table>
+                            <tr><td>Subject:</td><td><b>{{ value.email_settings.email_subject }}</b></td></tr>
+                            <tr><td>To:</td><td>{{ value.email_settings.email_to|splitlines|join:', ' }}</td></tr>
+                            {% if value.email_settings.email_cc %}
+                                <tr><td>Cc:</td><td>{{ value.email_settings.email_cc|splitlines|join:', ' }}</td></tr>
+                            {% endif %}
+                            <tr><td>From:</td><td><span class="user-input"><span id="previewFromFirstName-{{ value.petition_id }}"></span> <span id="previewFromLastName-{{ value.petition_id }}"></span></span> &lt;{% if value.email_settings.mailto_send %}<span class="user-input" id="previewEmailFrom-{{ value.petition_id }}"></span>{% else %}noreply@bikeaction.org{% endif %}&gt;</td></tr>
+                            <tr><td>Reply-To:</td><td><span class="user-input" id="previewEmailReplyTo-{{ value.petition_id }}"></span>{% if not value.email_settings.mailto_send %}, info@bikeaction.org{% endif %}</td></tr>
+                            <tr></tr>
+                            <tr></tr>
+                            <tr>
+                                <td colspan=2>
+                                    {% if value.email_settings.email_body %}{{ value.email_settings.email_body|linebreaks }}<br><br>{% endif %}
+                                    {% if value.email_settings.email_include_comment %}<span id="previewCommentOuter-{{ value.petition_id }}"><span id="previewComment-{{ value.petition_id }}" class="user-input"></span><br><br></span>{% endif %}
+                                    - <span class="user-input"><span id="previewFirstName-{{ value.petition_id }}"></span> <span id="previewLastName-{{ value.petition_id }}"></span></span>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                {% endif %}
+            </form>
+        </div>
+        {% else %}
+        {# For completed campaigns, just show the letter without form #}
+        {% if value.letter %}
+        <div class="petition">
+            <p>{{ value.letter|linebreaks }}</p>
+        </div>
+        {% endif %}
+        {% endif %}
+        
+        {# Signatures display if enabled #}
+        {% if value.show_submissions %}
+            <div class="fade-transition" 
+                 hx-get="{{ page.url }}petition/{{ petition_id }}/_signatures/" 
+                 hx-trigger="every 10s" 
+                 hx-swap="innerHTML transition:true">
+                {# Initial signatures will be loaded here #}
+            </div>
+        {% endif %}
+    {% endif %}
+</div>
+
+{# JavaScript for email preview #}
+{% if value.email_settings.mailto_send or value.email_settings.send_email %}
+<script>
+(function() {
+    const petitionId = '{% if value.use_existing_petition and value.existing_petition_id %}{{ value.existing_petition_id }}{% else %}{{ value.petition_id }}{% endif %}';
+    const form = document.querySelector('#petition-' + petitionId + ' form');
+    
+    function updatePreview() {
+        const firstName = form.querySelector('[name="first_name"]');
+        const lastName = form.querySelector('[name="last_name"]');
+        const email = form.querySelector('[name="email"]');
+        const comment = form.querySelector('[name="comment"]');
+        const sendEmail = form.querySelector('[name="send_email"]');
+        
+        if (firstName) {
+            document.getElementById('previewFirstName-' + petitionId).textContent = firstName.value;
+            document.getElementById('previewFromFirstName-' + petitionId).textContent = firstName.value;
+        }
+        if (lastName) {
+            document.getElementById('previewLastName-' + petitionId).textContent = lastName.value;
+            document.getElementById('previewFromLastName-' + petitionId).textContent = lastName.value;
+        }
+        if (email) {
+            document.getElementById('previewEmailFrom-' + petitionId).textContent = email.value;
+            document.getElementById('previewEmailReplyTo-' + petitionId).textContent = email.value;
+        }
+        
+        {% if value.email_settings.email_include_comment %}
+        if (comment) {
+            document.getElementById('previewComment-' + petitionId).textContent = comment.value;
+            const commentOuter = document.getElementById('previewCommentOuter-' + petitionId);
+            if (comment.value) {
+                commentOuter.style.display = 'block';
+            } else {
+                commentOuter.style.display = 'none';
+            }
+        }
+        {% endif %}
+        
+        {% if value.email_settings.send_email %}
+        const previewEmail = form.querySelector('.petition-preview-email');
+        if (sendEmail && previewEmail) {
+            previewEmail.style.display = sendEmail.checked ? 'block' : 'none';
+        }
+        {% endif %}
+    }
+    
+    // Bind update events
+    form.querySelectorAll('input, textarea').forEach(function(field) {
+        field.addEventListener('input', updatePreview);
+        field.addEventListener('change', updatePreview);
+    });
+    
+    // Initial update
+    updatePreview();
+})();
+</script>
+{% endif %}
+
+{% endwith %} {# End petition_id with block #}

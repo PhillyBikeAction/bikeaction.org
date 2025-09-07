@@ -378,7 +378,12 @@ class HomePage(Page):
         ]
     )
 
-    subpage_types = ["NavigationContainerPage", "CmsStreamPage", "PostsContainerPage"]
+    subpage_types = [
+        "NavigationContainerPage",
+        "CmsStreamPage",
+        "PostsContainerPage",
+        "campaigns.CampaignsIndexPage",
+    ]
     # max_count_per_parent = 1
     content_panels = Page.content_panels + [
         FieldPanel("hero_background"),

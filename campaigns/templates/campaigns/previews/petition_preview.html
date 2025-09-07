@@ -1,0 +1,50 @@
+{% load i18n %}
+
+<div class="petition-preview">
+    <h2>{{ petition.title }}</h2>
+    
+    {% if petition.active %}
+        <span style="color: green;">✓ Active</span>
+    {% else %}
+        <span style="color: red;">✗ Inactive</span>
+    {% endif %}
+    
+    {% if petition.letter %}
+        <div style="margin: 10px 0; padding: 10px; background: #f5f5f5; border-left: 3px solid #2e6da4;">
+            <strong>Letter:</strong><br>
+            {{ petition.letter|linebreaks|truncatechars:200 }}
+        </div>
+    {% endif %}
+    
+    <div style="margin: 10px 0;">
+        <strong>Call to Action:</strong> {{ petition.call_to_action|default:"Add your signature!" }}<br>
+        <strong>Display on Campaign:</strong> {{ petition.display_on_campaign_page|yesno:"Yes,No" }}<br>
+        <strong>Show Submissions:</strong> {{ petition.show_submissions|yesno:"Yes,No" }}<br>
+        {% if petition.signature_goal %}
+            <strong>Signature Goal:</strong> {{ petition.signature_goal }}<br>
+        {% endif %}
+        <strong>Total Signatures:</strong> {{ petition.signatures.count }}
+    </div>
+    
+    {% if petition.enabled_fields %}
+        <div style="margin: 10px 0;">
+            <strong>Form Fields:</strong>
+            <ul style="margin: 5px 0;">
+            {% for field in petition.enabled_fields %}
+                <li>{{ field|title }}</li>
+            {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+    
+    {% if petition.send_email or petition.mailto_send %}
+        <div style="margin: 10px 0; padding: 10px; background: #fff3cd; border-left: 3px solid #ffc107;">
+            <strong>Email Settings:</strong><br>
+            {% if petition.send_email %}
+                Sends email via server to: {{ petition.email_to|truncatechars:50 }}
+            {% elif petition.mailto_send %}
+                Opens mailto link to: {{ petition.email_to|truncatechars:50 }}
+            {% endif %}
+        </div>
+    {% endif %}
+</div>

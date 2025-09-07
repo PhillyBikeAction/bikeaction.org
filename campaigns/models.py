@@ -8,6 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from markdownfield.models import RenderedMarkdownField
 from markdownfield.validators import VALIDATOR_NULL
 from ordered_model.models import OrderedModel
+from wagtail.models import PreviewableMixin
 
 from campaigns.tasks import geocode_signature
 from events.models import ScheduledEvent
@@ -114,7 +115,7 @@ class Campaign(OrderedModel):
         return self.title
 
 
-class Petition(models.Model):
+class Petition(PreviewableMixin, models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
     active = models.BooleanField(default=True)
@@ -209,6 +210,17 @@ class Petition(models.Model):
 
     def __str__(self):
         return self.title
+
+    def get_preview_template(self, request, mode_name):
+        """Return the template to use for previewing this petition"""
+        return "campaigns/previews/petition_preview.html"
+
+    def get_preview_context(self, request, mode_name):
+        """Add context for the preview"""
+        context = super().get_preview_context(request, mode_name)
+        context["petition"] = self
+        context["form"] = self.form()
+        return context
 
 
 class PetitionSignature(models.Model):

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load wagtailcore_tags wagtailimages_tags wagtailuserbar %}
+{% load i18n %}
+
+{% block content %}
+{% regroup campaigns|dictsort:"status" by status as campaigns_by_status %}
+{% for status, status_campaigns in campaigns_by_status %}
+    {% if status == "draft" %}
+        {% if request.user.is_staff %}
+        <h2>{{ status|title }} Campaigns</h2>
+        {% endif %}
+    {% else %}
+        <h2>{{ status|title }} Campaigns</h2>
+    {% endif %}
+
+    <div class="campaigns-container">
+    {% for campaign in status_campaigns %}
+        {% if campaign.status == "draft" %}
+            {% if request.user.is_staff %}
+            <div class="campaign-card">
+                <a href="{% pageurl campaign %}">
+                    <h2>{{ campaign.title }} - <span style="color: red;"><b>{% translate "DRAFT" %}</b></span></h2>
+                    {% if campaign.cover %}
+                        {% image campaign.cover width-512 as cover_img %}
+                        <img class="campaign-card-img" src="{{ cover_img.url }}">
+                    {% endif %}
+                    <p>{{ campaign.description }}</p>
+                </a>
+            </div>
+            {% endif %}
+        {% else %}
+            {% if campaign.visible %}
+            <div class="campaign-card">
+                <a href="{% pageurl campaign %}">
+                    <h2>{{ campaign.title }}</h2>
+                    {% if campaign.cover %}
+                        {% image campaign.cover width-512 as cover_img %}
+                        <img class="campaign-card-img" src="{{ cover_img.url }}">
+                    {% endif %}
+                    <p>{{ campaign.description }}</p>
+                </a>
+            </div>
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+    </div>
+{% endfor %}
+{% wagtailuserbar %}
+{% endblock %}

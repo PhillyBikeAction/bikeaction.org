@@ -1,0 +1,100 @@
+{% load i18n %}
+
+<div class="petition-admin-preview" style="padding: 20px; background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 8px; margin: 10px 0;">
+    {% if petition %}
+        <div style="display: flex; align-items: center; margin-bottom: 15px;">
+            <svg style="width: 24px; height: 24px; margin-right: 10px; color: #2e6da4;" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
+                <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 1 1 0 000 2H6a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2v-1a1 1 0 10-2 0v1H6V7h2v1a1 1 0 102 0V7a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2H6z" clip-rule="evenodd"></path>
+            </svg>
+            <h3 style="margin: 0; color: #333; font-size: 18px;">{{ petition.title }}</h3>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
+            <div style="background: white; padding: 10px; border-radius: 4px; border: 1px solid #e0e0e0;">
+                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Status</div>
+                {% if petition.active %}
+                    <div style="color: #28a745; font-weight: 500;">✓ Active</div>
+                {% else %}
+                    <div style="color: #dc3545; font-weight: 500;">✗ Inactive</div>
+                {% endif %}
+            </div>
+            
+            <div style="background: white; padding: 10px; border-radius: 4px; border: 1px solid #e0e0e0;">
+                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Signatures</div>
+                <div style="font-weight: 500;">
+                    {{ petition.signatures.count }}
+                    {% if petition.signature_goal %}
+                        / {{ petition.signature_goal }}
+                        <span style="color: #666; font-size: 12px;">({{ petition.progress }}%)</span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            {% if value.override_display %}
+            <div style="background: white; padding: 10px; border-radius: 4px; border: 1px solid #e0e0e0;">
+                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Display Override</div>
+                {% if value.display_on_campaign_page %}
+                    <div style="color: #28a745; font-weight: 500;">✓ Shown</div>
+                {% else %}
+                    <div style="color: #dc3545; font-weight: 500;">✗ Hidden</div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        
+        {% if petition.call_to_action %}
+        <div style="background: white; padding: 12px; border-radius: 4px; margin-bottom: 15px; border-left: 3px solid #2e6da4;">
+            <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Call to Action</div>
+            <div style="font-weight: 500;">{{ petition.call_to_action }}</div>
+        </div>
+        {% endif %}
+        
+        {% if petition.letter %}
+        <div style="background: white; padding: 12px; border-radius: 4px; margin-bottom: 15px;">
+            <div style="font-size: 12px; color: #666; margin-bottom: 8px;">Letter Preview</div>
+            <div style="color: #333; max-height: 120px; overflow: hidden; position: relative;">
+                {{ petition.letter|linebreaksbr|truncatechars:250 }}
+                <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 30px; background: linear-gradient(transparent, white);"></div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+            {% if petition.signature_fields %}
+                <div style="flex: 1; min-width: 200px;">
+                    <div style="font-size: 12px; color: #666; margin-bottom: 8px;">Form Fields</div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 5px;">
+                        {% for field in petition.signature_fields %}
+                            <span style="display: inline-block; padding: 4px 8px; background: #e8f4f8; border-radius: 3px; font-size: 12px;">
+                                {{ field|title|cut:"_" }}
+                            </span>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+            
+            {% if petition.send_email or petition.mailto_send %}
+                <div style="flex: 1; min-width: 200px;">
+                    <div style="font-size: 12px; color: #666; margin-bottom: 8px;">Email Settings</div>
+                    <div style="background: #fff8dc; padding: 8px; border-radius: 3px; font-size: 12px;">
+                        {% if petition.send_email %}
+                            📧 Sends to: {{ petition.email_to|truncatechars:40 }}
+                        {% elif petition.mailto_send %}
+                            📧 Opens mailto: {{ petition.email_to|truncatechars:40 }}
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 40px 20px; color: #999;">
+            <svg style="width: 48px; height: 48px; margin-bottom: 10px; opacity: 0.3;" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
+                <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 1 1 0 000 2H6a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2v-1a1 1 0 10-2 0v1H6V7h2v1a1 1 0 102 0V7a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2H6z" clip-rule="evenodd"></path>
+            </svg>
+            <div style="font-size: 16px; margin-bottom: 5px;">No Petition Selected</div>
+            <div style="font-size: 13px;">Select a petition from the dropdown above</div>
+        </div>
+    {% endif %}
+</div>
