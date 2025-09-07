@@ -1,36 +1,45 @@
 {% load i18n %}
 {% load pba_tags %}
-
 {% with petition=value.petition %}
-{% if petition %}
-    {# Check if we're in the admin interface #}
-    {% if request.path and '/cms/' in request.path %}
-        {# Show admin preview #}
-        {% include "campaigns/blocks/petition_preview_admin.html" with petition=petition value=value %}
-    {% else %}
-        {# Show regular content #}
-        <div class="petition-block" id="petition-{{ petition.id }}">
-            {# Check display settings - use override if enabled, otherwise use petition's setting #}
-            {% if value.override_display %}
-                {% if value.display_on_campaign_page %}
+    {% if petition %}
+        {# Check if we're in the admin interface #}
+        {% if request.path and '/cms/' in request.path %}
+            {# Show admin preview #}
+            {% include "campaigns/blocks/petition_preview_admin.html" with petition=petition value=value %}
+        {% else %}
+            {# Show regular content #}
+            <div class="petition-block" id="petition-{{ petition.id }}">
+                {# Check display settings - use override if enabled, otherwise use petition's setting #}
+                {% if value.override_display %}
+                    {% if value.display_on_campaign_page %}
+                        {% include "campaigns/blocks/petition_content.html" with petition=petition page=page %}
+                    {% endif %}
+                {% elif petition.display_on_campaign_page %}
                     {% include "campaigns/blocks/petition_content.html" with petition=petition page=page %}
                 {% endif %}
-            {% elif petition.display_on_campaign_page %}
-                {% include "campaigns/blocks/petition_content.html" with petition=petition page=page %}
-            {% endif %}
-        </div>
+            </div>
+        {% endif %}
+    {% else %}
+        {# No petition selected #}
+        {% if request.path and '/cms/' in request.path %}
+            <div style="padding: 30px;
+                        background: #f5f5f5;
+                        border: 2px dashed #ccc;
+                        text-align: center;
+                        color: #999">
+                <svg style="width: 48px;
+                            height: 48px;
+                            margin-bottom: 10px;
+                            opacity: 0.3"
+                     fill="currentColor"
+                     viewBox="0 0 20 20">
+                    <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
+                    <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 1 1 0 000 2H6a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2v-1a1 1 0 10-2 0v1H6V7h2v1a1 1 0 102 0V7a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2H6z" clip-rule="evenodd">
+                    </path>
+                </svg>
+                <div style="font-size: 16px; margin-bottom: 5px;">No Petition Selected</div>
+                <div style="font-size: 13px;">Select a petition from the dropdown above to preview it here</div>
+            </div>
+        {% endif %}
     {% endif %}
-{% else %}
-    {# No petition selected #}
-    {% if request.path and '/cms/' in request.path %}
-        <div style="padding: 30px; background: #f5f5f5; border: 2px dashed #ccc; text-align: center; color: #999;">
-            <svg style="width: 48px; height: 48px; margin-bottom: 10px; opacity: 0.3;" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
-                <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 1 1 0 000 2H6a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2v-1a1 1 0 10-2 0v1H6V7h2v1a1 1 0 102 0V7a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2H6z" clip-rule="evenodd"></path>
-            </svg>
-            <div style="font-size: 16px; margin-bottom: 5px;">No Petition Selected</div>
-            <div style="font-size: 13px;">Select a petition from the dropdown above to preview it here</div>
-        </div>
-    {% endif %}
-{% endif %}
 {% endwith %}

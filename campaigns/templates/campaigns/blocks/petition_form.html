@@ -1,73 +1,125 @@
 {% load i18n %}
 {% load pba_tags %}
-
-{% if petition.call_to_action_header %}
-<h3 id="{{ petition.slug }}">{{ petition.call_to_action }}</h3>
-{% endif %}
-
+{% if petition.call_to_action_header %}<h3 id="{{ petition.slug }}">{{ petition.call_to_action }}</h3>{% endif %}
 <div class="form-container">
-  {% if petition.letter %}
-  <div class="petition-letter">{{ petition.letter|linebreaks }}</div>
-  {% endif %}
-
-  {# Use the page's routable URL for form submission #}
-  <form method="post" action="{{ page.url }}petition/{{ petition.id }}/sign/">
-
-    {% csrf_token %}
-
-    {{ form.non_field_errors }}
-
-    {% for hidden_field in form.hidden_fields %}
-      {{ hidden_field.errors }}
-      {{ hidden_field }}
-    {% endfor %}
-
-    {% for field in form.visible_fields %}
-    <p>
-      {{ field.label_tag }}
-      {{ field.errors }}
-      {{ field }}
-      {% if field.help_text %}
-      <span class="helptext">{{ field.help_text|safe }}</span>
-      {% endif %}
-    </p>
-    {% endfor %}
-
-    <div class="button-holder">
-      <input class="submit-button" type="submit" value="{% if petition.call_to_action %}{{ petition.call_to_action }}{% else %}Add your signature!{% endif %}">
-    </div>
-
-    {% if petition.mailto_send or petition.send_email %}
-    <div class="petition-preview-email">
-      <p>{% translate "This is a preview of the email that will be sent when you submit:" %}</p><br>
-      <table>
-        <tr><td>Subject:</td><td><b>{{ petition.email_subject }}</b></td></tr>
-        <tr><td>To:</td><td>{{ petition.email_to|splitlines|join:', ' }}</td></tr>
-        {% if petition.email_cc %}<tr><td>Cc:</td><td>{{ petition.email_cc|splitlines|join:', ' }}</td></tr>{% endif %}
-        <tr><td>From:</td><td><span class="user-input"><span id="previewFromFirstName"></span> <span id="previewFromLastName"></span></span> &lt;{% if petition.mailto_send %}<span class="user-input" id="previewEmailFrom"></span>{% else %}noreply@bikeaction.org{% endif %}&gt;</td></tr>
-        <tr><td>Reply-To:</td><td><span class="user-input" id="previewEmailReplyTo"></span>{% if not petition.mailto_send %}, info@bikeaction.org{% endif %}</td></tr>
-        <tr></tr>
-        <tr></tr>
-        <tr>
-          <td colspan=2>
-            {% if petition.email_body %}{{ petition.email_body|linebreaks }}<br><br>{% endif %}
-            {% if petition.email_include_comment %}<span id="previewCommentOuter"><span id="previewComment" class="user-input"></span><br><br></span>{% endif %}
-            - <span class="user-input"><span id="previewFirstName"></span> <span id="previewLastName"></span></span>
-            <br>
-            {% if form.fields.phone_number %}<span class="user-input"><span id="previewPhoneNumber"></span></span><br>{% endif %}
-            {% if form.fields.postal_address_line_1 %}<span class="user-input"><span id="previewAddressLine1"></span></span><br>{% endif %}
-            {% if form.fields.postal_address_line_2 %}<span class="user-input"><span id="previewAddressLine2"></span></span><br>{% endif %}
-            {% if form.fields.city %}<span class="user-input" id="previewCity"></span>{% endif %}{% if form.fields.state %}, <span class="user-input" id="previewState"></span>{% endif %} {% if form.fields.zip_code %}<span class="user-input" id="previewZip"></span>{% endif %}
-          </td>
-        </tr>
-      </table>
-    </div>
+    {% if petition.letter %}<div class="petition-letter">{{ petition.letter|linebreaks }}</div>{% endif %}
+    {# Use the page's routable URL for form submission #}
+    <form method="post"
+          action="{% if not preview_mode %}{{ page.url }}petition/{{ petition.id }}/sign/{% endif %}">
+        {% if not preview_mode %}
+            {% csrf_token %}
+        {% endif %}
+        {{ form.non_field_errors }}
+        {% for hidden_field in form.hidden_fields %}
+            {{ hidden_field.errors }}
+            {{ hidden_field }}
+        {% endfor %}
+        {% for field in form.visible_fields %}
+            <p>
+                {{ field.label_tag }}
+                {{ field.errors }}
+                {{ field }}
+                {% if field.help_text %}<span class="helptext">{{ field.help_text|safe }}</span>{% endif %}
+            </p>
+        {% endfor %}
+        <div class="button-holder">
+            <input class="submit-button"
+                   type="submit"
+                   value="{% if petition.call_to_action %}
+                              {{ petition.call_to_action }}
+                          {% else %}
+                              Add your signature!
+                          {% endif %}"
+                   {% if preview_mode %}disabled{% endif %}>
+        </div>
+        {% if preview_mode %}
+            <div style="margin-top: 10px;
+                        font-size: 12px;
+                        color: #666;
+                        text-align: center">
+                <em>This is a preview - the form is not functional</em>
+            </div>
+        {% endif %}
+        {% if petition.mailto_send or petition.send_email %}
+            <div class="petition-preview-email">
+                <p>{% translate "This is a preview of the email that will be sent when you submit:" %}</p>
+                <br>
+                <table>
+                    <tr>
+                        <td>Subject:</td>
+                        <td>
+                            <b>{{ petition.email_subject }}</b>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>To:</td>
+                        <td>{{ petition.email_to|splitlines|join:', ' }}</td>
+                    </tr>
+                    {% if petition.email_cc %}
+                        <tr>
+                            <td>Cc:</td>
+                            <td>{{ petition.email_cc|splitlines|join:', ' }}</td>
+                        </tr>
+                    {% endif %}
+                    <tr>
+                        <td>From:</td>
+                        <td>
+                            <span class="user-input"><span id="previewFromFirstName"></span> <span id="previewFromLastName"></span></span> &lt;
+                            {% if petition.mailto_send %}
+                                <span class="user-input" id="previewEmailFrom"></span>
+                            {% else %}
+                                noreply@bikeaction.org
+                            {% endif %}
+                            &gt;
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Reply-To:</td>
+                        <td>
+                            <span class="user-input" id="previewEmailReplyTo"></span>
+                            {% if not petition.mailto_send %}, info@bikeaction.org{% endif %}
+                        </td>
+                    </tr>
+                    <tr></tr>
+                    <tr></tr>
+                    <tr>
+                        <td colspan=2>
+                            {% if petition.email_body %}
+                                {{ petition.email_body|linebreaks }}
+                                <br>
+                                <br>
+                            {% endif %}
+                            {% if petition.email_include_comment %}
+                                <span id="previewCommentOuter"><span id="previewComment" class="user-input"></span>
+                                <br>
+                                <br>
+                            </span>
+                        {% endif %}
+                        - <span class="user-input"><span id="previewFirstName"></span> <span id="previewLastName"></span></span>
+                        <br>
+                        {% if form.fields.phone_number %}
+                            <span class="user-input"><span id="previewPhoneNumber"></span></span>
+                            <br>
+                        {% endif %}
+                        {% if form.fields.postal_address_line_1 %}
+                            <span class="user-input"><span id="previewAddressLine1"></span></span>
+                            <br>
+                        {% endif %}
+                        {% if form.fields.postal_address_line_2 %}
+                            <span class="user-input"><span id="previewAddressLine2"></span></span>
+                            <br>
+                        {% endif %}
+                        {% if form.fields.city %}<span class="user-input" id="previewCity"></span>{% endif %}
+                        {% if form.fields.state %}, <span class="user-input" id="previewState"></span>{% endif %}
+                        {% if form.fields.zip_code %}<span class="user-input" id="previewZip"></span>{% endif %}
+                    </td>
+                </tr>
+            </table>
+        </div>
     {% endif %}
-
-  </form>
-
-  {% if petition.mailto_send or petition.send_email %}
-  <script>
+</form>
+{% if petition.mailto_send or petition.send_email %}
+    <script>
     function bindUpdate(elementId) {
         if ( document.getElementById(elementId) !== null ) {
             document.getElementById(elementId).oninput= function () {updateForm()}.bind();
@@ -126,6 +178,6 @@
         updateForm();
         setInterval(function() {updateForm();}, 1000);
     }
-  </script>
-  {% endif %}
+    </script>
+{% endif %}
 </div>

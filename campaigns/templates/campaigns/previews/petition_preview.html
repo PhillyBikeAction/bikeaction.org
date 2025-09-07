@@ -1,50 +1,61 @@
+{% extends "base.html" %}
 {% load i18n %}
-
-<div class="petition-preview">
-    <h2>{{ petition.title }}</h2>
-    
-    {% if petition.active %}
-        <span style="color: green;">✓ Active</span>
-    {% else %}
-        <span style="color: red;">✗ Inactive</span>
-    {% endif %}
-    
-    {% if petition.letter %}
-        <div style="margin: 10px 0; padding: 10px; background: #f5f5f5; border-left: 3px solid #2e6da4;">
-            <strong>Letter:</strong><br>
-            {{ petition.letter|linebreaks|truncatechars:200 }}
+{% load pba_tags %}
+{% block content %}
+    <style>
+    /* Include the actual petition styles */
+    .petition-letter {
+        border: 1px solid lightgrey;
+        border-radius: 1em;
+        padding-left: 1em;
+        padding-right: 1em;
+        background-color: #F8F8F8;
+    }
+    .petition {
+        margin: 20px 0;
+    }
+    .signature-card {
+        border: 1px solid grey;
+        border-radius: 1em;
+        padding: 1em;
+        margin: 1em 0;
+        background-color: #fafafa;
+    }
+    </style>
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                {# Admin status indicator #}
+                <div style="padding: 10px;
+                            background:
+                            {% if petition.active %}
+                                #d4edda
+                            {% else %}
+                                #f8d7da
+                            {% endif %}
+                            ;
+                            border: 1px solid
+                            {% if petition.active %}
+                                #c3e6cb
+                            {% else %}
+                                #f5c6cb
+                            {% endif %}
+                            ;
+                            border-radius: 4px;
+                            margin-bottom: 20px">
+                    <strong>Status:</strong>
+                    {% if petition.active %}
+                        <span style="color: #155724;">✓ Active</span>
+                    {% else %}
+                        <span style="color: #721c24;">✗ Inactive</span>
+                    {% endif %}
+                    | <strong>Display on Campaign:</strong> {{ petition.display_on_campaign_page|yesno:"Yes,No" }}
+                    | <strong>Signatures:</strong> {{ petition.signatures.count }}
+                    {% if petition.signature_goal %}/ {{ petition.signature_goal }}{% endif %}
+                </div>
+                {# Use the shared partial for rendering the petition #}
+                {% include 'campaigns/partials/petition_display.html' with petition=petition is_preview=True %}
+            </div>
         </div>
-    {% endif %}
-    
-    <div style="margin: 10px 0;">
-        <strong>Call to Action:</strong> {{ petition.call_to_action|default:"Add your signature!" }}<br>
-        <strong>Display on Campaign:</strong> {{ petition.display_on_campaign_page|yesno:"Yes,No" }}<br>
-        <strong>Show Submissions:</strong> {{ petition.show_submissions|yesno:"Yes,No" }}<br>
-        {% if petition.signature_goal %}
-            <strong>Signature Goal:</strong> {{ petition.signature_goal }}<br>
-        {% endif %}
-        <strong>Total Signatures:</strong> {{ petition.signatures.count }}
     </div>
-    
-    {% if petition.enabled_fields %}
-        <div style="margin: 10px 0;">
-            <strong>Form Fields:</strong>
-            <ul style="margin: 5px 0;">
-            {% for field in petition.enabled_fields %}
-                <li>{{ field|title }}</li>
-            {% endfor %}
-            </ul>
-        </div>
-    {% endif %}
-    
-    {% if petition.send_email or petition.mailto_send %}
-        <div style="margin: 10px 0; padding: 10px; background: #fff3cd; border-left: 3px solid #ffc107;">
-            <strong>Email Settings:</strong><br>
-            {% if petition.send_email %}
-                Sends email via server to: {{ petition.email_to|truncatechars:50 }}
-            {% elif petition.mailto_send %}
-                Opens mailto link to: {{ petition.email_to|truncatechars:50 }}
-            {% endif %}
-        </div>
-    {% endif %}
-</div>
+{% endblock %}

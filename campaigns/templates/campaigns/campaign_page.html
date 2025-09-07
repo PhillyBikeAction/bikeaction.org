@@ -1,174 +1,167 @@
 {% extends "base.html" %}
 {% load wagtailcore_tags wagtailimages_tags wagtailuserbar %}
 {% load humanize i18n thumbnail share_tags qr_code %}
-
 {% block extra_head %}
-<meta property="og:type" content="article">
-<meta property="og:title" content="{{ page.title }}">
-<meta property="og:url" content="{{ page.full_url }}">
-{% if page.cover %}
-    {% image page.cover fill-1200x630 as og_image %}
-    <meta property="og:image" content="{{ og_image.url }}">
-{% endif %}
-<meta property="og:description" content="{{ page.description }}">
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lity/2.4.1/lity.min.css" integrity="sha512-UiVP2uTd2EwFRqPM4IzVXuSFAzw+Vo84jxICHVbOA1VZFUyr4a6giD9O3uvGPFIuB2p3iTnfDVLnkdY7D/SJJQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/lity/2.4.1/lity.min.js" integrity="sha512-UU0D/t+4/SgJpOeBYkY+lG16MaNF8aqmermRIz8dlmQhOlBnw6iQrnt4Ijty513WB3w+q4JO75IX03lDj6qQNA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="{{ page.title }}">
+    <meta property="og:url" content="{{ page.full_url }}">
+    {% if page.cover %}
+        {% image page.cover fill-1200x630 as og_image %}
+        <meta property="og:image" content="{{ og_image.url }}">
+    {% endif %}
+    <meta property="og:description" content="{{ page.description }}">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/lity/2.4.1/lity.min.css"
+          integrity="sha512-UiVP2uTd2EwFRqPM4IzVXuSFAzw+Vo84jxICHVbOA1VZFUyr4a6giD9O3uvGPFIuB2p3iTnfDVLnkdY7D/SJJQ=="
+          crossorigin="anonymous"
+          referrerpolicy="no-referrer" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
+            integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lity/2.4.1/lity.min.js"
+            integrity="sha512-UU0D/t+4/SgJpOeBYkY+lG16MaNF8aqmermRIz8dlmQhOlBnw6iQrnt4Ijty513WB3w+q4JO75IX03lDj6qQNA=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"></script>
 {% endblock %}
-
 {% block content_container %}
-<div class="campaign-content-container">
-    
-    {# Campaign header with cover image #}
-    <div class="campaign-header">
-        <div class="campaign-overlay"></div>
-        {% if page.cover %}
-            {% image page.cover fill-1920x400 as banner_image %}
-            <div class="campaign-header-img" style="background: url({{ banner_image.url }}); background-repeat: no-repeat; background-size: cover; background-position: center;"></div>
-        {% else %}
-            <div class="campaign-header-img"></div>
-        {% endif %}
-        <div class="campaign-title">
-            <h1>{{ page.title }}</h1>
+    <div class="campaign-content-container">
+        {# Campaign header with cover image #}
+        <div class="campaign-header">
+            <div class="campaign-overlay"></div>
+            {% if page.cover %}
+                {% image page.cover fill-1920x400 as banner_image %}
+                <div class="campaign-header-img"
+                     style="background: url({{ banner_image.url }});
+                            background-repeat: no-repeat;
+                            background-size: cover;
+                            background-position: center"></div>
+            {% else %}
+                <div class="campaign-header-img"></div>
+            {% endif %}
+            <div class="campaign-title">
+                <h1>{{ page.title }}</h1>
+            </div>
         </div>
-    </div>
-    
-    {% block content %}
-    <div class="campaign-container content-container">
-        
-        {# Call to action button at top if campaign has actions and is not completed #}
-        {% if page.has_actions and page.status != "completed" %}
-            <div class="button-holder">
-                <a href="#action" class="cta-button submit-button">
-                    {% if page.call_to_action %}
-                        {{ page.call_to_action }}
-                    {% else %}
-                        {% translate "Take Action Now!" %}
+        {% block content %}
+            <div class="campaign-container content-container">
+                {# Call to action button at top if campaign has actions and is not completed #}
+                {% if page.has_actions and page.status != "completed" %}
+                    <div class="button-holder">
+                        <a href="#action" class="cta-button submit-button">
+                            {% if page.call_to_action %}
+                                {{ page.call_to_action }}
+                            {% else %}
+                                {% translate "Take Action Now!" %}
+                            {% endif %}
+                        </a>
+                    </div>
+                {% endif %}
+                {# Status message for completed campaigns #}
+                {% if page.status == "completed" %}
+                    <p style="font-size: smaller;
+                              color: grey;
+                              width: 100%;
+                              text-align: center">{% translate "This campaign has been completed." %}</p>
+                {% endif %}
+                {# Render the StreamField body content EXCEPT petitions #}
+                {% for block in page.body %}
+                    {% if block.block_type != "petition" %}
+                        {% include_block block %}
                     {% endif %}
-                </a>
-            </div>
-        {% endif %}
-        
-        {# Status message for completed campaigns #}
-        {% if page.status == "completed" %}
-            <p style="font-size: smaller; color: grey; width: 100%; text-align: center;">
-                {% translate "This campaign has been completed." %}
-            </p>
-        {% endif %}
-        
-        {# Render the StreamField body content EXCEPT petitions #}
-        {% for block in page.body %}
-            {% if block.block_type != "petition" %}
-                {% include_block block %}
-            {% endif %}
-        {% endfor %}
-        
-        {# Action section #}
-        {% if page.has_actions and page.status != "completed" %}
-            <span id="action"></span>
-            {% if page.call_to_action_header %}
-                <h2>
-                    {% if page.call_to_action %}
-                        {{ page.call_to_action }}
-                    {% else %}
-                        {% translate "Take Action Now!" %}
+                {% endfor %}
+                {# Action section #}
+                {% if page.has_actions and page.status != "completed" %}
+                    <span id="action"></span>
+                    {% if page.call_to_action_header %}
+                        <h2>
+                            {% if page.call_to_action %}
+                                {{ page.call_to_action }}
+                            {% else %}
+                                {% translate "Take Action Now!" %}
+                            {% endif %}
+                        </h2>
                     {% endif %}
-                </h2>
-            {% endif %}
-        {% endif %}
-        
-        {# Donation section #}
-        {% if page.donation_action %}
-            <div id="donation" class="button-holder">
-                <h2>{% translate "Make a donation" %}</h2>
-                
-                {% if page.donation_goal %}
-                    <div class="progress-bar-container">
-                        <div class="progress-bar">
-                            <div class="progress-bar-fill" style="width: {{ page.donation_progress }}%"></div>
-                        </div>
-                        {% if page.donation_goal_show_numbers %}
-                            <span style="float: left; padding-left: min(calc({{ page.donation_progress }}% - 1.5em), calc(100% - 4.2em)); margin-top: .5em;">
-                                ${{ page.donation_total|intcomma }}
-                            </span>
-                            <span class="progress-goal">${{ page.donation_goal|intcomma }}</span>
+                {% endif %}
+                {# Donation section #}
+                {% if page.donation_action %}
+                    <div id="donation" class="button-holder">
+                        <h2>{% translate "Make a donation" %}</h2>
+                        {% if page.donation_goal %}
+                            <div class="progress-bar-container">
+                                <div class="progress-bar">
+                                    <div class="progress-bar-fill"
+                                         style="width: {{ page.donation_progress }}%"></div>
+                                </div>
+                                {% if page.donation_goal_show_numbers %}
+                                    <span style="float: left;
+                                                 padding-left: min(calc({{ page.donation_progress }}% - 1.5em), calc(100% - 4.2em));
+                                                 margin-top: .5em">${{ page.donation_total|intcomma }}</span>
+                                    <span class="progress-goal">${{ page.donation_goal|intcomma }}</span>
+                                {% endif %}
+                            </div>
                         {% endif %}
+                        <a href="{% url 'create_one_time_donation_checkout_session' %}?donation_product_id={{ page.donation_product.id }}"
+                           class="cta-button submit-button">{% translate "Donate Now!" %}</a>
+                        {% if page.donation_product.disclaimer %}<p>{{ page.donation_product.disclaimer_rendered|safe }}</p>{% endif %}
                     </div>
                 {% endif %}
-                
-                <a href="{% url 'create_one_time_donation_checkout_session' %}?donation_product_id={{ page.donation_product.id }}" class="cta-button submit-button">
-                    {% translate "Donate Now!" %}
-                </a>
-                {% if page.donation_product.disclaimer %}
-                    <p>{{ page.donation_product.disclaimer_rendered|safe }}</p>
+                {# Subscription section #}
+                {% if page.subscription_action and page.status != "completed" %}
+                    {% with request.user.djstripe_customers.first as customer %}
+                        {% if customer.active_subscriptions.all %}
+                            <div id="subscription" class="button-holder">
+                                <h2>{% translate "🎉 Thank you for being a supporter 🎉" %}</h2>
+                                <a class="submit-button" href="{% url 'profile' %}">{% translate "Manage your recurring donation" %}</a>
+                            </div>
+                        {% else %}
+                            <div id="subscription" class="button-holder">
+                                <h2>{% translate "Become a monthly supporter" %}</h2>
+                                <a href="{% url 'setup_recurring_donation' %}"
+                                   class="cta-button submit-button">{% translate "Become a Supporter!" %}</a>
+                            </div>
+                        {% endif %}
+                    {% endwith %}
                 {% endif %}
-            </div>
-        {% endif %}
-        
-        {# Subscription section #}
-        {% if page.subscription_action and page.status != "completed" %}
-            {% with request.user.djstripe_customers.first as customer %}
-                {% if customer.active_subscriptions.all %}
-                    <div id="subscription" class="button-holder">
-                        <h2>{% translate "🎉 Thank you for being a supporter 🎉" %}</h2>
-                        <a class="submit-button" href="{% url 'profile' %}">
-                            {% translate "Manage your recurring donation" %}
-                        </a>
-                    </div>
-                {% else %}
-                    <div id="subscription" class="button-holder">
-                        <h2>{% translate "Become a monthly supporter" %}</h2>
-                        <a href="{% url 'setup_recurring_donation' %}" class="cta-button submit-button">
-                            {% translate "Become a Supporter!" %}
-                        </a>
+                {# Events section #}
+                {% if page.future_events and page.status != "completed" %}
+                    <h3>{% translate "Attend an event" %}</h3>
+                    <div id="events">
+                        {% for campaign_event in page.future_events %}
+                            <div class="event">
+                                <a href="{% url 'event_detail' slug=campaign_event.event.slug %}">
+                                    <i class="fa-regular fa-calendar"></i>
+                                    {{ campaign_event.event.title }} - {{ campaign_event.event.start_datetime|date }}
+                                </a>
+                            </div>
+                        {% endfor %}
                     </div>
                 {% endif %}
-            {% endwith %}
-        {% endif %}
-        
-        {# Events section #}
-        {% if page.future_events and page.status != "completed" %}
-            <h3>{% translate "Attend an event" %}</h3>
-            <div id="events">
-                {% for campaign_event in page.future_events %}
-                    <div class="event">
-                        <a href="{% url 'event_detail' slug=campaign_event.event.slug %}">
-                            <i class="fa-regular fa-calendar"></i> 
-                            {{ campaign_event.event.title }} - {{ campaign_event.event.start_datetime|date }}
-                        </a>
+                {# Social sharing #}
+                {% if page.social_shares %}
+                    <div class="calendar-subscribe">
+                        <div>Share:</div>
+                        {% with share_url=request.build_absolute_uri %}
+                            {% with share_title=page.call_to_action|default_if_none:"Take Action Now"|add:" "|add:page.title %}
+                                <span class="calendar-share">{% post_to_reddit share_title share_url "<i class=\"fa-brands fa-reddit\"></i> Reddit" %}</span>
+                                <span class="calendar-share">{% post_to_twitter share_title share_url "<i class=\"fa-brands fa-twitter\"></i> Twitter" %}</span>
+                                <span class="calendar-share">{% post_to_bluesky share_title share_url "<i class=\"fa-brands fa-bluesky\"></i> Bluesky" %}</span>
+                                <span class="calendar-share"><a href="{% qr_url_from_text share_url image_format='png' %}"
+   download="qr-code-{{ page.slug }}.png"><i class="fa-solid fa-qrcode"></i> QR Code</a></span>
+                            {% endwith %}
+                        {% endwith %}
+                        <span class="calendar-share">{% copy_to_clipboard share_url "<i class=\"fa-solid fa-copy\"></i> Copy URL" %}</span>
+                        {% add_copy_script %}
                     </div>
+                {% endif %}
+                {# Render petition blocks at the end, like in the old campaign template #}
+                {% for block in page.body %}
+                    {% if block.block_type == "petition" %}
+                        {% include_block block %}
+                    {% endif %}
                 {% endfor %}
             </div>
-        {% endif %}
-        
-        {# Social sharing #}
-        {% if page.social_shares %}
-            <div class="calendar-subscribe">
-                <div>Share:</div>
-                {% with share_url=request.build_absolute_uri %}
-                {% with share_title=page.call_to_action|default_if_none:"Take Action Now"|add:" "|add:page.title %}
-                    <span class="calendar-share">{% post_to_reddit share_title share_url "<i class=\"fa-brands fa-reddit\"></i> Reddit" %}</span>
-                    <span class="calendar-share">{% post_to_twitter share_title share_url "<i class=\"fa-brands fa-twitter\"></i> Twitter" %}</span>
-                    <span class="calendar-share">{% post_to_bluesky share_title share_url "<i class=\"fa-brands fa-bluesky\"></i> Bluesky" %}</span>
-                    <span class="calendar-share"><a href="{% qr_url_from_text share_url image_format='png' %}" download="qr-code-{{ page.slug }}.png"><i class="fa-solid fa-qrcode"></i> QR Code</a></span>
-                {% endwith %}
-                {% endwith %}
-                <span class="calendar-share">{% copy_to_clipboard share_url "<i class=\"fa-solid fa-copy\"></i> Copy URL" %}</span>
-                {% add_copy_script %}
-            </div>
-        {% endif %}
-        
-        {# Render petition blocks at the end, like in the old campaign template #}
-        {% for block in page.body %}
-            {% if block.block_type == "petition" %}
-                {% include_block block %}
-            {% endif %}
-        {% endfor %}
-        
-    </div>
-    
-    <script>
+            <script>
         // Smooth scroll for anchor links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
@@ -178,8 +171,8 @@
                 });
             });
         });
-    </script>
-    {% endblock %}
-</div>
-{% wagtailuserbar %}
+            </script>
+        {% endblock %}
+    </div>
+    {% wagtailuserbar %}
 {% endblock %}

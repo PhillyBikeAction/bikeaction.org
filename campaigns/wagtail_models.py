@@ -290,6 +290,12 @@ class CampaignPage(RoutablePageMixin, Page):
     # Legacy ID for migration
     legacy_campaign_id = models.UUIDField(null=True, blank=True, editable=False)
 
+    # Page hierarchy restrictions
+    parent_page_types = [
+        "campaigns.CampaignsIndexPage"
+    ]  # Can only be created under CampaignsIndexPage
+    subpage_types = []  # Cannot have any child pages
+
     # Admin panels
     content_panels = Page.content_panels + [
         MultiFieldPanel(
@@ -381,6 +387,25 @@ class CampaignPage(RoutablePageMixin, Page):
 
         return petition_signatures_wagtail(request, self, petition_id)
 
+    def get_status_display_formatted(self):
+        """Get formatted status display with color for admin"""
+        from django.utils.html import format_html
+
+        status_colors = {
+            "draft": "#999",
+            "active": "#28a745",
+            "completed": "#007bff",
+            "canceled": "#dc3545",
+            "suspended": "#ffc107",
+        }
+
+        color = status_colors.get(self.status, "#000")
+        return format_html(
+            '<span style="color: {}; font-weight: bold;">{}</span>',
+            color,
+            self.get_status_display(),
+        )
+
     class Meta:
         verbose_name = "Campaign"
         verbose_name_plural = "Campaigns"
@@ -400,6 +425,11 @@ class CampaignEvent(Orderable):
 class CampaignsIndexPage(Page):
     """Index page for listing all campaigns"""
 
+    # Page hierarchy restrictions
+    parent_page_types = ["cms.HomePage"]  # Can only be created under HomePage
+    subpage_types = ["campaigns.CampaignPage"]  # Can only have CampaignPage children
+    max_count = 1  # Only one campaigns index page should exist
+
     def get_context(self, request):
         context = super().get_context(request)
         campaigns = CampaignPage.objects.live().descendant_of(self)
@@ -418,9 +448,6 @@ class CampaignsIndexPage(Page):
     class Meta:
         verbose_name = "Campaigns Index"
         verbose_name_plural = "Campaigns Indexes"
-
-    # Only allow CampaignPage children
-    subpage_types = ["CampaignPage"]
 
     # Admin panels
     content_panels = Page.content_panels

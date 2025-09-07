@@ -1,42 +1,46 @@
 {% extends 'base.html' %}
 {% load i18n %}
 {% load thumbnail %}
-
 {% block content %}
-{% regroup object_list|dictsort:"status" by status as campaigns_by_status %}
-{% for status, campaigns in campaigns_by_status %}
-{% if status == "draft" %}
-{% if request.user.is_staff %}
-<h2>{{ status|title }} Campaigns</h2>
-{% endif %}
-{% else %}
-<h2>{{ status|title }} Campaigns</h2>
-{% endif %}
-
-<div class="campaigns-container">
-{% for campaign in campaigns %}
-  {% if campaign.status == "draft" %}
-  {% if request.user.is_staff %}
-  <div class="campaign-card">
-    <a href="{% url 'campaign' slug=campaign.slug %}">
-      <h2>{{ campaign.title }} - <span style="color: red;"><b>{% translate "DRAFT" %}</b></span></h2>
-      {% if campaign.cover %}<img class="campaign-card-img" src="{{ campaign.cover|thumbnail_url:'small'}}">{% endif %}
-      <p>{{ campaign.description }}</p>
-    </a>
-  </div>
-  {% endif %}
-  {% else %}
-  {% if campaign.visible %}
-  <div class="campaign-card">
-    <a href="{% url 'campaign' slug=campaign.slug %}">
-      <h2>{{ campaign.title }}</h2>
-      {% if campaign.cover %}<img class="campaign-card-img" src="{{ campaign.cover|thumbnail_url:'small' }}">{% endif %}
-      <p>{{ campaign.description }}</p>
-    </a>
-  </div>
-  {% endif %}
-  {% endif %}
-{% endfor %}
-</div>
-{% endfor %}
+    {% regroup object_list|dictsort:"status" by status as campaigns_by_status %}
+    {% for status, campaigns in campaigns_by_status %}
+        {% if status == "draft" %}
+            {% if request.user.is_staff %}<h2>{{ status|title }} Campaigns</h2>{% endif %}
+        {% else %}
+            <h2>{{ status|title }} Campaigns</h2>
+        {% endif %}
+        <div class="campaigns-container">
+            {% for campaign in campaigns %}
+                {% if campaign.status == "draft" %}
+                    {% if request.user.is_staff %}
+                        <div class="campaign-card">
+                            <a href="{% url 'campaign' slug=campaign.slug %}">
+                                <h2>
+                                    {{ campaign.title }} - <span style="color: red;"><b>{% translate "DRAFT" %}</b></span>
+                                </h2>
+                                {% if campaign.cover %}
+                                    <img class="campaign-card-img"
+                                         src="{{ campaign.cover|thumbnail_url:'small' }}">
+                                {% endif %}
+                                <p>{{ campaign.description }}</p>
+                            </a>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    {% if campaign.visible %}
+                        <div class="campaign-card">
+                            <a href="{% url 'campaign' slug=campaign.slug %}">
+                                <h2>{{ campaign.title }}</h2>
+                                {% if campaign.cover %}
+                                    <img class="campaign-card-img"
+                                         src="{{ campaign.cover|thumbnail_url:'small' }}">
+                                {% endif %}
+                                <p>{{ campaign.description }}</p>
+                            </a>
+                        </div>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endfor %}
 {% endblock %}

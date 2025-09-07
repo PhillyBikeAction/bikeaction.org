@@ -1,0 +1,43 @@
+{% load i18n %}
+{% load pba_tags %}
+{# Shared partial for displaying petitions - used by both preview and actual rendering #}
+{# Required context: petition, is_preview (optional), page (optional) #}
+<div id="petitions">
+    <h2>{{ petition.title }}</h2>
+    <div class="petition">
+        {# Show the letter if present #}
+        {% if petition.letter %}<div class="petition-letter">{{ petition.letter|linebreaks }}</div>{% endif %}
+        {# Show form based on context #}
+        {% if is_preview %}
+            {# Preview - always show form #}
+            {% include 'campaigns/blocks/petition_form.html' with petition=petition form=petition.form page=page preview_mode=True %}
+        {% elif petition.active and page.status != "completed" %}
+            {# Live - show working form if active and campaign not completed #}
+            {% include 'campaigns/blocks/petition_form.html' with petition=petition form=petition.form page=page %}
+        {% elif not petition.active %}
+            <div style="padding: 20px;
+                        background: #f8d7da;
+                        border: 1px solid #f5c6cb;
+                        border-radius: 4px">
+                <strong>This petition is currently inactive and will not accept signatures.</strong>
+            </div>
+        {% elif page.status == "completed" %}
+            <div style="padding: 20px;
+                        background: #f8f9f9;
+                        border: 1px solid #dee2e6;
+                        border-radius: 4px">
+                <strong>This campaign has been completed. Thank you for your support!</strong>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{# Signatures display if enabled #}
+{% if petition.show_submissions %}
+    <div class="fade-transition"
+         {% if not is_preview %}
+             hx-get="{{ page.url }}petition/{{ petition.id }}/_signatures/" hx-trigger="every 10s" hx-swap="innerHTML transition:true"
+         {% endif %}>
+        {# Render signatures the same way for both preview and live #}
+        {% include 'campaigns/_partial_signatures.html' with petition=petition %}
+    </div>
+{% endif %}
