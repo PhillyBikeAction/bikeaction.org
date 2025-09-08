@@ -37,6 +37,7 @@ class ScheduledEvent(models.Model):
 
     discord_id = models.CharField(max_length=64, null=True, blank=True)
     slug = models.SlugField(max_length=512, null=True, blank=True)
+    hidden = models.BooleanField(blank=False, default=False)
 
     title = models.CharField(max_length=512)
     status = models.CharField(max_length=16, choices=Status.choices)

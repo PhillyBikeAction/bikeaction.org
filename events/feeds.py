@@ -18,6 +18,7 @@ class AllEventsFeed(ICalFeed):
         return (
             ScheduledEvent.objects.all()
             .exclude(status=ScheduledEvent.Status.DELETED)
+            .exclude(hidden=True)
             .order_by("-start_datetime")
         )
 

@@ -32,6 +32,7 @@ class DonationAdmin(admin.ModelAdmin):
     list_filter = ("donation_product",)
     search_fields = ("comment",)
 
+
 admin.site.register(Membership, MembershipAdmin)
 admin.site.register(Donation, DonationAdmin)
 admin.site.register(DonationTier, DonationTierAdmin)

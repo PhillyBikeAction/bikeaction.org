@@ -4,6 +4,7 @@ import pkgutil
 import sys
 
 from allauth.socialaccount.models import SocialAccount
+from django.conf import settings
 from interactions import Client, Intents, listen
 from interactions.api.events import (
     GuildScheduledEventCreate,
@@ -96,6 +97,11 @@ class PBADiscordBot(Client):
                     if event.scheduled_event.description
                     else "No details provided."
                 ),
+                "hidden": bool(
+                    event.scheduled_event.get_channel()
+                    and event.scheduled_event.get_channel().id
+                    in settings.EVENTS_HIDDEN_DISCORD_CHANNELS
+                ),
                 "start_datetime": datetime.datetime.fromtimestamp(
                     event.scheduled_event.start_time.timestamp(),
                     tz=datetime.timezone.utc,
@@ -129,6 +135,10 @@ class PBADiscordBot(Client):
                 "title": event.after.name,
                 "description": (
                     event.after.description if event.after.description else "No details provided."
+                ),
+                "hidden": bool(
+                    event.after.get_channel()
+                    and event.after.get_channel().id in settings.EVENTS_HIDDEN_DISCORD_CHANNELS
                 ),
                 "start_datetime": datetime.datetime.fromtimestamp(
                     event.after.start_time.timestamp(),
