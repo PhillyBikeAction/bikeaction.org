@@ -1,0 +1,18 @@
+Hi {{ first_name }},
+
+<small><i>*You are receiving this email from <a href="https://bikeaction.org/">Philly Bike Action</a> because you have a PBA account and live in Queen Village or Bella Vista.*</i></small>
+
+The Queen Village Neighbors Association (QVNA) and Bella Vista Neighbors Association (BVNA) are co-hosting a [**community meeting**](https://www.qvna.org/events/help-us-reimagine-the-6thpassyunk-triangle) **September 15, 7PM** at the [Palumbo Recreation Center](https://maps.app.goo.gl/qMYKnBjVFJLHZM6g8) to discuss ways to **improve the safety of the triangle intersection at** **6th, Queen, and Passyunk.**
+
+As a resident of the area, this is a great opportunity to **advocate for a safer design** that would improve the usability of the intersection for pedestrians, cyclists, and drivers.
+
+Recommended talking points include:
+
+* Physical infrastructure such as planters, bollards, or a pedestrian plaza will calm traffic and make the separation between street and sidewalk more clear.  
+* The paint and flexposts around the triangle do not prevent cars from driving or parking in an unsafe or illegal manner. Hardened structures like concrete curbs would prevent this.  
+* Adding [daylighting](https://www.cityoflancasterpa.gov/blog/vision-zero-what-is-intersection-daylighting/) near the crosswalks will improve visibility of pedestrians crossing.  
+* Replace the cut through from Passyunk Ave to Queen St. with space for pedestrians. The space could be used for children and parents at the Montessori school, for example.
+
+<span style="width: 80%; text-align: center;"><img style="width: 100%; border-radius: 5px; border: solid grey;" src="templates/email/6th-n-pass/looking-south.jpeg"></span>
+
+**Philly Bike Action**
