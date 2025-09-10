@@ -38,6 +38,31 @@ class ProfileCompleteFilter(admin.SimpleListFilter):
         return queryset
 
 
+class NewsletterSubscriberFilter(admin.SimpleListFilter):
+    title = "subscribed to newsletter"
+    parameter_name = "newsletter subscriber"
+
+    def lookups(self, request, model_admin):
+        return ((True, "Yes"), (False, "No"))
+
+    def queryset(self, request, queryset):
+        if self.value() in (
+            "True",
+            True,
+        ):
+            return queryset.filter(
+                newsletter_opt_in=True,
+            )
+        elif self.value() in (
+            "False",
+            False,
+        ):
+            return queryset.filter(
+                newsletter_opt_in=False,
+            )
+        return queryset
+
+
 class GeolocatedFilter(admin.SimpleListFilter):
     title = "geolocated"
     parameter_name = "geolocated"
@@ -200,6 +225,7 @@ class ProfileAdmin(ReadOnlyLeafletGeoAdminMixin, admin.ModelAdmin):
         MemberFilter,
         MemberByDonationFilter,
         MemberByDiscordActivityFilter,
+        NewsletterSubscriberFilter,
         AppsConnectedFilter,
         GeolocatedFilter,
         DistrictFilter,
