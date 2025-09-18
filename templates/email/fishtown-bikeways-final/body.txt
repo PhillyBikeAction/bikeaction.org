@@ -6,7 +6,7 @@ Hello {{ first_name }},
 
 OTIS is finalizing their designs for the **[Fishtown Neighborhood Bikeways Project](https://www.phila.gov/documents/fishtown-bikeways/)**, which aims to make residential streets safer for people walking and biking. **FNA opened a survey to gather YOUR input on two locations, one eastbound and one westbound,** to determine which designs should move forward to final design. **You must live within the FNA boundaries to vote.**
 
-**Section 1\. Eastbound: Palmer St \- Frankford Ave to Sepviva St**
+<b><u>Section 1. Eastbound: Palmer St - Frankford Ave to Sepviva St</u></b>
 
 **PBA recommends: Eastbound Route A. Parking Protected Contraflow Lane** 
 
@@ -14,7 +14,7 @@ This is the **only option that includes *necessary* protection for the contraflo
 
 <div style="width: 100%; text-align: center;"><img style="width: 75%; max-width: 200px; border-radius: 5px; border: solid grey;" src="templates/email/fishtown-bikeways-final/image0.jpg"></div>
 
-**Section 2\. Westbound: Delaware Avenue & Palmer Park**
+<b><u>Section 2. Westbound: Delaware Avenue & Palmer Park</u></b>
 
 **PBA recommends: Westbound Route B.** Answer “**No**” to “Do you support moving forward with Westbound Route A as part of near-term implementation with the Neighborhood Bikeways project?”
 
