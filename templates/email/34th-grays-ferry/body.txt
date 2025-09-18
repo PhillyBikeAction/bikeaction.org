@@ -1,0 +1,21 @@
+Hello {{ first_name }},
+
+<small><i>You are receiving this email from [Philly Bike Action](https://bikeaction.org/) because you have a PBA account and live in District 2 or 3.</i></small>
+
+**Attend the Public Meeting for the 34th Street Grays Ferry Project \- Monday September 22nd**
+
+<div style="width: 100%; text-align: center;"><img style="width: 75%; border-radius: 5px; border: solid grey;" src="templates/email/34th-grays-ferry/image.png"></div>
+
+The Philadelphia City Planning Commission is collecting feedback on the [Re-Envisioning 34th Street](https://34th-street-at-grays-ferry-avenue-visioning-fitp.hub.arcgis.com/) project through a [corridor survey](https://34th-street-at-grays-ferry-avenue-visioning-fitp.hub.arcgis.com/pages/0588b5f65ee442559a91594ed3eb33c4#Survey) and public meeting on Monday, September 22\. 
+
+The survey and meeting are open to **anyone who travels through/on 34th St** in Grays Ferry by any transportation mode \- you do not need to live within Grays Ferry, just need to travel through it\! *This is a key opportunity to demonstrate support for safety on this high-stress corridor – use the survey and meeting to ask for protected bike lanes\!*
+
+**Public Meeting Details:**   
+Monday, September 22nd | 6:00 \- 8:00 PM   
+Location: [Finnegan Recreation Center](https://maps.app.goo.gl/9cfKUhvNyqkz4T8J8) (1231 S 30th St)
+
+Attending the meeting? Drop in to learn more and speak with street planners – no need to stay the full two hours. 
+
+Thank you for taking action to make our streets safer\!
+
+**Philly Bike Action**
