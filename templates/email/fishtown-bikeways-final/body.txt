@@ -1,0 +1,29 @@
+Hello {{ first_name }},
+
+<small><i>You are receiving this email from [Philly Bike Action](https://bikeaction.org/) because you have a PBA account and live in the boundaries of the Fishtown Neighbors Association.</i></small>
+
+**Complete the Fishtown Neighbors Association (FNA) Bikeways Final Design [Survey](https://docs.google.com/forms/d/e/1FAIpQLSeL81B0afqADkLoHdLLU9QraZZy9zkU2pjHTdGZ6m4scQCeeA/viewform) by September 24 to ensure protected bike infrastructure.**
+
+OTIS is finalizing their designs for the **[Fishtown Neighborhood Bikeways Project](https://www.phila.gov/documents/fishtown-bikeways/)**, which aims to make residential streets safer for people walking and biking. **FNA opened a survey to gather YOUR input on two locations, one eastbound and one westbound,** to determine which designs should move forward to final design. **You must live within the FNA boundaries to vote.**
+
+**Section 1\. Eastbound: Palmer St \- Frankford Ave to Sepviva St**
+
+**PBA recommends: Eastbound Route A. Parking Protected Contraflow Lane** 
+
+This is the **only option that includes *necessary* protection for the contraflow lanes**. The **buffered option includes zero protection from oncoming traffic**, where vehicles frequently speed and make quick left turns on to Frankford Ave.
+
+<div style="width: 100%; text-align: center;"><img style="width: 75%; max-width: 200px; border-radius: 5px; border: solid grey;" src="templates/email/fishtown-bikeways-final/image0.jpg"></div>
+
+**Section 2\. Westbound: Delaware Avenue & Palmer Park**
+
+**PBA recommends: Westbound Route B.** Answer “**No**” to “Do you support moving forward with Westbound Route A as part of near-term implementation with the Neighborhood Bikeways project?”
+
+We recommend “No” because it provides the **opportunity for a high quality bike lane on Delaware Ave** that **connects more directly to Palmer St**. The longer-term solution on Delaware Ave would also likely connect further north to the bike path at Aramingo Avenue under I-95. This would then link to the bike lanes on York St. into Fishtown. 
+
+The proposed **Westbound Route A** is not a high quality bike lane and **would put bikers and pedestrians in conflict on a narrow, shared sidewalk path**. It is also **unclear if the proposed contraflow lane on Columbia would be protected**.
+
+<div style="width: 100%; text-align: center;"><img style="width: 75%; max-width: 200px; border-radius: 5px; border: solid grey;" src="templates/email/fishtown-bikeways-final/image1.jpg"></div>
+
+In the open comment box, we recommend explicitly stating that you want a two way, concrete protected bike lane on Delaware Ave that connects to Aramingo Avenue.
+
+**Philly Bike Action**
