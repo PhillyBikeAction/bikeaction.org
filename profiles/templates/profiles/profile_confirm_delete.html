@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="form-header">
+  <h1>{% translate "Delete Profile and Account" %}</h1>
+  
+  {% if has_active_subscription %}
+  <div style="background: #ffebee; border: 2px solid #d32f2f; padding: 1rem; margin: 1rem 0; border-radius: 4px; text-align: left;">
+    <h2 style="color: #d32f2f; margin-top: 0;">🚫 {% translate "Account Cannot Be Deleted" %}</h2>
+    <p><strong>{% translate "You have active subscriptions that must be cancelled first:" %}</strong></p>
+    <ul style="text-align: left;">
+      {% for subscription in active_subscriptions %}
+      <li>{{ subscription.plan.product.name }} - ${{ subscription.plan.amount|floatformat:2 }}/{{ subscription.plan.interval }}</li>
+      {% endfor %}
+    </ul>
+    <p>{% translate "Please cancel your subscriptions from your profile page before deleting your account." %}</p>
+    <div style="margin: 2rem 0;">
+      <a href="{% url 'profile' %}" class="submit-button">
+        {% translate "Return to Profile" %}
+      </a>
+    </div>
+  </div>
+  {% elif has_applications %}
+  <div style="background: #ffebee; border: 2px solid #d32f2f; padding: 1rem; margin: 1rem 0; border-radius: 4px; text-align: left;">
+    <h2 style="color: #d32f2f; margin-top: 0;">🚫 {% translate "Account Cannot Be Deleted" %}</h2>
+    <p><strong>{% translate "You have submitted applications that prevent account deletion:" %}</strong></p>
+    <ul style="text-align: left;">
+      {% if has_project_applications %}
+      <li>{% translate "Project application(s)" %}</li>
+      {% endif %}
+      {% if has_organizer_applications %}
+      <li>{% translate "Organizer application(s)" %}</li>
+      {% endif %}
+    </ul>
+    <p>{% translate "To delete your account, please contact" %} <a href="mailto:apps@bikeaction.org">apps@bikeaction.org</a> {% translate "for assistance." %}</p>
+    <div style="margin: 2rem 0;">
+      <a href="{% url 'profile' %}" class="submit-button">
+        {% translate "Return to Profile" %}
+      </a>
+    </div>
+  </div>
+  {% else %}
+  <div style="background: #ffebee; border: 1px solid #e57373; padding: 1rem; margin: 1rem 0; border-radius: 4px; text-align: left;">
+    <h2 style="color: #c62828; margin-top: 0;">⚠️ {% translate "Warning: This action cannot be undone" %}</h2>
+    <p><strong>{% translate "Deleting your profile will permanently remove:" %}</strong></p>
+    <ul style="text-align: left;">
+      <li>{% translate "Your profile information and account login credentials" %}</li>
+      <li>{% translate "Your event RSVPs (if you have RSVP'd to any events)" %}</li>
+      <li>{% translate "Your donation history (if you have donated - records may be retained for accounting purposes)" %}</li>
+      <li>{% translate "Your newsletter subscription (if you are subscribed)" %}</li>
+      <li>{% translate "Your Discord connection (if you have connected your account)" %}</li>
+      <li>{% translate "Your project and organizer applications (if you have submitted any)" %}</li>
+      <li>{% translate "All other data associated with your account" %}</li>
+    </ul>
+  </div>
+
+  <p>{% translate "Are you sure you want to delete your profile and account?" %}</p>
+  
+  <form method="post">
+    {% csrf_token %}
+    <div>
+      <button type="submit" style="background: #d32f2f; color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 4px; cursor: pointer; margin-right: 1rem; font-size: 1rem; font-family: inherit;">
+        {% translate "Yes, Delete My Profile and Account" %}
+      </button>
+      <a href="{% url 'profile' %}" style="background: #666; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 4px; font-size: 1rem; display: inline-block; font-family: inherit;">
+        {% translate "Cancel" %}
+      </a>
+    </div>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

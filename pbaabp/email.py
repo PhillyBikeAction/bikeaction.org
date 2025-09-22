@@ -9,6 +9,8 @@ from django.core.mail import EmailMultiAlternatives
 from django.template import TemplateDoesNotExist, TemplateSyntaxError, engines
 from django.template.loader import get_template
 
+from profiles.models import DoNotEmail
+
 HEADER = """
     <div class="email-header">
       <a href="https://bikeaction.org/"
@@ -57,6 +59,11 @@ FOOTER = """
               </a>
            </td>
         </tr>
+        <tr>
+          <td colspan=2>
+            <p>Want to stop receiving these emails? Delete your profile <a href="https://bikeaction.org/accounts/profile/">here</a>.</p>
+          </td>
+        </tr>
       </table>
     </div>
 """
@@ -104,6 +111,24 @@ def send_email_message(
     :param subject_template: optional string to use as the subject template, in place of
        email/{{ template_name }}/subject.txt
     """
+    # Filter out emails in DoNotEmail list
+    filtered_to = []
+    for email in to:
+        try:
+            DoNotEmail.objects.get(email=email)
+            # Email is in DoNotEmail list, skip it
+            continue
+        except DoNotEmail.DoesNotExist:
+            # Email not in do-not-email list, include it
+            filtered_to.append(email)
+
+    # If all emails were filtered out, don't send anything
+    if not filtered_to:
+        return
+
+    # Update the to list to only include allowed emails
+    to = filtered_to
+
     if from_ is None:
         from_ = settings.DEFAULT_FROM_EMAIL
 

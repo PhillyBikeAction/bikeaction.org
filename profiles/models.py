@@ -207,6 +207,28 @@ class DiscordActivity(models.Model):
         indexes = [models.Index(fields=["profile", "date"])]
 
 
+class DoNotEmail(models.Model):
+    """
+    Model to track email addresses that should not be contacted.
+    Used for users who deleted their accounts or explicitly opted out.
+    """
+
+    class Reason(models.TextChoices):
+        ACCOUNT_DELETION = "account_deletion", "Account Deletion"
+        KNOWN_OPPONENT = "known_opponent", "Known Opponent"
+
+    email = models.EmailField(unique=True)
+    reason = models.CharField(max_length=50, choices=Reason.choices)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.email} ({self.get_reason_display()})"
+
+    class Meta:
+        verbose_name = "Do Not Email"
+        verbose_name_plural = "Do Not Email"
+
+
 class ShirtOrder(models.Model):
     class Fit(models.IntegerChoices):
         # ALTERNATIVE_01070C = 0, 'Unisex Classic Fit - "Go-To T-Shirt"'

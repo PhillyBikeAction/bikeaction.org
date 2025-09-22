@@ -23,4 +23,5 @@ urlpatterns = [
         views.complete_tshirt_checkout_session,
         name="shirt_pay_complete",
     ),
+    path("delete/", views.ProfileDeleteView.as_view(), name="profile_delete"),
 ]

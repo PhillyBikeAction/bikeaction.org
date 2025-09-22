@@ -55,6 +55,9 @@
   {% url 'account_set_password' as set_password_url %}
   <p><b>{% blocktranslate %}Set a password for your account <a href="{{ set_password_url }}">here</a>.{% endblocktranslate %}</b></p>
   {% endif %}
+  <br><small style="color: darkred;">
+    <a href="{% url 'profile_delete' %}" style="color: darkred;">{% translate "Delete your profile and account" %}</a>
+  </small>
 </div>
 
 {% if request.user.profile.project_application_drafts %}

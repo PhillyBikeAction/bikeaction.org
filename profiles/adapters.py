@@ -2,6 +2,7 @@ from allauth.account.adapter import DefaultAccountAdapter
 from allauth.core import context  # noqa: F401
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from django.contrib.sites.shortcuts import get_current_site
+from django.core.exceptions import ValidationError
 from django.template.loader import render_to_string
 from django.urls import reverse
 
@@ -9,6 +10,31 @@ from pbaabp.email import send_email_message
 
 
 class AccountAdapter(DefaultAccountAdapter):
+    def clean_email(self, email):
+        """
+        Check DoNotEmail list during signup.
+        Remove entries for account deletion, but block for other reasons.
+        """
+        email = super().clean_email(email)
+
+        from profiles.models import DoNotEmail
+
+        try:
+            do_not_email = DoNotEmail.objects.get(email=email)
+
+            if do_not_email.reason == DoNotEmail.Reason.ACCOUNT_DELETION:
+                # User previously deleted their account, allow re-signup and remove from list
+                do_not_email.delete()
+            else:
+                # Other reasons (e.g., Known Opponent) should block signup
+                raise ValidationError("Something went wrong. Please try again later.")
+
+        except DoNotEmail.DoesNotExist:
+            # Email not in do-not-email list, proceed normally
+            pass
+
+        return email
+
     def render_mail(self, template_prefix, email, context, headers=None):  # noqa: F811
         subject = render_to_string("{0}_subject.txt".format(template_prefix), context)
         subject = " ".join(subject.splitlines()).strip()

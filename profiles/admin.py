@@ -11,7 +11,7 @@ from django.utils.safestring import mark_safe
 
 from facets.models import District, RegisteredCommunityOrganization
 from pbaabp.admin import ReadOnlyLeafletGeoAdminMixin
-from profiles.models import DiscordActivity, Profile, ShirtOrder
+from profiles.models import DiscordActivity, DoNotEmail, Profile, ShirtOrder
 
 
 class ProfileCompleteFilter(admin.SimpleListFilter):
@@ -465,6 +465,14 @@ class UserAdmin(BaseUserAdmin):
     readonly_fields = ["profile"]
 
 
+class DoNotEmailAdmin(admin.ModelAdmin):
+    list_display = ["email", "reason", "created_at"]
+    list_filter = ["reason", "created_at"]
+    search_fields = ["email"]
+    readonly_fields = ["created_at"]
+
+
 admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
 admin.site.register(ShirtOrder, ShirtOrderAdmin)
+admin.site.register(DoNotEmail, DoNotEmailAdmin)
