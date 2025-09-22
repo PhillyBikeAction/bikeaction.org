@@ -6,7 +6,7 @@
 <meta property="og:type" content="article">
 <meta property="og:title" content="{{ campaign.title }} - Philly Bike Action">
 <meta property="og:url" content="https://bikeaction.org/campaigns/{{ campaign.slug }}">
-{% if campaign.cover %}<meta property="og:image" content="https://{{ request.get_host }}{{ campaign.cover|thumbnail_url:'small' }}">{% endif %}
+{% if campaign.cover %}<meta property="og:image" content="{{ campaign.cover|thumbnail_url:'small' }}">{% endif %}
 <meta property="og:description" content="{{ campaign.description }}">
 <meta property="og:site_name" content="Philly Bike Action">
 
@@ -14,7 +14,7 @@
 <meta name="twitter:card" content="{% if campaign.cover %}summary_large_image{% else %}summary{% endif %}">
 <meta name="twitter:title" content="{{ campaign.title }} - Philly Bike Action">
 <meta name="twitter:description" content="{{ campaign.description }}">
-{% if campaign.cover %}<meta name="twitter:image" content="https://{{ request.get_host }}{{ campaign.cover|thumbnail_url:'small' }}">{% endif %}
+{% if campaign.cover %}<meta name="twitter:image" content="{{ campaign.cover|thumbnail_url:'small' }}">{% endif %}
 {% endblock %}
 
 {% block extra_head %}
