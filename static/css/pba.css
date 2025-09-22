@@ -1722,3 +1722,112 @@ body {
   border-top: 1px solid grey;
   white-space: pre-line;
 }
+
+/* Posts/Blog Styles */
+
+/* Prevent visited link color change for posts and events */
+.event-event a:visited,
+.event-event a,
+.event-title a:visited,
+.event-title a,
+.event-description a:visited,
+.event-description a,
+.post-tags a:visited,
+.post-tags a {
+  color: inherit;
+}
+
+.event-description a:hover,
+.post-tags a:hover {
+  text-decoration: underline;
+}
+
+/* Collapsible tag filter */
+.tag-filter-dropdown {
+  margin: 1rem 0;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  background: #f8f9fa;
+}
+
+.tag-filter-dropdown summary {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  user-select: none;
+  font-size: 0.95rem;
+  color: #495057;
+}
+
+.tag-filter-dropdown summary:hover {
+  background: #e9ecef;
+}
+
+.tag-filter-dropdown[open] summary {
+  border-bottom: 1px solid #dee2e6;
+}
+
+.tag-filter-content {
+  padding: 0.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.tag-filter-link {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  background: white;
+  text-decoration: none;
+  color: #333;
+  border: 1px solid #dee2e6;
+  border-radius: 15px;
+  transition: all 0.2s;
+  font-size: 0.85rem;
+}
+
+.tag-filter-link:hover {
+  background: #e9ecef;
+  border-color: #adb5bd;
+}
+
+.tag-filter-link.active {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+  font-weight: bold;
+}
+
+.tag-count {
+  font-size: 0.85em;
+  opacity: 0.7;
+}
+
+/* Pagination styles */
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2rem;
+}
+
+.pagination-nav.center {
+  flex: 1;
+  text-align: center;
+}
+
+/* Mobile responsiveness for posts */
+@media (max-width: 768px) {
+  .tag-filters {
+    padding: 0.5rem;
+  }
+
+  .tag-filter-link {
+    padding: 0.2rem 0.5rem;
+    font-size: 0.85rem;
+  }
+
+  .pagination {
+    flex-direction: column;
+    gap: 1rem;
+  }
+}

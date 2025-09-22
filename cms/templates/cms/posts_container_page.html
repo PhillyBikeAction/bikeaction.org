@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% load wagtailuserbar %}
-
 {% load static %}
 {% load wagtailcore_tags %}
 {% load post_tags %}
@@ -10,16 +9,91 @@
 {% block content %}
   {% wagtailuserbar %}
   <div class="cms-content">
-    <div class="cms-title">
-      <h1>{{ page.title }}</h1>
-    </div>
-    <div class="cms-body">
-      <div class="content-container">
-        <ul>
-        {% for post in self.get_posts %}
-          <li><a href="{% post_url post %}">{{post.title}} - {{post.date}}</a>
+    <h1>{{ page.title }}</h1>
+
+    <!-- Minimal tag navigation -->
+    {% if all_tags %}
+    <details class="tag-filter-dropdown" {% if current_tag %}open{% endif %}>
+      <summary>
+        {% if current_tag %}
+          Filtering: <strong>{{ current_tag }}</strong> <span style="font-size: 0.85em;">(click for more)</span>
+        {% else %}
+          Filter by topic <span style="font-size: 0.85em;">({{ all_tags|length }} tags)</span>
+        {% endif %}
+      </summary>
+      <div class="tag-filter-content">
+        <a href="{{ page.url }}" class="tag-filter-link {% if not current_tag %}active{% endif %}">
+          All Posts
+        </a>
+        {% for tag in all_tags %}
+          <a href="{{ page.url }}tag/{{ tag.slug }}/"
+             class="tag-filter-link {% if current_tag == tag.name %}active{% endif %}">
+            {{ tag.name }} <span class="tag-count">({{ tag.num_times }})</span>
+          </a>
         {% endfor %}
-        </ul>
+      </div>
+    </details>
+    {% endif %}
+
+    <!-- Posts grouped by month (always in reverse chronological order - newest first) -->
+    {% regroup posts.object_list by date|date:"F Y" as posts_by_month %}
+
+    {% for month, month_posts in posts_by_month %}
+      <div class="event-month">
+        <div class="event-month-month">{{ month }}</div>
+        <div class="event-month-divider"></div>
+      </div>
+
+      {% for post in month_posts %}
+      <div class="event-event">
+        <div class="event-header">
+          <div class="event-header-box">
+            <div class="event-header-box-day-of-week">
+              <span>{{ post.date|date:"M"|upper }}</span>
+            </div>
+            <div class="event-header-box-day-of-month">
+              <span>{{ post.date|date:"j" }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="event-details">
+          <div class="event-title"><a href="{% post_url post %}">{{ post.title }}</a></div>
+          <div class="event-location"><i class="fa-solid fa-user"></i> {{ post.author }}</div>
+          {% if post.tags.all %}
+          <div class="event-description">
+            <i class="fa-solid fa-tags"></i>
+            {% for tag in post.tags.all %}
+              <a href="{{ page.url }}tag/{{ tag.slug }}/">{{ tag.name }}</a>{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    {% empty %}
+      <p>No posts found.</p>
+    {% endfor %}
+
+    <!-- Clean blog-style pagination -->
+    <div class="pagination">
+      <div class="pagination-nav previous">
+        {% if posts.has_next %}
+        <span><a href="?{% if current_tag %}tag={{ current_tag }}&{% endif %}page={{ posts.next_page_number }}"><i class='fa-solid fa-arrow-left'></i> Older Posts</a></span>
+        {% endif %}
+      </div>
+
+      <div class="pagination-nav center" style="text-align: center;">
+        {% if posts.paginator.num_pages > 1 %}
+        <span style="color: #6c757d;">
+          Showing {{ posts.start_index }}-{{ posts.end_index }} of {{ posts.paginator.count }} posts
+        </span>
+        {% endif %}
+      </div>
+
+      <div class="pagination-nav next">
+        {% if posts.has_previous %}
+        <span><a href="?{% if current_tag %}tag={{ current_tag }}&{% endif %}page={{ posts.previous_page_number }}">Newer Posts <i class='fa-solid fa-arrow-right'></i></a></span>
+        {% endif %}
       </div>
     </div>
   </div>

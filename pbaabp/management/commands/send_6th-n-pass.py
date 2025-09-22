@@ -1,16 +1,16 @@
 from django.conf import settings
-from django.contrib.gis.geos import GEOSGeometry
 from django.core.management.base import BaseCommand
 from django.db.models import Q
 
 from facets.models import RegisteredCommunityOrganization
 from pbaabp.email import send_email_message
-from profiles.models import Profile
 
 SENT = []
 
 profiles = set()
-for rco in RegisteredCommunityOrganization.objects.filter(Q(name="Queen Village Neighbors Association") | Q(name="Bella Vista Neighbors Association")).all():
+for rco in RegisteredCommunityOrganization.objects.filter(
+    Q(name="Queen Village Neighbors Association") | Q(name="Bella Vista Neighbors Association")
+).all():
     profiles.update(set(rco.contained_profiles.all()))
 
 

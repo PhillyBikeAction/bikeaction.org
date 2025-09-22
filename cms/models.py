@@ -1,5 +1,9 @@
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db import models
 from django.http import Http404
+from modelcluster.contrib.taggit import ClusterTaggableManager
+from modelcluster.fields import ParentalKey
+from taggit.models import TaggedItemBase
 from wagtail.admin.panels import FieldPanel
 from wagtail.blocks import (
     BooleanBlock,
@@ -239,6 +243,10 @@ class NavigationContainerPage(Page):
     subpage_types = ["NavigationContainerPage", "CmsStreamPage"]
 
 
+class PostPageTag(TaggedItemBase):
+    content_object = ParentalKey("PostPage", related_name="tagged_items", on_delete=models.CASCADE)
+
+
 class PostPage(Page):
     """
     A Post
@@ -247,6 +255,8 @@ class PostPage(Page):
     author = models.CharField(max_length=128, default="Philly Bike Action")
 
     date = models.DateField()
+
+    tags = ClusterTaggableManager(through=PostPageTag, blank=True)
 
     body = StreamField(
         [
@@ -263,6 +273,7 @@ class PostPage(Page):
         FullSlugFieldPanel("canonical_url"),
         FieldPanel("author"),
         FieldPanel("date"),
+        FieldPanel("tags"),
         FieldPanel("body"),
     ]
 
@@ -317,19 +328,88 @@ class PostsContainerPage(RoutablePageMixin, Page):
     Displays recent posts, contains posts
     """
 
-    def get_posts(self):
-        return PostPage.objects.descendant_of(self).live().order_by("-date")
+    posts_per_page = models.IntegerField(
+        default=10, help_text="Number of posts to display per page"
+    )
+
+    content_panels = Page.content_panels + [
+        FieldPanel("posts_per_page"),
+    ]
+
+    def get_posts(self, tag=None):
+        posts = PostPage.objects.descendant_of(self).live().order_by("-date")
+        if tag:
+            posts = posts.filter(tags__name=tag)
+        return posts
+
+    def get_context(self, request):
+        context = super().get_context(request)
+
+        # Get tag from URL parameter
+        tag = request.GET.get("tag")
+
+        # Get all posts, ordered by date (newest first)
+        posts = self.get_posts(tag=tag).order_by("-date")
+
+        # Pagination
+        page = request.GET.get("page", 1)
+        paginator = Paginator(posts, self.posts_per_page)
+
+        try:
+            posts = paginator.page(page)
+        except PageNotAnInteger:
+            posts = paginator.page(1)
+        except EmptyPage:
+            posts = paginator.page(paginator.num_pages)
+
+        context["posts"] = posts
+        context["current_tag"] = tag
+
+        # Get all tags used in posts with counts
+        from django.db.models import Count
+        from taggit.models import Tag
+
+        context["all_tags"] = (
+            Tag.objects.filter(cms_postpagetag_items__content_object__in=self.get_posts())
+            .annotate(num_times=Count("cms_postpagetag_items"))
+            .distinct()
+            .order_by("name")
+        )
+
+        return context
 
     @path("<int:year>/")
     @path("<int:year>/<int:month>/")
     @path("<int:year>/<int:month>/<int:day>/")
     def post_by_date(self, request, year, month=None, day=None, *args, **kwargs):
-        self.posts = self.get_posts().filter(date__year=year)
+        context = self.get_context(request)
+        posts = self.get_posts().filter(date__year=year)
         if month:
-            self.posts = self.posts.filter(date__month=month)
+            posts = posts.filter(date__month=month)
         if day:
-            self.posts = self.posts.filter(date__day=day)
-        return self.render(request)
+            posts = posts.filter(date__day=day)
+
+        # Apply pagination
+        page = request.GET.get("page", 1)
+        paginator = Paginator(posts, self.posts_per_page)
+
+        try:
+            posts = paginator.page(page)
+        except PageNotAnInteger:
+            posts = paginator.page(1)
+        except EmptyPage:
+            posts = paginator.page(paginator.num_pages)
+
+        context["posts"] = posts
+        return self.render(request, context_overrides=context)
+
+    @path("tag/<slug:tag>/")
+    def posts_by_tag(self, request, tag, *args, **kwargs):
+        # Use regular get_context which handles tag via GET param
+        request.GET = request.GET.copy()
+        request.GET["tag"] = tag
+        context = self.get_context(request)
+        return self.render(request, context_overrides=context)
 
     @path("<int:year>/<int:month>/<int:day>/<slug:slug>/")
     def post_by_date_slug(self, request, year, month, day, slug, *args, **kwargs):

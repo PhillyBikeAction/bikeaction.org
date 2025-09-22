@@ -9,6 +9,7 @@ from profiles.models import Profile
 district3 = District.objects.get(name="District 3")
 district2 = District.objects.get(name="District 2")
 
+
 class Command(BaseCommand):
 
     def add_arguments(self, parser):
