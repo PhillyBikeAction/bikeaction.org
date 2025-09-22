@@ -2,6 +2,26 @@
 {% load i18n %}
 {% load thumbnail %}
 
+{% block extra_head %}
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Campaigns - Philly Bike Action">
+<meta property="og:url" content="{{ request.build_absolute_uri }}">
+<meta property="og:description" content="Join our campaigns for safer streets, better bike infrastructure, and Vision Zero in Philadelphia.">
+<meta property="og:site_name" content="Philly Bike Action">
+<meta property="og:locale" content="en_US">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Campaigns - Philly Bike Action">
+<meta name="twitter:description" content="Join our campaigns for safer streets, better bike infrastructure, and Vision Zero in Philadelphia.">
+<meta name="twitter:site" content="@PhillyBikeActn">
+
+<!-- Additional Meta Tags -->
+<meta name="description" content="Join our campaigns for safer streets, better bike infrastructure, and Vision Zero in Philadelphia.">
+<link rel="canonical" href="{{ request.build_absolute_uri }}">
+{% endblock %}
+
 {% block content %}
 {% regroup object_list|dictsort:"status" by status as campaigns_by_status %}
 {% for status, campaigns in campaigns_by_status %}

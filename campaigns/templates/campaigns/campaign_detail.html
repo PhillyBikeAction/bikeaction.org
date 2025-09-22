@@ -5,9 +5,16 @@
 {% block extra_head %}
 <meta property="og:type" content="article">
 <meta property="og:title" content="{{ campaign.title }}">
-<meta property="og:url" content="https://apps.bikeaction.org/campaigns/{{ campaign.slug }}">
+<meta property="og:url" content="https://bikeaction.org/campaigns/{{ campaign.slug }}">
 {% if campaign.cover %}<meta property="og:image" content="{{ campaign.cover|thumbnail_url:'small' }}">{% endif %}
 <meta property="og:description" content="{{ campaign.description }}">
+<meta property="og:site_name" content="Philly Bike Action">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="{% if campaign.cover %}summary_large_image{% else %}summary{% endif %}">
+<meta name="twitter:title" content="{{ campaign.title }}">
+<meta name="twitter:description" content="{{ campaign.description }}">
+{% if campaign.cover %}<meta name="twitter:image" content="{{ campaign.cover|thumbnail_url:'small' }}">{% endif %}
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lity/2.4.1/lity.min.css" integrity="sha512-UiVP2uTd2EwFRqPM4IzVXuSFAzw+Vo84jxICHVbOA1VZFUyr4a6giD9O3uvGPFIuB2p3iTnfDVLnkdY7D/SJJQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
