@@ -1,0 +1,33 @@
+Hello {{ profile.user.first_name }},
+
+<div style="width: 100%"><small style="width: 100%; text-align: center;"><i>You are receiving this email from <a href="https://bikeaction.org">Philly Bike Action</a> because you have a PBA account.</i></small></div>
+
+<span style="font-size: larger; font-weight: bold; text-align: center; width: 100%;">SIGN OUR PETITION TO DEMAND A SAFER FAIRMOUNT PARK!</span>
+
+<div style="width: 100%; text-align: center; font-size: smaller;">
+<a href="https://bikeaction.org/campaigns/demand-a-safer-fairmount-park/" class="submit-button">
+Sign The Petition!
+</a>
+</div>
+
+On September 2, 2025, Harry Fenton, a resident of Philadelphia and a member of Philly Bike Action, was **struck and killed** by a speeding car while **riding his bike in Fairmount Park** at the intersection of Belmont Avenue and the Avenue of the Republic.
+
+<i><b>We call on our city leaders and PennDOT to prioritize safety over speed in Fairmount Park and:</b></i>
+
+1. **Introduce a road diet** on Belmont Avenue and install quick-build traffic calming immediately.  
+2. **Immediately lower the speed limit** on ALL roads in the park to 25 mph.  
+3. **Repair** the Park’s crumbling cycling and pedestrian paths, beginning by fixing the damaged multi-use path on both sides of Belmont Ave for the 2026 Semiquincentennial.  
+4. **Construct single-lane roundabouts** at the intersections of Belmont Ave & Avenue of the Republic, and Belmont Ave & Concourse Dr.  
+   
+
+<div style="width: 100%; text-align: center; font-size: smaller;">
+<a href="https://bikeaction.org/campaigns/demand-a-safer-fairmount-park/" class="submit-button">
+Sign The Petition!
+</a>
+</div>
+
+Harry’s death was preventable—if only the streets in Fairmount Park were designed for **safety instead of high speeds**. Since 2019, at least [**41 people**](https://www.google.com/maps/d/viewer?mid=1aJWiICNgha0GE9A0k2_X8PPXhli9cP0&hl=en&usp=sharing) **have been killed** in car crashes inside or directly adjacent to Fairmount Park. This is **not acceptable**.
+
+Now, Philly Bike Action is joining forces with a broad coalition to demand infrastructure changes to make Belmont Ave and Fairmount Park safer. The Bicycle Coalition of Greater Philadelphia, 5th Square, Families for Safe Streets, PA Safe Roads PAC, Philly Running Alliance, Black Girl Joy Bike Ride, PATHS, Clean Air Council, and Feet First Philly have all signed a petition demanding that the city and PennDOT take immediate action.
+
+**Philly Bike Action**
