@@ -61,7 +61,11 @@ FOOTER = """
         </tr>
         <tr>
           <td colspan=2>
-            <p>Want to stop receiving these emails? Delete your profile <a href="https://bikeaction.org/accounts/profile/">here</a>.</p>
+            <p>
+                Want to stop receiving these emails?
+                Delete your profile
+                <a href="https://bikeaction.org/accounts/profile/">here</a>.
+            </p>
           </td>
         </tr>
       </table>
