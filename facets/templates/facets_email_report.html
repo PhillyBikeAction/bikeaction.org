@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Email Report by Geography</h1>
+<p>{{ date_range }}</p>
+
+<h2>Districts by Average Emails Received</h2>
+
+<div class="table-container">
+<table>
+  <tr>
+    <th>District</th>
+    <th>Profiles</th>
+    <th>Total Emails</th>
+    <th>Avg per Profile</th>
+  </tr>
+{% for district in districts %}
+  <tr>
+    <td>{{ district.name }}</td>
+    <td>{{ district.profile_count }}</td>
+    <td>{{ district.total_emails }}</td>
+    <td>{{ district.avg_emails }}</td>
+  </tr>
+{% endfor %}
+</table>
+</div>
+
+<h2>RCOs by Average Emails Received</h2>
+
+<div class="table-container">
+<table>
+  <tr>
+    <th>RCO</th>
+    <th>Profiles</th>
+    <th>Total Emails</th>
+    <th>Avg per Profile</th>
+  </tr>
+{% for rco in rcos %}
+  <tr>
+    <td>{{ rco.name }}</td>
+    <td>{{ rco.profile_count }}</td>
+    <td>{{ rco.total_emails }}</td>
+    <td>{{ rco.avg_emails }}</td>
+  </tr>
+{% endfor %}
+</table>
+</div>
+
+{% endblock %}
