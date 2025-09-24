@@ -4,10 +4,12 @@ import datetime
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
-from django.db.models import Count, Q
+from django.db.models import Count, IntegerField, OuterRef, Q, Subquery, Value
+from django.db.models.functions import Coalesce
 from django.http import HttpResponse
 from django.utils import timezone
 from django.utils.safestring import mark_safe
+from email_log.models import Email
 
 from facets.models import District, RegisteredCommunityOrganization
 from pbaabp.admin import ReadOnlyLeafletGeoAdminMixin
@@ -209,6 +211,22 @@ class RCOFilter(admin.SimpleListFilter):
         return queryset
 
 
+class EmailHistory:
+    """Custom class to display email history in Profile admin"""
+
+    def __init__(self, profile):
+        self.profile = profile
+
+    def get_emails(self):
+        if self.profile and self.profile.user.email:
+            return Email.objects.filter(recipients__icontains=self.profile.user.email).order_by(
+                "-date_sent"
+            )[
+                :50
+            ]  # Show last 50 emails
+        return Email.objects.none()
+
+
 class ProfileAdmin(ReadOnlyLeafletGeoAdminMixin, admin.ModelAdmin):
     list_display = [
         "_name",
@@ -218,6 +236,7 @@ class ProfileAdmin(ReadOnlyLeafletGeoAdminMixin, admin.ModelAdmin):
         "apps_connected",
         "geolocated",
         "council_district_display",
+        "emails_last_30_days",
         "created_at",
     ]
     list_filter = [
@@ -238,6 +257,29 @@ class ProfileAdmin(ReadOnlyLeafletGeoAdminMixin, admin.ModelAdmin):
         "user__socialaccount__extra_data__username",
     ]
     autocomplete_fields = ("user",)
+
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        queryset = queryset.select_related("user")
+
+        # Use a subquery to count emails efficiently
+        thirty_days_ago = timezone.now() - datetime.timedelta(days=30)
+
+        # Create subquery that counts emails for each user
+        email_count_subquery = Subquery(
+            Email.objects.filter(
+                recipients__icontains=OuterRef("user__email"), date_sent__gte=thirty_days_ago
+            )
+            .values("recipients")
+            .annotate(count=Count("*"))
+            .values("count")[:1],
+            output_field=IntegerField(),
+        )
+
+        # Annotate with email count, defaulting to 0
+        queryset = queryset.annotate(email_count_30d=Coalesce(email_count_subquery, Value(0)))
+
+        return queryset
 
     def _user(self, obj=None):
         if obj is None:
@@ -341,6 +383,15 @@ class ProfileAdmin(ReadOnlyLeafletGeoAdminMixin, admin.ModelAdmin):
 
     council_district_display.short_description = "District"
 
+    def emails_last_30_days(self, obj=None):
+        if obj is None:
+            return 0
+        # Use the annotated field from get_queryset
+        return getattr(obj, "email_count_30d", 0)
+
+    emails_last_30_days.short_description = "Emails (30d)"
+    emails_last_30_days.admin_order_field = "email_count_30d"
+
     def active_subscription(self, obj=None):
         if obj is None:
             return None
@@ -354,6 +405,46 @@ class ProfileAdmin(ReadOnlyLeafletGeoAdminMixin, admin.ModelAdmin):
                 )
         return None
 
+    def email_history(self, obj=None):
+        if obj is None or not obj.user.email:
+            return "No emails found"
+
+        emails = Email.objects.filter(recipients__icontains=obj.user.email).order_by("-date_sent")[
+            :20
+        ]
+
+        if not emails:
+            return "No emails found"
+
+        html = '<div style="max-height: 400px; overflow-y: auto;">'
+        html += '<table style="width: 100%; border-collapse: collapse;">'
+        html += '<thead><tr style="background-color: #f0f0f0;">'
+        html += (
+            '<th style="padding: 8px; text-align: left; border-bottom: 2px solid #ddd;">'
+            "Date Sent</th>"
+        )
+        html += (
+            '<th style="padding: 8px; text-align: left; border-bottom: 2px solid #ddd;">'
+            "Subject</th>"
+        )
+        html += (
+            '<th style="padding: 8px; text-align: left; border-bottom: 2px solid #ddd;">'
+            "From</th>"
+        )
+        html += "</tr></thead><tbody>"
+
+        for email in emails:
+            html += '<tr style="border-bottom: 1px solid #ddd;">'
+            html += f'<td style="padding: 8px;">{email.date_sent.strftime("%Y-%m-%d %H:%M")}</td>'
+            html += f'<td style="padding: 8px;">{email.subject}</td>'
+            html += f'<td style="padding: 8px;">{email.from_email}</td>'
+            html += "</tr>"
+
+        html += "</tbody></table></div>"
+        return mark_safe(html)
+
+    email_history.short_description = "Email History (Last 20)"
+
     def get_readonly_fields(self, request, obj=None):
         if obj is None:
             return ()
@@ -366,6 +457,7 @@ class ProfileAdmin(ReadOnlyLeafletGeoAdminMixin, admin.ModelAdmin):
                 "user",
                 "mailjet_contact_id",
                 "council_district_calculated",
+                "email_history",
             )
 
     fieldsets = [
@@ -391,6 +483,10 @@ class ProfileAdmin(ReadOnlyLeafletGeoAdminMixin, admin.ModelAdmin):
         (
             "Internal",
             {"fields": ["mailjet_contact_id"]},
+        ),
+        (
+            "Email History",
+            {"fields": ["email_history"]},
         ),
     ]
 
