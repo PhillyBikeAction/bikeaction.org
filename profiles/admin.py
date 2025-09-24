@@ -405,6 +405,66 @@ class ProfileAdmin(ReadOnlyLeafletGeoAdminMixin, admin.ModelAdmin):
                 )
         return None
 
+    def email_activity_sparkline(self, obj=None):
+        if obj is None or not obj.user.email:
+            return ""
+
+        # Get date ranges for sparkline
+        date_range_prev_60 = [
+            timezone.now().date() - datetime.timedelta(days=(90 - i)) for i in range(60)
+        ]
+        date_range_last_30 = [
+            timezone.now().date() - datetime.timedelta(days=(30 - i)) for i in range(31)
+        ]
+
+        # Query emails for the last 90 days
+        ninety_days_ago = timezone.now().date() - datetime.timedelta(days=90)
+        emails = Email.objects.filter(
+            recipients__icontains=obj.user.email, date_sent__gte=ninety_days_ago
+        ).values_list("date_sent", flat=True)
+
+        # Count emails by date
+        email_dates = [email.date() if hasattr(email, "date") else email for email in emails]
+        counts_by_date = {}
+        for date in email_dates:
+            counts_by_date[date] = counts_by_date.get(date, 0) + 1
+
+        # Build counts for sparklines
+        counts_prev_60 = ",".join(
+            [str(counts_by_date.get(date, 0)) for date in date_range_prev_60]
+        )
+        counts_last_30 = ",".join(
+            [str(counts_by_date.get(date, 0)) for date in date_range_last_30]
+        )
+
+        return mark_safe(
+            f"""
+            <div style="padding: 0; margin: 0; display: block; border-collapse: collapse;">
+                <div
+                    style="display: inline-block;"
+                    data-sparkline="true"
+                    data-points="{counts_prev_60}"
+                    data-width="150"
+                    data-height="50"
+                    data-gap="0"
+                ></div>
+                <div
+                    style="display: inline-block;"
+                    data-colors="#83bd56"
+                    data-sparkline="true"
+                    data-points="{counts_last_30}"
+                    data-width="75"
+                    data-height="50"
+                    data-gap="0"
+                ></div>
+            </div>
+            """
+        )
+
+    email_activity_sparkline.short_description = (
+        "Email activity over last 90 days, most recent 30 is in green"
+    )
+
     def email_history(self, obj=None):
         if obj is None or not obj.user.email:
             return "No emails found"
@@ -452,6 +512,7 @@ class ProfileAdmin(ReadOnlyLeafletGeoAdminMixin, admin.ModelAdmin):
             return (
                 "active_subscription",
                 "discord_activity",
+                "email_activity_sparkline",
                 "apps_connected",
                 "membership",
                 "user",
@@ -486,7 +547,7 @@ class ProfileAdmin(ReadOnlyLeafletGeoAdminMixin, admin.ModelAdmin):
         ),
         (
             "Email History",
-            {"fields": ["email_history"]},
+            {"fields": ["email_activity_sparkline", "email_history"]},
         ),
     ]
 
