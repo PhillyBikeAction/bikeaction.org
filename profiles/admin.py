@@ -238,6 +238,7 @@ class ProfileAdmin(ReadOnlyLeafletGeoAdminMixin, admin.ModelAdmin):
         "council_district_display",
         "emails_last_30_days",
         "created_at",
+        "street_address",
     ]
     list_filter = [
         ProfileCompleteFilter,
@@ -255,6 +256,7 @@ class ProfileAdmin(ReadOnlyLeafletGeoAdminMixin, admin.ModelAdmin):
         "user__last_name",
         "user__email",
         "user__socialaccount__extra_data__username",
+        "street_address",
     ]
     autocomplete_fields = ("user",)
 
