@@ -22,7 +22,7 @@ anytree==2.12.1
     # via django-modeltree
 asgiref==3.8.1
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   channels
     #   daphne
     #   django
@@ -44,7 +44,7 @@ automat==24.8.1
     # via twisted
 beautifulsoup4==4.13.3
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   pynliner
     #   wagtail
 billiard==4.2.1
@@ -61,7 +61,7 @@ botocore==1.37.22
     #   boto3
     #   s3transfer
 celery[redis]==5.4.0
-    # via -r requirements/base.in
+    # via -r base.in
 certifi==2025.1.31
     # via
     #   httpcore
@@ -74,7 +74,7 @@ cffi==1.17.1
     #   cryptography
     #   pygit2
 channels[daphne]==4.2.0
-    # via -r requirements/base.in
+    # via -r base.in
 charset-normalizer==3.4.1
     # via requests
 click==8.1.8
@@ -91,7 +91,7 @@ click-repl==0.3.0
     # via celery
 cmarkgfm==2024.11.20
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   django-tuieditor
 constantly==23.10.4
     # via twisted
@@ -110,14 +110,14 @@ daphne==4.1.2
 defusedxml==0.7.1
     # via willow
 discord-py-interactions==5.14.0
-    # via -r requirements/base.in
+    # via -r base.in
 discord-typings==0.9.0
     # via discord-py-interactions
 dj-stripe==2.9.0
-    # via -r requirements/base.in
-django==5.1.8
+    # via -r base.in
+django==5.1.13
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   channels
     #   dj-stripe
     #   django-admin-csvexport
@@ -157,59 +157,59 @@ django==5.1.8
     #   wagtail-localize
     #   wagtail-localize-git
 django-admin-csvexport==2.3
-    # via -r requirements/base.in
+    # via -r base.in
 django-admin-extra-buttons==2.1.1
-    # via -r requirements/base.in
+    # via -r base.in
 django-allauth[mfa]==65.6.0
-    # via -r requirements/base.in
+    # via -r base.in
 django-anymail[mailgun]==12.0
-    # via -r requirements/base.in
+    # via -r base.in
 django-bleach==1.0.0
-    # via -r requirements/base.in
+    # via -r base.in
 django-cors-headers==4.7.0
-    # via -r requirements/base.in
+    # via -r base.in
 django-dotenv==1.4.2
-    # via -r requirements/base.in
+    # via -r base.in
 django-email-log==1.4.0
-    # via -r requirements/base.in
+    # via -r base.in
 django-environ==0.12.0
-    # via -r requirements/base.in
+    # via -r base.in
 django-filter==25.1
     # via wagtail
 django-htmx==1.23.0
-    # via -r requirements/base.in
+    # via -r base.in
 django-ical==1.9.2
-    # via -r requirements/base.in
+    # via -r base.in
 django-leaflet==0.31.0
-    # via -r requirements/base.in
+    # via -r base.in
 django-markdownfield==0.11.0
-    # via -r requirements/base.in
+    # via -r base.in
 django-markdownify==0.9.5
-    # via -r requirements/base.in
+    # via -r base.in
 django-modelcluster==6.4
     # via wagtail
 django-modeltree==0.6
     # via django-admin-csvexport
 django-ordered-model==3.7.4
-    # via -r requirements/base.in
+    # via -r base.in
 django-permissionedforms==0.1
     # via wagtail
 django-qr-code==4.1.0
-    # via -r requirements/base.in
+    # via -r base.in
 django-recaptcha==4.0.0
-    # via -r requirements/base.in
+    # via -r base.in
 django-recurrence==1.11.1
     # via django-ical
 django-redis==5.4.0
-    # via -r requirements/base.in
+    # via -r base.in
 django-relativity==0.2.6
-    # via -r requirements/base.in
+    # via -r base.in
 django-sesame==3.2.2
-    # via -r requirements/base.in
+    # via -r base.in
 django-sitetree==1.18.0
-    # via -r requirements/base.in
+    # via -r base.in
 django-storages[s3]==1.14.5
-    # via -r requirements/base.in
+    # via -r base.in
 django-stubs==5.1.3
     # via django-admin-extra-buttons
 django-stubs-ext==5.1.3
@@ -223,13 +223,13 @@ django-tasks==0.6.1
 django-treebeard==4.7.1
     # via wagtail
 django-tuieditor==0.2.0
-    # via -r requirements/base.in
+    # via -r base.in
 djangorestframework==3.15.2
     # via wagtail
 draftjs-exporter==5.1.0
     # via wagtail
 easy-thumbnails==2.10
-    # via -r requirements/base.in
+    # via -r base.in
 emoji==2.14.1
     # via discord-py-interactions
 et-xmlfile==2.0.0
@@ -247,7 +247,7 @@ frozenlist==1.5.0
 geographiclib==2.0
     # via geopy
 geopy==2.4.1
-    # via -r requirements/base.in
+    # via -r base.in
 gitdb==4.0.12
     # via gitpython
 gitpython==3.1.44
@@ -259,7 +259,7 @@ h11==0.16.0
 httpcore==1.0.9
     # via httpx
 httpx==0.28.1
-    # via -r requirements/base.in
+    # via -r base.in
 hyperlink==21.0.0
     # via
     #   autobahn
@@ -286,7 +286,7 @@ laces==0.1.2
     # via wagtail
 markdown==3.7
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   django-markdownfield
     #   django-markdownify
 more-itertools==10.6.0
@@ -301,7 +301,7 @@ openpyxl==3.1.5
     # via wagtail
 pillow==11.1.0
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   easy-thumbnails
     #   pillow-heif
     #   wagtail
@@ -309,7 +309,7 @@ pillow-heif==0.22.0
     # via willow
 playwright==1.52.0
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   tf-playwright-stealth
 polib==1.2.0
     # via wagtail-localize
@@ -320,9 +320,9 @@ propcache==0.3.1
     #   aiohttp
     #   yarl
 psycopg2-binary==2.9.10
-    # via -r requirements/base.in
+    # via -r base.in
 pyap2==0.1.14
-    # via -r requirements/base.in
+    # via -r base.in
 pyasn1==0.6.1
     # via
     #   pyasn1-modules
@@ -339,10 +339,10 @@ pyee==13.0.0
     # via playwright
 pygit2==1.17.0
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   wagtail-localize-git
 pynliner==0.8.0
-    # via -r requirements/base.in
+    # via -r base.in
 pyopenssl==25.0.0
     # via twisted
 python-dateutil==2.9.0.post0
@@ -362,7 +362,7 @@ redis==5.2.1
     #   django-redis
     #   redis-lock-py
 redis-lock-py==1.1.1
-    # via -r requirements/base.in
+    # via -r base.in
 requests==2.32.3
     # via
     #   django-anymail
@@ -373,11 +373,11 @@ s3transfer==0.11.4
 segno==1.6.6
     # via django-qr-code
 sentry-sdk[django]==2.24.1
-    # via -r requirements/base.in
+    # via -r base.in
 service-identity==24.2.0
     # via twisted
 shapely==2.0.7
-    # via -r requirements/base.in
+    # via -r base.in
 shortuuid==1.0.13
     # via django-markdownfield
 six==1.17.0
@@ -397,7 +397,7 @@ stripe==11.6.0
 telepath==0.3.1
     # via wagtail
 tf-playwright-stealth==1.1.2
-    # via -r requirements/base.in
+    # via -r base.in
 tinycss2==1.4.0
     # via bleach
 toml==0.10.2
@@ -405,9 +405,7 @@ toml==0.10.2
 tomli==2.2.1
     # via discord-py-interactions
 twisted[tls]==24.11.0
-    # via
-    #   daphne
-    #   twisted
+    # via daphne
 txaio==23.1.1
     # via autobahn
 types-pyyaml==6.0.12.20250516
@@ -446,21 +444,21 @@ vine==5.1.0
     #   kombu
 wagtail==6.4.1
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   wagtail-link-block
     #   wagtail-localize
     #   wagtail-localize-git
     #   wagtailset
 wagtail-link-block==1.1.7
-    # via -r requirements/base.in
+    # via -r base.in
 wagtail-localize==1.11.3
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   wagtail-localize-git
 wagtail-localize-git==0.15.0
-    # via -r requirements/base.in
+    # via -r base.in
 wagtailset==1.1.2
-    # via -r requirements/base.in
+    # via -r base.in
 wcwidth==0.2.13
     # via prompt-toolkit
 webencodings==0.5.1
@@ -468,7 +466,7 @@ webencodings==0.5.1
     #   bleach
     #   tinycss2
 whitenoise==6.9.0
-    # via -r requirements/base.in
+    # via -r base.in
 willow[heif]==1.9.0
     # via
     #   wagtail
