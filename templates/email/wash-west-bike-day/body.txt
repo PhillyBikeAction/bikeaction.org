@@ -1,0 +1,26 @@
+Hi {{ first_name }},
+
+<small><i>You are receiving this email because you have a PBA Account and live in Washington Square West.</i></small> 
+
+**Attend or Volunteer at Wash West Bike Day on Saturday Oct 11**
+
+Philly Bike Action is organizing this year’s **Wash West Bike Day** in collaboration with *Washington Square West Civic Association* (WSWCA).
+
+Date: **Saturday, October 11, 2025**  
+Time: **1 \- 3 pm**  
+Location: **Kahn Par**k (11th & Pine St)
+
+We are **seeking volunteers** to help marshal a short **kids’ bike ride** from Kahn Park to Seger Park at 2:30 pm as well as help operate the PBA table.  
+**You can [sign up to volunteer here](https://docs.google.com/forms/d/e/1FAIpQLSfj4UYgtZlY_2ORF5_SbJjoYoQONYgDCsa9-eg6NkUpxhSdsA/viewform?usp=header).**
+
+This event is a great way to **meet your neighbors**. There will be bike wash, decoration, and tune-up stations.
+
+**Join your RCO\!**
+
+* Your RCO, WSWCA has historically been a **voice in favor of street safety** & a strong bike network. We encourage you to **consider [joining the civic association](https://washwestcivic.org/membership/):** pro-safety voices in the civic are important to continue advocating for improvements.
+
+You can join **WSWCA’s Complete Streets Committee** which meets on the 3rd Monday of each month at 7pm and focuses on safe, accessible streets for the whole neighborhood.
+
+<span style="width: 80%; text-align: center;"><img style="width: 100%; border-radius: 5px; border: solid grey;" src="templates/email/wash-west-bike-day/img.png"></span>
+
+**Philly Bike Action**
