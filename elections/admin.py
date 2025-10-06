@@ -7,7 +7,6 @@ from elections.models import Election
 class ElectionAdmin(admin.ModelAdmin):
     list_display = (
         "title",
-        "eligibility_open",
         "eligibility_closed",
         "nominations_open_status",
         "nominations_closed_status",
@@ -16,12 +15,6 @@ class ElectionAdmin(admin.ModelAdmin):
     )
     search_fields = ("title", "description")
     ordering = ("-membership_eligibility_deadline",)
-
-    def eligibility_open(self, obj):
-        return timezone.now() < obj.membership_eligibility_deadline
-
-    eligibility_open.boolean = True
-    eligibility_open.short_description = "Eligibility Open"
 
     def eligibility_closed(self, obj):
         return timezone.now() >= obj.membership_eligibility_deadline
