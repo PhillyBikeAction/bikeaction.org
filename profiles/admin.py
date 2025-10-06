@@ -563,6 +563,7 @@ def make_fulfilled(modeladmin, request, queryset):
 def csv_export(self, request, queryset):
 
     fields = [
+        "product_type",
         "shipping_method",
         "shipping_name",
         "shipping_line1",
@@ -582,6 +583,7 @@ def csv_export(self, request, queryset):
     for obj in queryset:
         writer.writerow(
             [
+                obj.get_product_type_display(),
                 obj.shipping_method,
                 obj.shipping_name(),
                 obj.shipping_line1(),
@@ -599,8 +601,25 @@ def csv_export(self, request, queryset):
 
 
 class ShirtOrderAdmin(ReadOnlyLeafletGeoAdminMixin, admin.ModelAdmin):
-    list_display = ["user", "paid", "shipping_method", "fulfilled", "fit", "size", "print_color"]
-    list_filter = ["paid", "shipping_method", "fulfilled", "fit", "size", "print_color"]
+    list_display = [
+        "user",
+        "product_type",
+        "paid",
+        "shipping_method",
+        "fulfilled",
+        "fit",
+        "size",
+        "print_color",
+    ]
+    list_filter = [
+        "product_type",
+        "paid",
+        "shipping_method",
+        "fulfilled",
+        "fit",
+        "size",
+        "print_color",
+    ]
     search_fields = ["user__first_name", "user__last_name", "user__email"]
     autocomplete_fields = ("user",)
     readonly_fields = [

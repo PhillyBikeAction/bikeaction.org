@@ -230,6 +230,10 @@ class DoNotEmail(models.Model):
 
 
 class ShirtOrder(models.Model):
+    class ProductType(models.IntegerChoices):
+        T_SHIRT = 0, "T-Shirt"
+        SWEATSHIRT = 1, "Sweatshirt"
+
     class Fit(models.IntegerChoices):
         # ALTERNATIVE_01070C = 0, 'Unisex Classic Fit - "Go-To T-Shirt"'
         # ALTERNATIVE_5114C1 = (
@@ -238,6 +242,7 @@ class ShirtOrder(models.Model):
         # )
         NEXT_LEVEL_3600 = 2, 'Unisex Classic Fit - "Next Level - Cotton T-Shirt - 3600"'
         NEXT_LEVEL_1580 = 3, "Women's Relaxed Fit - \"Next Level - Women's Ideal Crop Top - 1580\""
+        GILDAN_G180 = 4, 'Unisex Classic Fit - "Gildan G180 - Heavy Blend Crewneck Sweatshirt"'
 
     class Size(models.IntegerChoices):
         XS = -2, "XS"
@@ -271,6 +276,9 @@ class ShirtOrder(models.Model):
         max_length=32, null=True, blank=True, choices=ShippingMethod.choices
     )
 
+    product_type = models.IntegerField(
+        null=False, blank=False, choices=ProductType.choices, default=ProductType.T_SHIRT
+    )
     fit = models.IntegerField(null=False, blank=False, choices=Fit.choices)
     size = models.IntegerField(null=False, blank=False, choices=Size.choices)
     print_color = models.IntegerField(null=False, blank=False, choices=PrintColor.choices)

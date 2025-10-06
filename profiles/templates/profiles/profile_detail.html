@@ -213,23 +213,21 @@
 </div>
 <hr>
 <div class="form-header">
-  <h2>T-Shirts</h2>
-  <i>T-Shirt pre-orders are closed! You can buy a shirt from the February 2025 order at the <a href="https://apps.bikeaction.org/events/philly-bike-expo-2025-x-pba/">Philly Bike Expo</a> or PBA April Citywide, though we can't guarantee availability.</i>
-  <!--
+  <h2>T-Shirts & Sweatshirts</h2>
   {% if request.user.profile.complete %}
-  <p><a class="submit-button" href="{% url 'shirt_order' %}">Pre-Order a shirt</a></p>
+  <p><a class="submit-button" href="{% url 'shirt_order' %}">Pre-Order a shirt or sweatshirt</a></p>
   {% else %}
-  <span>Please <a href="{% url 'profile_update' %}">complete your profile</a> to pre-order a shirt.</span>
+  <span>Please <a href="{% url 'profile_update' %}">complete your profile</a> to pre-order.</span>
   {% endif %}
-  -->
 {% if request.user.tshirt_orders.all %}
-  <p>Your T-Shirt pre-orders</p>
+  <p>Your Shirt Orders</p>
   <div class="table-container">
     <table>
-      <tr><th>Fit</th><th>Size</th><th>Print Color</th><th>Action</th></tr>
+      <tr><th>Product</th><th>Fit</th><th>Size</th><th>Print Color</th><th>Action</th></tr>
       {% for tshirt_order in request.user.tshirt_orders.all %}
       <tr>
-        <td>{% if tshirt_order.fit == 2 %}Unisex{% elif tshirt_order.fit == 3 %}Crop{% else %}?{% endif %}</td>
+        <td>{{ tshirt_order.get_product_type_display }}</td>
+        <td>{% if tshirt_order.fit == 2 %}Unisex{% elif tshirt_order.fit == 3 %}Crop{% elif tshirt_order.fit == 4 %}Sweatshirt{% else %}?{% endif %}</td>
         <td>{{ tshirt_order.get_size_display }}</td>
         <td>{{ tshirt_order.get_print_color_display }}</td>
         <td>

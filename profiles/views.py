@@ -67,16 +67,21 @@ class ShirtsAreDoneMixin:
         return HttpResponseRedirect(reverse("profile"))
 
 
-class ShirtOrderView(LoginRequiredMixin, ShirtsAreDoneMixin, CreateView):
+class ShirtOrderView(LoginRequiredMixin, CreateView):
     model = ShirtOrder
-    fields = ["fit", "print_color", "size"]
+    fields = ["product_type", "fit", "print_color", "size"]
 
     def form_valid(self, form):
         obj = form.save(commit=False)
         obj.user = self.request.user
         obj.save()
+        product_name = (
+            "T-Shirt" if obj.product_type == ShirtOrder.ProductType.T_SHIRT else "Sweatshirt"
+        )
         messages.add_message(
-            self.request, messages.INFO, "T-Shirt order recorded! Complete payment to finalize."
+            self.request,
+            messages.INFO,
+            f"{product_name} order recorded! Complete payment to finalize.",
         )
         self.obj = obj
         return HttpResponseRedirect(self.get_success_url())
@@ -85,30 +90,54 @@ class ShirtOrderView(LoginRequiredMixin, ShirtsAreDoneMixin, CreateView):
         return reverse("shirt_pay", kwargs={"shirt_id": self.obj.id})
 
 
-class ShirtOrderDeleteView(LoginRequiredMixin, ShirtsAreDoneMixin, DeleteView):
+class ShirtOrderDeleteView(LoginRequiredMixin, DeleteView):
     model = ShirtOrder
 
     def get_success_url(self):
-        messages.add_message(self.request, messages.INFO, "T-Shirt order deleted.")
+        messages.add_message(self.request, messages.INFO, "Order deleted.")
         return reverse("profile")
 
 
 @csrf_exempt
 def create_tshirt_checkout_session(request, shirt_id):
-    # Close t-shirt orders
-    messages.add_message(request, messages.INFO, "Sorry, shirt orders are closed!")
-    return HttpResponseRedirect(reverse("profile"))
-
     stripe.api_key = settings.STRIPE_SECRET_KEY
-    stripe_product_search = stripe.Product.search(
-        query="active:'true' AND name:'T-Shirt Pre-Order 2025-02'"
-    )
+
+    # Get the shirt order to determine product type
+    shirt = ShirtOrder.objects.get(id=shirt_id)
+
+    # Search for appropriate Stripe product based on product type
+    if shirt.product_type == ShirtOrder.ProductType.SWEATSHIRT:
+        product_search_query = "active:'true' AND name:'Sweatshirt Pre-Order 2025-10'"
+        product_name = "Sweatshirt"
+    else:
+        product_search_query = "active:'true' AND name:'T-Shirt Pre-Order 2025-10'"
+        product_name = "T-Shirt"
+
+    stripe_product_search = stripe.Product.search(query=product_search_query)
+
+    if not stripe_product_search["data"]:
+        messages.add_message(
+            request,
+            messages.ERROR,
+            f"'{product_name} Pre-Order 2025-10' not found. Please contact apps@bikeaction.org.",
+        )
+        return HttpResponseRedirect(reverse("profile"))
+
     price_search = [
         p
         for p in stripe.Price.search(query=f"product:'{stripe_product_search['data'][0]['id']}'")[
             "data"
         ]
     ]
+
+    if not price_search:
+        messages.add_message(
+            request,
+            messages.ERROR,
+            f"No price found for {product_name}. Please contact apps@bikeaction.org.",
+        )
+        return HttpResponseRedirect(reverse("profile"))
+
     price = Price()._get_or_retrieve(price_search[0]["id"])
 
     if request.method == "POST":
@@ -131,7 +160,6 @@ def create_tshirt_checkout_session(request, shirt_id):
         request.session["_stripe_checkout_session_id"] = session.id
         return JsonResponse({"clientSecret": session.client_secret})
     else:
-        shirt = ShirtOrder.objects.get(id=shirt_id)
         context = {"stripe_public_key": settings.STRIPE_PUBLIC_KEY, "shirt": shirt}
         return TemplateResponse(request, "tshirt_checkout_session.html", context)
 
@@ -146,9 +174,12 @@ def complete_tshirt_checkout_session(request, shirt_id):
         s.shipping_details = session["shipping_details"]
         s.paid = True
         s.save()
-        messages.add_message(request, messages.INFO, "T-Shirt paid!")
+        product_name = (
+            "T-Shirt" if s.product_type == ShirtOrder.ProductType.T_SHIRT else "Sweatshirt"
+        )
+        messages.add_message(request, messages.INFO, f"{product_name} paid!")
         return HttpResponseRedirect(reverse("profile"))
-    messages.add_message(request, messages.ERROR, "T-Shirt payment incomoplete!")
+    messages.add_message(request, messages.ERROR, "Payment incomplete!")
     return HttpResponseRedirect(reverse("profile"))
 
 
