@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 
 class Election(models.Model):
@@ -15,6 +16,18 @@ class Election(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    @classmethod
+    def get_upcoming(cls):
+        """
+        Get the next upcoming election where the membership eligibility deadline hasn't passed.
+        Returns None if no upcoming elections.
+        """
+        return (
+            cls.objects.filter(membership_eligibility_deadline__gte=timezone.now())
+            .order_by("membership_eligibility_deadline")
+            .first()
+        )
 
     def __str__(self):
         return self.title

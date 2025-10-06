@@ -24,6 +24,29 @@ class ProfileDetailView(LoginRequiredMixin, DetailView):
     def get_object(self, queryset=None):
         return self.request.user.profile
 
+    def get_context_data(self, **kwargs):
+        import datetime
+
+        from django.utils import timezone
+
+        from elections.models import Election
+
+        context = super().get_context_data(**kwargs)
+        upcoming_election = Election.get_upcoming()
+        if upcoming_election:
+            context["upcoming_election"] = upcoming_election
+            context["current_eligibility"] = self.request.user.profile.eligible_as_of(
+                timezone.now()
+            )
+            context["election_eligibility"] = self.request.user.profile.eligible_as_of(
+                upcoming_election.membership_eligibility_deadline
+            )
+            # Calculate the earliest date for Discord activity to be valid
+            context["discord_activity_start_date"] = (
+                upcoming_election.membership_eligibility_deadline - datetime.timedelta(days=30)
+            )
+        return context
+
 
 class ProfileDistrictAndRCOPartial(LoginRequiredMixin, DetailView):
     model = Profile

@@ -130,6 +130,141 @@ class Profile(models.Model):
         )["total"]
         return total or 0
 
+    def eligible_as_of(self, target_datetime):
+        """
+        Check if the user is eligible for membership at a specific datetime.
+        Returns a dict with detailed eligibility information.
+        """
+        from django.db.models import Max, Sum
+        from djstripe.models import Subscription
+
+        now = timezone.now()
+        target_date = (
+            target_datetime.date() if hasattr(target_datetime, "date") else target_datetime
+        )
+
+        # Check donor status
+        donor_status = "inactive"
+        donor_next_renewal = None
+        donor_sufficient_alone = False
+
+        subscriptions = Subscription.objects.filter(
+            customer__subscriber=self.user, status__in=["active", "trialing"]
+        ).order_by("-current_period_end")
+
+        if subscriptions.exists():
+            latest_sub = subscriptions.first()
+            # Check if subscription is active at target datetime
+            if (
+                latest_sub.current_period_end
+                and latest_sub.current_period_end.date() >= target_date
+            ):
+                donor_sufficient_alone = True
+                # Check if renewal is needed before target
+                if latest_sub.current_period_end.date() > now.date():
+                    if latest_sub.current_period_end.date() >= target_date:
+                        if now.date() < latest_sub.current_period_end.date() < target_date:
+                            donor_status = "active_renewal_required"
+                            donor_next_renewal = latest_sub.current_period_end
+                        else:
+                            donor_status = "active_stable"
+                else:
+                    donor_status = "expiring"
+
+        # Check Discord activity
+        discord_active = False
+        discord_last_activity = None
+        discord_sufficient_alone = False
+
+        # Check if Discord is connected
+        has_discord = self.user.socialaccount_set.filter(provider="discord").exists()
+
+        if has_discord:
+            # For target datetime, check activity in 30 days prior
+            thirty_days_before_target = target_date - datetime.timedelta(days=30)
+            activity_result = self.discord_activity.filter(
+                date__gte=thirty_days_before_target, date__lte=target_date
+            ).aggregate(total=Sum("count"), last_activity=Max("date"))
+
+            if activity_result["total"] and activity_result["total"] > 0:
+                discord_active = True
+                discord_last_activity = activity_result["last_activity"]
+                discord_sufficient_alone = True
+
+        # Determine overall eligibility
+        eligible = donor_sufficient_alone or discord_sufficient_alone
+
+        # Generate warnings
+        warnings = []
+        at_risk = False
+
+        if eligible:
+            # Check for renewal risk
+            if donor_status == "active_renewal_required" and not discord_sufficient_alone:
+                warnings.append(
+                    f"Your donation renews on {donor_next_renewal.strftime('%b %d, %Y')} "
+                    "before the deadline - please ensure your payment method is current"
+                )
+                at_risk = True
+            elif donor_status == "active_renewal_required" and discord_sufficient_alone:
+                warnings.append(
+                    f"Your donation renews on {donor_next_renewal.strftime('%b %d, %Y')} "
+                    "before the deadline - you're also eligible via Discord activity as backup"
+                )
+
+            # Check for Discord activity aging risk
+            if discord_sufficient_alone and target_date > now.date():
+                # Calculate when current activity would age out
+                if discord_last_activity:
+                    activity_valid_until = discord_last_activity + datetime.timedelta(days=30)
+                    if activity_valid_until < target_date and not donor_sufficient_alone:
+                        days_needed = (target_date - datetime.timedelta(days=30)).strftime(
+                            "%b %d, %Y"
+                        )
+                        warnings.append(
+                            f"You'll need to post on Discord at least once after {days_needed} "
+                            "to maintain eligibility"
+                        )
+                        at_risk = True
+                    elif activity_valid_until < target_date and donor_sufficient_alone:
+                        days_needed = (target_date - datetime.timedelta(days=30)).strftime(
+                            "%b %d, %Y"
+                        )
+                        warnings.append(
+                            f"Your Discord activity will age out before the deadline - "
+                            f"post after {days_needed} to maintain backup eligibility, "
+                            "or you're covered by your active donation"
+                        )
+
+            # Single point of failure warnings
+            if donor_sufficient_alone and not discord_sufficient_alone:
+                if has_discord:
+                    warnings.append(
+                        "You're eligible via donation only - consider posting on Discord as backup"
+                    )
+                else:
+                    warnings.append(
+                        "You're eligible via donation only - consider connecting Discord as backup"
+                    )
+            elif discord_sufficient_alone and not donor_sufficient_alone:
+                warnings.append(
+                    "You're eligible via Discord activity only - "
+                    "consider becoming a recurring donor as backup"
+                )
+
+        return {
+            "eligible": eligible,
+            "donor": donor_sufficient_alone,
+            "donor_status": donor_status,
+            "donor_next_renewal": donor_next_renewal,
+            "discord_active": discord_active,
+            "discord_last_activity": discord_last_activity,
+            "discord_sufficient_alone": discord_sufficient_alone,
+            "donor_sufficient_alone": donor_sufficient_alone,
+            "warnings": warnings,
+            "at_risk": at_risk,
+        }
+
     @property
     def complete(self):
         return bool(self.street_address) and bool(self.zip_code)

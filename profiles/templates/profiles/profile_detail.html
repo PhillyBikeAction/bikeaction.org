@@ -114,6 +114,58 @@
         </tr>
     </table>
   </div>
+
+  {% if upcoming_election and current_eligibility.eligible and not election_eligibility.eligible %}
+  <div style="padding: 1rem; background-color: #f5f5f5; border-left: 4px solid #9ca3af; margin: 1rem 0;">
+    <p style="margin: 0 0 0.5rem 0;"><strong><i class="fa-solid fa-exclamation-triangle"></i> Upcoming Election: {{ upcoming_election.title }}</strong></p>
+    <p style="margin: 0.5rem 0;">The membership eligibility deadline is <strong>{{ upcoming_election.membership_eligibility_deadline|date:"F d, Y g:i A" }}</strong>. You're currently a member, but you <em>may</em> not meet the eligibility requirements by that date.</p>
+
+    <p style="margin: 0.75rem 0 0.25rem 0; font-weight: bold;">What you need to be aware of:</p>
+    <ul style="margin: 0; text-align: left;">
+      {% if not election_eligibility.donor and not election_eligibility.discord_active %}
+        {% if current_eligibility.donor %}
+          {# User is currently a donor but won't be by deadline #}
+          <li>
+            Your recurring donation {% if election_eligibility.donor_status == "active_renewal_required" %}renews on {{ election_eligibility.donor_next_renewal|date:"M d, Y" }} before the deadline - make sure your payment method is up to date{% else %}may expire before the deadline if payment does not succeed{% endif %}
+          </li>
+          <li>
+            {% if not request.user.profile.discord %}
+              <a href="{% provider_login_url "discord" process="connect" %}">Connect your Discord account</a> and participate between {{ discord_activity_start_date|date:"M d" }} and {{ upcoming_election.membership_eligibility_deadline|date:"M d" }}
+            {% else %}
+              Participate on Discord between {{ discord_activity_start_date|date:"M d" }} and {{ upcoming_election.membership_eligibility_deadline|date:"M d" }}
+            {% endif %}
+          </li>
+        {% else %}
+          {# User is not currently a donor #}
+          <li>
+            Become a <a href="#donations">recurring donor</a>
+          </li>
+          <li>
+            {% if request.user.profile.discord %}
+              Participate on Discord between {{ discord_activity_start_date|date:"M d" }} and {{ upcoming_election.membership_eligibility_deadline|date:"M d" }}
+            {% else %}
+              <a href="{% provider_login_url "discord" process="connect" %}">Connect your Discord account</a> and participate between now and the deadline
+            {% endif %}
+          </li>
+        {% endif %}
+      {% elif not election_eligibility.donor %}
+        <li>Your Discord activity will be too old by the deadline</li>
+        <li>Participate on Discord after {{ discord_activity_start_date|date:"M d" }}</li>
+        {% if current_eligibility.donor %}
+          <li>Ensure your recurring donation renews successfully{% if election_eligibility.donor_next_renewal %} on {{ election_eligibility.donor_next_renewal|date:"M d, Y" }}{% endif %}</li>
+        {% else %}
+          <li>Become a <a href="#donations">recurring donor</a></li>
+        {% endif %}
+      {% elif not election_eligibility.discord_active %}
+        <li>Your recurring donation {% if election_eligibility.donor_status == "active_renewal_required" %}renews on {{ election_eligibility.donor_next_renewal|date:"M d, Y" }} before the deadline - make sure your payment method is up to date{% else %}may expire before the deadline if payment does not succeed{% endif %}</li>
+        {% if election_eligibility.donor_status != "active_renewal_required" %}
+          <li>Renew your <a href="#donations">recurring donation</a></li>
+        {% endif %}
+        <li>{% if request.user.profile.discord %}Participate on Discord after {{ discord_activity_start_date|date:"M d" }}{% else %}<a href="{% provider_login_url "discord" process="connect" %}">Connect your Discord account</a> and be active{% endif %}</li>
+      {% endif %}
+    </ul>
+  </div>
+  {% endif %}
 </div>
 
 
