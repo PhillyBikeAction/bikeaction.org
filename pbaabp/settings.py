@@ -124,6 +124,7 @@ INSTALLED_APPS = [
     "aliases",
     "lazer",
     "cms",
+    "elections",
 ]
 
 MIDDLEWARE = [

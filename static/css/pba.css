@@ -308,6 +308,18 @@ blockquote {
   }
 }
 
+.icon-green {
+  color: rgb(131, 189, 86);
+}
+
+.icon-pink {
+  color: #d8107d;
+}
+
+.icon-grey {
+  color: grey;
+}
+
 /* Messages */
 .messages {
   background: #d8107d;

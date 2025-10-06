@@ -105,6 +105,31 @@ class Profile(models.Model):
 
     donor.boolean = True
 
+    def discord_active(self):
+        return (
+            User.objects.filter(id=self.user.id)
+            .filter(
+                Q(socialaccount__provider="discord")
+                & Q(
+                    profile__discord_activity__date__gte=(
+                        timezone.now().date() - datetime.timedelta(days=30)
+                    )
+                )
+            )
+            .exists()
+        )
+
+    discord_active.boolean = True
+
+    def discord_messages_last_30(self):
+        from django.db.models import Sum
+
+        thirty_days_ago = timezone.now().date() - datetime.timedelta(days=30)
+        total = self.discord_activity.filter(date__gte=thirty_days_ago).aggregate(
+            total=Sum("count")
+        )["total"]
+        return total or 0
+
     @property
     def complete(self):
         return bool(self.street_address) and bool(self.zip_code)

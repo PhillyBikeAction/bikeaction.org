@@ -60,6 +60,63 @@
   </small>
 </div>
 
+<hr>
+<div class="form-header">
+  <h2>Membership</h2>
+  <div class="table-container">
+    <table>
+        <tr>
+          <th>Donor</th>
+          <td>
+            {% if request.user.profile.donor %}
+            <i class="fa-solid fa-check icon-green"></i>
+            {% else %}
+            <i class="fa-solid fa-xmark icon-{% if request.user.profile.membership %}grey{% else %}pink{% endif %}"></i>
+            {% endif %}
+          </td>
+          <td>
+            {% if request.user.profile.donor %}
+            Manage your recurring donation <a href="#donations">here</a>
+            {% else %}
+            You can become a recurring donor <a href="#donations">here</a>
+            {% endif %}
+          </td>
+        </tr>
+        <tr>
+          <th>Discord Activity</th>
+          <td>
+            {% if request.user.profile.discord_active %}
+            <i class="fa-solid fa-check icon-green"></i>
+            {% else %}
+            <i class="fa-solid fa-xmark icon-{% if request.user.profile.membership %}grey{% else %}pink{% endif %}"></i>
+            {% endif %}
+          </td>
+          <td>
+            {% if request.user.profile.discord_active %}
+            Activity in last 30 days: {{ request.user.profile.discord_messages_last_30 }} messages
+            {% elif request.user.profile.discord %}
+            No activity in last 30 days
+            {% else %}
+            Not Apps Connected!
+            {% endif %}
+          </td>
+        </tr>
+        <tr>
+          <th>Status</th>
+          <td>{% if request.user.profile.membership %}<i class="fa-solid fa-check icon-green"></i>{% else %}<i class="fa-solid fa-xmark icon-pink">{% endif %}</td>
+          <td>
+            {% if request.user.profile.membership %}
+            You are a member in good standing! 🎉
+            {% else %}
+            You are not an active member.
+            {% endif %}
+          </td>
+        </tr>
+    </table>
+  </div>
+</div>
+
+
 {% if request.user.profile.project_application_drafts %}
 <hr>
 <div class="form-header">
@@ -195,7 +252,7 @@
 {% endif %}
 <hr>
 <div class="form-header">
-  <h2>{% translate "Donations" %}</h2>
+  <h2 id="donations">{% translate "Donations" %}</h2>
   <a style="font-size: 1.5em;" class="homepage-button" href="{% url 'create_one_time_donation_checkout_session' %}">{% translate "Make a one-time donation" %}</a>
   <p><small>
     {% translate "Philly Bike Action is a social welfare organization incorporated in the Commonwealth of Pennsylvania." %}
