@@ -16,13 +16,26 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+        id: buildx
+
+      - name: Cache buildkit mounts
+        uses: reproducible-containers/buildkit-cache-dance@v3
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          cache-map: |
+            {
+              "var-cache-apt": "/var/cache/apt",
+              "var-lib-apt": "/var/lib/apt",
+              "root-npm": "/root/.npm",
+              "user-cache-pip": "/home/user/.cache/pip"
+            }
+          skip-extraction: ${{ steps.cache.outputs.cache-hit }}
 
       - name: Run lint
         run: make lint
         env:
           DOCKER_BUILDKIT: 1
-          BUILDX_CACHE_FROM: type=gha
-          BUILDX_CACHE_TO: type=gha,mode=max
+          BUILDKIT_PROGRESS: plain
 
   test:
     runs-on: ubuntu-latest
@@ -32,10 +45,23 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+        id: buildx
+
+      - name: Cache buildkit mounts
+        uses: reproducible-containers/buildkit-cache-dance@v3
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          cache-map: |
+            {
+              "var-cache-apt": "/var/cache/apt",
+              "var-lib-apt": "/var/lib/apt",
+              "root-npm": "/root/.npm",
+              "user-cache-pip": "/home/user/.cache/pip"
+            }
+          skip-extraction: ${{ steps.cache.outputs.cache-hit }}
 
       - name: Run tests
         run: make test
         env:
           DOCKER_BUILDKIT: 1
-          BUILDX_CACHE_FROM: type=gha
-          BUILDX_CACHE_TO: type=gha,mode=max
+          BUILDKIT_PROGRESS: plain
