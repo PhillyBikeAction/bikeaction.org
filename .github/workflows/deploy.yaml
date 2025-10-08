@@ -19,9 +19,27 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Start deployment
+        uses: bobheadxi/deployments@v1
+        id: deployment
+        with:
+          step: start
+          token: ${{ secrets.GITHUB_TOKEN }}
+          env: bikeaction.org
+
       - name: Push to dokku
         uses: dokku/github-action@master
         with:
           git_remote_url: 'ssh://dokku@dokku.bikeaction.org:22/apps-bikeaction-org'
           branch: main
           ssh_private_key: ${{ secrets.DEPLOY_SSH_KEY }}
+
+      - name: Update deployment status
+        uses: bobheadxi/deployments@v1
+        if: always()
+        with:
+          step: finish
+          token: ${{ secrets.GITHUB_TOKEN }}
+          status: ${{ job.status }}
+          env: ${{ steps.deployment.outputs.env }}
+          deployment_id: ${{ steps.deployment.outputs.deployment_id }}
