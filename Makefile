@@ -64,7 +64,7 @@ reformat: .state/docker-build-base
 	docker compose run --rm base black .
 
 test: .state/docker-build-base
-	docker compose run --rm web pytest --reuse-db --no-migrations
+	docker compose run --rm web ./manage.py test --keepdb $(filter-out $@,$(MAKECMDGOALS))
 
 check: test lint
 
