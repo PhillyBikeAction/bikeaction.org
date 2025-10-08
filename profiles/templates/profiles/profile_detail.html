@@ -101,6 +101,28 @@
             {% endif %}
           </td>
         </tr>
+        {% for membership in request.user.memberships.all %}
+        {% if membership.start_date <= today %}
+        {% if not membership.end_date or membership.end_date >= today %}
+        <tr>
+          <th>Other</th>
+          <td>
+            {% if request.user.profile.membership %}
+            <i class="fa-solid fa-check icon-green"></i>
+            {% else %}
+            <i class="fa-solid fa-xmark icon-pink"></i>
+            {% endif %}
+          </td>
+          <td>
+            {{ membership.reason }}
+            {% if membership.end_date %}
+            <br><small>(Expires {{ membership.end_date|date:"M d, Y" }})</small>
+            {% endif %}
+          </td>
+        </tr>
+        {% endif %}
+        {% endif %}
+        {% endfor %}
         <tr>
           <th>Status</th>
           <td>{% if request.user.profile.membership %}<i class="fa-solid fa-check icon-green"></i>{% else %}<i class="fa-solid fa-xmark icon-pink">{% endif %}</td>

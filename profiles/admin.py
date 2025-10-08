@@ -117,10 +117,21 @@ class MemberFilter(admin.SimpleListFilter):
         return ((True, "Yes"), (False, "No"))
 
     def queryset(self, request, queryset):
-        condition = Q(
-            Q(user__socialaccount__provider="discord")
-            & Q(discord_activity__date__gte=(timezone.now().date() - datetime.timedelta(days=30)))
-        ) | Q(user__djstripe_customers__subscriptions__status__in=["active"])
+        now = timezone.now().date()
+        condition = (
+            Q(
+                Q(user__socialaccount__provider="discord")
+                & Q(discord_activity__date__gte=(now - datetime.timedelta(days=30)))
+            )
+            | Q(user__djstripe_customers__subscriptions__status__in=["active"])
+            | Q(
+                Q(user__memberships__start_date__lte=now)
+                & (
+                    Q(user__memberships__end_date__isnull=True)
+                    | Q(user__memberships__end_date__gte=now)
+                )
+            )
+        )
         if self.value() in (
             "True",
             True,
@@ -178,6 +189,31 @@ class MemberByDiscordActivityFilter(admin.SimpleListFilter):
             False,
         ):
             return queryset.exclude(condition).distinct().annotate(total=Count("id"))
+        return queryset
+
+
+class MemberBySpecialRecognitionFilter(admin.SimpleListFilter):
+    title = "PBA Member (special recognition)"
+    parameter_name = "member_special"
+
+    def lookups(self, request, model_admin):
+        return ((True, "Yes"), (False, "No"))
+
+    def queryset(self, request, queryset):
+        now = timezone.now().date()
+        condition = Q(
+            user__memberships__start_date__lte=now,
+        ) & (Q(user__memberships__end_date__isnull=True) | Q(user__memberships__end_date__gte=now))
+        if self.value() in (
+            "True",
+            True,
+        ):
+            return queryset.filter(condition).distinct()
+        elif self.value() in (
+            "False",
+            False,
+        ):
+            return queryset.exclude(condition).distinct()
         return queryset
 
 
@@ -245,6 +281,7 @@ class ProfileAdmin(ReadOnlyLeafletGeoAdminMixin, admin.ModelAdmin):
         MemberFilter,
         MemberByDonationFilter,
         MemberByDiscordActivityFilter,
+        MemberBySpecialRecognitionFilter,
         NewsletterSubscriberFilter,
         AppsConnectedFilter,
         GeolocatedFilter,

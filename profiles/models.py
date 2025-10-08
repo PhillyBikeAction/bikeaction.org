@@ -13,6 +13,7 @@ from facets.models import District as DistrictFacet
 from facets.models import (
     RegisteredCommunityOrganization as RegisteredCommunityOrganizationFacet,
 )
+from membership.models import Membership
 from organizers.models import OrganizerApplication
 from profiles.tasks import geocode_profile, sync_to_mailjet
 from projects.models import ProjectApplication
@@ -78,6 +79,22 @@ class Profile(models.Model):
         super(Profile, self).save(*args, **kwargs)
 
     def membership(self):
+        now = timezone.now().date()
+
+        # Check if there's an active Membership record
+        has_membership_record = (
+            Membership.objects.filter(
+                user=self.user,
+                start_date__lte=now,
+            )
+            .filter(Q(end_date__isnull=True) | Q(end_date__gte=now))
+            .exists()
+        )
+
+        if has_membership_record:
+            return True
+
+        # Otherwise check Discord activity or active subscription
         return (
             User.objects.filter(id=self.user.id)
             .filter(
@@ -191,8 +208,20 @@ class Profile(models.Model):
                 discord_last_activity = activity_result["last_activity"]
                 discord_sufficient_alone = True
 
+        # Check for Membership record
+        membership_sufficient_alone = (
+            Membership.objects.filter(
+                user=self.user,
+                start_date__lte=target_date,
+            )
+            .filter(Q(end_date__isnull=True) | Q(end_date__gte=target_date))
+            .exists()
+        )
+
         # Determine overall eligibility
-        eligible = donor_sufficient_alone or discord_sufficient_alone
+        eligible = (
+            donor_sufficient_alone or discord_sufficient_alone or membership_sufficient_alone
+        )
 
         # Generate warnings
         warnings = []
@@ -236,21 +265,22 @@ class Profile(models.Model):
                             "or you're covered by your active donation"
                         )
 
-            # Single point of failure warnings
-            if donor_sufficient_alone and not discord_sufficient_alone:
-                if has_discord:
+            # Single point of failure warnings (skip if they have a membership record)
+            if not membership_sufficient_alone:
+                if donor_sufficient_alone and not discord_sufficient_alone:
+                    if has_discord:
+                        warnings.append(
+                            "You're eligible via donation only - " "consider posting on Discord"
+                        )
+                    else:
+                        warnings.append(
+                            "You're eligible via donation only - " "consider connecting Discord"
+                        )
+                elif discord_sufficient_alone and not donor_sufficient_alone:
                     warnings.append(
-                        "You're eligible via donation only - consider posting on Discord as backup"
+                        "You're eligible via Discord activity only - "
+                        "consider becoming a recurring donor"
                     )
-                else:
-                    warnings.append(
-                        "You're eligible via donation only - consider connecting Discord as backup"
-                    )
-            elif discord_sufficient_alone and not donor_sufficient_alone:
-                warnings.append(
-                    "You're eligible via Discord activity only - "
-                    "consider becoming a recurring donor as backup"
-                )
 
         return {
             "eligible": eligible,
@@ -261,6 +291,7 @@ class Profile(models.Model):
             "discord_last_activity": discord_last_activity,
             "discord_sufficient_alone": discord_sufficient_alone,
             "donor_sufficient_alone": donor_sufficient_alone,
+            "membership_sufficient_alone": membership_sufficient_alone,
             "warnings": warnings,
             "at_risk": at_risk,
         }

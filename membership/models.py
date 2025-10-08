@@ -102,5 +102,17 @@ class Membership(models.Model):
         PARTICIPATION = 1, "Participation"
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="memberships")
     kind = models.IntegerField(null=False, blank=False, choices=Kind.choices)
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
+    reason = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
+
+    class Meta:
+        ordering = ["-start_date"]
+
+    def __str__(self):
+        end_str = f" to {self.end_date}" if self.end_date else " (ongoing)"
+        return f"{self.user.email} - {self.get_kind_display()} - {self.start_date}{end_str}"

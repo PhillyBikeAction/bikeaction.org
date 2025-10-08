@@ -32,6 +32,7 @@ class ProfileDetailView(LoginRequiredMixin, DetailView):
         from elections.models import Election
 
         context = super().get_context_data(**kwargs)
+        context["today"] = timezone.now().date()
         upcoming_election = Election.get_upcoming()
         if upcoming_election:
             context["upcoming_election"] = upcoming_election

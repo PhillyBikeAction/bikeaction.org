@@ -5,7 +5,13 @@ from membership.models import Donation, DonationProduct, DonationTier, Membershi
 
 
 class MembershipAdmin(admin.ModelAdmin):
-    pass
+    list_display = ("user", "kind", "start_date", "end_date", "created_at")
+    list_filter = ("kind", "start_date", "end_date")
+    search_fields = ("user__email", "user__first_name", "user__last_name", "reason")
+    autocomplete_fields = ("user",)
+    date_hierarchy = "start_date"
+    fields = ("user", "kind", "start_date", "end_date", "reason", "created_at", "updated_at")
+    readonly_fields = ("created_at", "updated_at")
 
 
 class DonationTierAdmin(OrderedModelAdmin):
