@@ -180,6 +180,7 @@ def create_tshirt_checkout_session(request, shirt_id):
                 if request.user.is_authenticated and request.user.djstripe_customers.first()
                 else None
             ),
+            allow_promotion_codes=True,
         )
         request.session["_stripe_checkout_session_id"] = session.id
         return JsonResponse({"clientSecret": session.client_secret})
