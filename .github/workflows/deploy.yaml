@@ -11,6 +11,8 @@ on:
 
 jobs:
   deploy:
+    permissions:
+      deployments: write
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
@@ -25,7 +27,7 @@ jobs:
         with:
           step: start
           token: ${{ secrets.GITHUB_TOKEN }}
-          env: bikeaction-org
+          env: bikeaction.org
 
       - name: Push to dokku
         uses: dokku/github-action@master
