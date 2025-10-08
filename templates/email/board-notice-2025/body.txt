@@ -1,0 +1,15 @@
+Hi {{ first_name }},
+
+<small><i>You are receiving this email from <a href="https://bikeaction.org/">Philly Bike Action</a> because you have a PBA Account.</i></small> 
+
+Elections for Philly Bike Action’s Board of Directors will take place November 14–21.
+
+**You must be a Member to vote.** You can check your current membership status by logging in to <a href="https://bikeaction.org">bikeaction.org</a> and reviewing the Membership section of your <a href="https://bikeaction.org/accounts/profile/">profile</a>.
+
+The deadline to become a Member to participate in any part of this election is October 15\. The easiest way to become a Member is to set up a recurring monthly donation of $5 or more.
+
+For more information about membership, see [our website](https://bikeaction.org/get-involved/membership). Nominations will open October 15 and close October 31\.
+
+This is the only email you will receive about the election unless you qualify to vote. 
+
+**Philly Bike Action**

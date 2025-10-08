@@ -44,6 +44,10 @@ p {
     line-height: 1.2rem;
 }
 
+a {
+  color: blue !important;
+}
+
 .footer {
   width: 100%;
   max-width: 600px;
