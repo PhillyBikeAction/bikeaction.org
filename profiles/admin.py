@@ -507,6 +507,152 @@ class ProfileAdmin(ReadOnlyLeafletGeoAdminMixin, admin.ModelAdmin):
 
     email_history.short_description = "Email History (Last 20)"
 
+    def donation_history(self, obj=None):
+        if obj is None:
+            return "No donation data"
+
+        try:
+            customer = obj.user.djstripe_customers.first()
+            if not customer:
+                return "No customer found in Stripe"
+
+            # Try to sync data from Stripe
+            try:
+                customer.api_retrieve()
+                customer._sync_subscriptions()
+                customer._sync_charges()
+            except Exception:
+                # Continue even if sync fails, we'll show what we have
+                pass
+
+            html = '<div style="max-height: 600px; overflow-y: auto;">'
+
+            # Calculate total from all succeeded charges
+            charges = customer.charges.all()
+            total_amount = sum(charge.amount for charge in charges if charge.status == "succeeded")
+
+            if total_amount > 0:
+                html += (
+                    f'<h3 style="margin-top: 0; color: #417505;">'
+                    f"Total Donated: ${total_amount:,.2f}</h3>"
+                )
+
+            # Subscriptions section
+            subscriptions = customer.subscriptions.all().order_by("-created")
+            subscription_count = subscriptions.count()
+
+            if subscription_count > 0:
+                html += f'<h4 style="margin-top: 0;">' f"Subscriptions ({subscription_count})</h4>"
+                html += (
+                    '<table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">'
+                )
+                html += '<thead><tr style="background-color: #f0f0f0;">'
+                html += (
+                    '<th style="padding: 8px; text-align: left; border-bottom: 2px solid #ddd;">'
+                    "Plan</th>"
+                )
+                html += (
+                    '<th style="padding: 8px; text-align: left; border-bottom: 2px solid #ddd;">'
+                    "Status</th>"
+                )
+                html += (
+                    '<th style="padding: 8px; text-align: left; border-bottom: 2px solid #ddd;">'
+                    "Created</th>"
+                )
+                html += (
+                    '<th style="padding: 8px; text-align: left; border-bottom: 2px solid #ddd;">'
+                    "Current Period</th>"
+                )
+                html += "</tr></thead><tbody>"
+
+                for subscription in subscriptions:
+                    html += '<tr style="border-bottom: 1px solid #ddd;">'
+                    html += f'<td style="padding: 8px;">{subscription.plan}</td>'
+                    html += f'<td style="padding: 8px;">{subscription.status}</td>'
+                    created = subscription.created.strftime("%Y-%m-%d")
+                    html += f'<td style="padding: 8px;">{created}</td>'
+                    if subscription.current_period_start and subscription.current_period_end:
+                        period_start = subscription.current_period_start.strftime("%Y-%m-%d")
+                        period_end = subscription.current_period_end.strftime("%Y-%m-%d")
+                        html += (
+                            f'<td style="padding: 8px;">' f"{period_start} to {period_end}</td>"
+                        )
+                    else:
+                        html += '<td style="padding: 8px;">-</td>'
+                    html += "</tr>"
+
+                html += "</tbody></table>"
+
+            # Charges section (all payments including one-off and recurring)
+            charges = customer.charges.all().order_by("-created")
+            charge_count = charges.count()
+
+            if charge_count > 0:
+                html += f"<h4>All Payments ({charge_count})</h4>"
+                html += '<table style="width: 100%; border-collapse: collapse;">'
+                html += '<thead><tr style="background-color: #f0f0f0;">'
+                html += (
+                    '<th style="padding: 8px; text-align: left; border-bottom: 2px solid #ddd;">'
+                    "Amount</th>"
+                )
+                html += (
+                    '<th style="padding: 8px; text-align: left; border-bottom: 2px solid #ddd;">'
+                    "Type</th>"
+                )
+                html += (
+                    '<th style="padding: 8px; text-align: left; border-bottom: 2px solid #ddd;">'
+                    "Status</th>"
+                )
+                html += (
+                    '<th style="padding: 8px; text-align: left; border-bottom: 2px solid #ddd;">'
+                    "Date</th>"
+                )
+                html += (
+                    '<th style="padding: 8px; text-align: left; border-bottom: 2px solid #ddd;">'
+                    "Payment Method</th>"
+                )
+                html += "</tr></thead><tbody>"
+
+                for charge in charges:
+                    html += '<tr style="border-bottom: 1px solid #ddd;">'
+                    html += f'<td style="padding: 8px;">${charge.amount}</td>'
+                    charge_type = "recurring" if charge.invoice else "one-time"
+                    html += f'<td style="padding: 8px;">{charge_type}</td>'
+                    html += f'<td style="padding: 8px;">{charge.status}</td>'
+                    created_str = charge.created.strftime("%Y-%m-%d %H:%M")
+                    html += f'<td style="padding: 8px;">{created_str}</td>'
+
+                    # Handle payment method - can be object or dict
+                    payment_info = "-"
+                    if charge.payment_method:
+                        try:
+                            card = charge.payment_method.card
+                            if isinstance(card, dict):
+                                brand = card.get("display_brand") or card.get("brand", "Card")
+                                last4 = card.get("last4", "")
+                                payment_info = f"{brand} {last4}"
+                            elif card:
+                                payment_info = f"{card.display_brand} {card.last4}"
+                        except (AttributeError, TypeError):
+                            pass
+
+                    html += f'<td style="padding: 8px;">{payment_info}</td>'
+                    html += "</tr>"
+
+                html += "</tbody></table>"
+
+            if subscription_count == 0 and charge_count == 0:
+                html += "<p>No donations found</p>"
+
+            html += "</div>"
+            return mark_safe(html)
+        except Exception as e:
+            return mark_safe(
+                f'<div style="color: red;">Error loading donation data: {str(e)}</div>'
+            )
+
+    donation_history.short_description = "Donation History"
+
     def get_readonly_fields(self, request, obj=None):
         if obj is None:
             return ()
@@ -521,6 +667,7 @@ class ProfileAdmin(ReadOnlyLeafletGeoAdminMixin, admin.ModelAdmin):
                 "mailjet_contact_id",
                 "council_district_calculated",
                 "email_history",
+                "donation_history",
             )
 
     fieldsets = [
@@ -546,6 +693,10 @@ class ProfileAdmin(ReadOnlyLeafletGeoAdminMixin, admin.ModelAdmin):
         (
             "Internal",
             {"fields": ["mailjet_contact_id"]},
+        ),
+        (
+            "Donations",
+            {"fields": ["donation_history"]},
         ),
         (
             "Email History",
