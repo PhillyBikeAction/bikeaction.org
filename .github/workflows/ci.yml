@@ -22,8 +22,12 @@ jobs:
         uses: actions/cache@v4
         id: cache
         with:
-          path: cache-mount
-          key: ${{ runner.os }}-cache-mount-${{ hashFiles('Dockerfile.dev', 'requirements.txt', 'requirements/**') }}
+          path: |
+              var-cache-apt
+              var-lib-apt
+              root-npm
+              user-cache-pip
+          key: ${{ runner.os }}-cache-mount-${{ hashFiles('Dockerfile.dev') }}
           restore-keys: |
             ${{ runner.os }}-cache-mount-
 
@@ -75,8 +79,12 @@ jobs:
         uses: actions/cache@v4
         id: cache
         with:
-          path: cache-mount
-          key: ${{ runner.os }}-cache-mount-${{ hashFiles('Dockerfile.dev', 'requirements.txt', 'requirements/**') }}
+          path: |
+              var-cache-apt
+              var-lib-apt
+              root-npm
+              user-cache-pip
+          key: ${{ runner.os }}-cache-mount-${{ hashFiles('Dockerfile.dev') }}
           restore-keys: |
             ${{ runner.os }}-cache-mount-
 
