@@ -284,7 +284,7 @@ msgstr "Boletín"
 #: profiles/models.py:68
 #, fuzzy
 #| msgid "Welcome to Philly Bike Action %(event.title)s"
-msgid "Subscribe to Philly Bike Actions monthly newsletter."
+msgid "Subscribe to Philly Bike Action's monthly newsletter."
 msgstr "Bienvenido/a/e a Philly Bike Action %(event.title)s"
 
 #: profiles/templates/profiles/_donations_partial.html:10

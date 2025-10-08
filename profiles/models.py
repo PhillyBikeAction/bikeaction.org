@@ -53,7 +53,7 @@ class Profile(models.Model):
         blank=False,
         default=False,
         verbose_name=_("Newsletter"),
-        help_text=_("Subscribe to Philly Bike Actions monthly newsletter."),
+        help_text=_("Subscribe to Philly Bike Action's monthly newsletter."),
     )
 
     location = models.PointField(blank=True, null=True, srid=4326)
