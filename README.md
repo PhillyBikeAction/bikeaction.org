@@ -24,15 +24,18 @@ git clone https://github.com/<your github username>/apps.git
 
 ### Windows Specific Instruction
 
-# [Install WSL](https://learn.microsoft.com/en-us/windows/wsl/install#prerequisites) on windows. We'll use Ubuntu here, but you may use any other distro.
-# Install "make":
-```shell
-sudo apt-get install make
-```
-# Open this project in VS Code and open a new WSL terminal in VS Code. This should open WSL in the directory where your repo is. From there just run this command to start the service
-```shell
-make serve
-```
+1. [Install WSL](https://learn.microsoft.com/en-us/windows/wsl/install#prerequisites) on windows.
+We'll use Ubuntu here, but you may use any other distro.
+2. Install "make":
+    ```shell
+    sudo apt-get install make
+    ```
+3. Open this project in VS Code and open a new WSL terminal in VS Code.
+This opens WSL in the directory where your repo is.
+Now run this command to start the service:
+    ```shell
+    make serve
+    ```
 
 If you do not want to use VScode, you may also open WSL and run this command to get WSL to access
 your repo directory in the windows filesystem
