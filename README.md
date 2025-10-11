@@ -9,7 +9,7 @@ which is built with [interactions.py](https://interactions-py.github.io/interact
 ## Getting Started
 
 First you'll want to ensure that you have created a
-[fork](https://github.com/PhillyBikeAction/abp/fork)
+[fork](https://github.com/PhillyBikeAction/apps/fork)
 of this repo in your own GitHub account.
 This will allow you to push your changes to GitHub so that they can be shared with the main
 repository via Pull Request.
@@ -25,7 +25,53 @@ and orchestrated with [make](https://www.gnu.org/software/make/).
 Clone you fork of the repo:
 
 ```shell
-git clone https://github.com/<your github username>/abp.git
+git clone https://github.com/<your github username>/apps.git
+```
+
+### Windows Specific Instruction
+
+We will be using WSL for this. Experimentation to get the Makefile to run natively on windows
+failed. In part because the Makefile runs unix only shell commands such as `id -u`
+
+First you will need to install WSL on windows. If you do not have that already microsoft has a
+handy page to walk you through the process ([link](https://learn.microsoft.com/en-us/windows/wsl/install#prerequisites)).
+We will be using Ubuntu for this installation process but you may use any other distro
+
+Once you have WSL installed the only dependency that you will need to install is "make". Run this command in WSL to install it
+```shell
+sudo apt-get install make
+```
+
+Great you now should be ready to start this service. There is two common ways to do this.
+The first is to open this project in VScode and open a new wsl terminal in VScode. This should open 
+WSL in the directory where your repo is. From there just run this command to start the service
+```shell
+make serve
+```
+
+If you do not want to use VScode you may also open WSL and run this command to get WSL to access 
+your repo directory in the windows filesystem
+```shell
+cd /mnt/<path to repo in windows>
+```
+
+Now to address some potential problems that might not be universal
+
+If you are getting a `python\r’: No such file or directory` error. This is the windows
+new line `\n\r` causing problems when a unix new line `\n` is expected. To correct this 
+there are several methods but one is to use git to replace all the `\n\r` in the project
+with `\n` this can be done by running these three commands in your command line
+
+```shell
+git config core.auto crlf false
+git rm --cached -r .
+git reset --hard
+```
+
+Lastly if you run into any error messages about your database after attempting to run `make serve`
+run the following command to get your database setup correctly
+```shell
+make migrate
 ```
 
 ### Starting the services
