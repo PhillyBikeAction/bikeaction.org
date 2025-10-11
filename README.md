@@ -9,7 +9,7 @@ which is built with [interactions.py](https://interactions-py.github.io/interact
 ## Getting Started
 
 First you'll want to ensure that you have created a
-[fork](https://github.com/PhillyBikeAction/abp/fork)
+[fork](https://github.com/PhillyBikeAction/apps/fork)
 of this repo in your own GitHub account.
 This will allow you to push your changes to GitHub so that they can be shared with the main
 repository via Pull Request.
@@ -25,7 +25,43 @@ and orchestrated with [make](https://www.gnu.org/software/make/).
 Clone you fork of the repo:
 
 ```shell
-git clone https://github.com/<your github username>/abp.git
+git clone https://github.com/<your github username>/apps.git
+```
+
+### Windows Specific Instruction
+
+1. [Install WSL](https://learn.microsoft.com/en-us/windows/wsl/install#prerequisites) on windows.
+We'll use Ubuntu here, but you may use any other distro.
+2. Install "make":
+    ```shell
+    sudo apt-get install make
+    ```
+3. Open this project in VS Code and open a new WSL terminal in VS Code.
+This opens WSL in the directory where your repo is.
+Now run this command to start the service:
+    ```shell
+    make serve
+    ```
+
+If you do not want to use VScode, you may also open WSL and run this command to get WSL to access
+your repo directory in the windows filesystem
+
+```shell
+cd /mnt/<path to repo in windows>
+```
+
+If you are getting a `python\r’: No such file or directory` error, run:
+
+```shell
+git config core.autocrlf false
+git rm --cached -r .
+git reset --hard
+```
+
+If you see any error messages about your database after attempting to run `make serve`,
+run the following command to get your database setup correctly
+```shell
+make migrate
 ```
 
 ### Starting the services
