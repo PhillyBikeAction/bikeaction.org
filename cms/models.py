@@ -69,6 +69,34 @@ class NewsletterSignupBlock(StructBlock):
         template = "_block_newsletter_signup_partial.html"
 
 
+class ButtonBlock(StructBlock):
+    """
+    A button with text, a color, and optional icon
+    """
+
+    text = CharBlock()
+    url = LinkBlock()
+    color = ChoiceBlock(
+        choices=[("pink", "Pink"), ("green", "Green")],
+        default="green",
+    )
+    width = ChoiceBlock(
+        choices=[("full", "Full"), ("half", "Half")],
+        default="full",
+    )
+    icon = CharBlock(
+        required=False,
+        help_text=(
+            "A FontAwesome icon name, see "
+            '<a href="https://fontawesome.com/search?ic=free">here</a> '
+            "for list of options"
+        ),
+    )
+
+    class Meta:
+        template = "blocks/button.html"
+
+
 class HomepageButtonBlock(StructBlock):
     """
     A button with text, a color, width, and optional icon
@@ -210,6 +238,7 @@ class CmsStreamPage(Page):
             ("table", TableBlock(table_options=table_options)),
             ("newsletter_signup", NewsletterSignupBlock()),
             ("display_card_block", DisplayCardsBlock()),
+            ("button", ButtonBlock()),
         ],
         use_json_field=True,
     )

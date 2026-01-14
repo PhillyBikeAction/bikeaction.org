@@ -1,0 +1,7 @@
+<a href="{{ value.url.get_url }}"
+   {% if value.url.new_window %}target="_blank"{% endif %}
+   style="{% if value.width == "full" %}grid-column: span 2;{% endif %}"
+   class="homepage-button homepage-button-{{ value.color }}"
+>
+  {{ value.text }}{% if value.icon %} <i class="{{ value.icon }}"></i>{% endif %}
+</a>
