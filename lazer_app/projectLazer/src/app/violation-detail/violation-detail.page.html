@@ -102,6 +102,9 @@
           lazy="true"
         />
       </div>
+      <ion-text color="medium" *ngIf="violationData.raw?.redactionBoxes?.length > 0">
+        <small>Greyed out areas will be redacted before submission to the PPA</small>
+      </ion-text>
     </div>
     <ion-card-content>
       <ion-grid>

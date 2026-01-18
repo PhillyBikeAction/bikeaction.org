@@ -19,6 +19,7 @@ from django.shortcuts import render
 from django.utils import timezone
 from django.views.decorators.cache import cache_page
 from django.views.decorators.csrf import csrf_exempt
+from PIL import Image as PILImage
 
 from campaigns.admin import randomize_lat_long
 from facets.utils import reverse_geocode_point
@@ -27,6 +28,7 @@ from lazer.integrations.platerecognizer import read_plate
 from lazer.integrations.submit_form import MobilityAccessViolation
 from lazer.models import Banner, LazerWrapped, ViolationReport, ViolationSubmission
 from lazer.session_backend import SessionStore as LazerSessionStore
+from lazer.utils import detect_faces, detect_people
 
 # Keep the default session store for backwards compatibility with existing sessions
 DjangoSessionStore = import_module(settings.SESSION_ENGINE).SessionStore
@@ -134,6 +136,29 @@ async def submission_api(request):
             submission.plate_recognizer_response = data
             await submission.asave()
 
+            # Detect people and plates for redaction preview
+            image.seek(0)
+            pil_image = PILImage.open(image)
+            if pil_image.mode in ("RGBA", "P"):
+                pil_image = pil_image.convert("RGB")
+            pil_image.load()  # Force load before passing to threads
+
+            redaction_boxes = []
+            for result in data.get("results", []):
+                if result.get("plate") and result["plate"].get("box"):
+                    box = result["plate"]["box"]
+                    redaction_boxes.append({"type": "plate", **box})
+
+            from concurrent.futures import ThreadPoolExecutor
+
+            with ThreadPoolExecutor(max_workers=2) as executor:
+                people_future = executor.submit(detect_people, pil_image)
+                faces_future = executor.submit(detect_faces, pil_image)
+                for box in people_future.result():
+                    redaction_boxes.append({"type": "person", **box})
+                for box in faces_future.result():
+                    redaction_boxes.append({"type": "face", **box})
+
             vehicles = data.get("results", [])
             return JsonResponse(
                 {
@@ -148,6 +173,7 @@ async def submission_api(request):
                     "address": addresses[0].address,
                     "timestamp": form.cleaned_data["datetime"],
                     "submissionId": submission.submission_id,
+                    "redactionBoxes": redaction_boxes,
                 },
                 status=200,
             )

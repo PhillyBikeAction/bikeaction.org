@@ -123,6 +123,32 @@ export class ViolationDetailPage implements OnInit {
         overlayDiv.appendChild(box);
       }
     });
+
+    // Draw redaction preview boxes
+    if (this.violationData.raw?.redactionBoxes) {
+      this.violationData.raw.redactionBoxes.forEach((redaction: any) => {
+        const box = document.createElement('div');
+        box.style.position = 'absolute';
+        box.style.zIndex = '20';
+        box.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+        box.style.border = '2px dashed red';
+        box.style.left =
+          (redaction.xmin / shadowImage!.naturalWidth) * shadowImage!.width +
+          'px';
+        box.style.top =
+          (redaction.ymin / shadowImage!.naturalHeight) * shadowImage!.height +
+          'px';
+        box.style.width =
+          ((redaction.xmax - redaction.xmin) / shadowImage!.naturalWidth) *
+            shadowImage!.width +
+          'px';
+        box.style.height =
+          ((redaction.ymax - redaction.ymin) / shadowImage!.naturalHeight) *
+            shadowImage!.height +
+          'px';
+        overlayDiv.appendChild(box);
+      });
+    }
   }
 
   async reprocess() {

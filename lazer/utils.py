@@ -5,48 +5,123 @@ import os
 import urllib.parse
 from io import BytesIO
 
-import cv2
 import interactions
-import numpy as np
 import requests
 from django.conf import settings
 from django.utils import timezone
 from PIL import Image, ImageDraw
 
+logger = logging.getLogger(__name__)
 
-def detect_faces(image_bytes):
+
+def detect_faces(image):
     """
     Detect faces in an image using OpenCV Haar cascades.
+
+    Args:
+        image: PIL Image
 
     Returns:
         List of dicts with xmin, ymin, xmax, ymax keys
     """
-    nparr = np.frombuffer(image_bytes, np.uint8)
-    img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-    if img is None:
-        return []
+    import cv2
+    import numpy as np
 
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    logger.info("Starting face detection")
+
+    # Resize for faster processing, keep track of scale
+    max_dimension = 1200
+    orig_width, orig_height = image.size
+    scale = 1.0
+    if max(orig_width, orig_height) > max_dimension:
+        scale = max_dimension / max(orig_width, orig_height)
+        new_size = (int(orig_width * scale), int(orig_height * scale))
+        image = image.resize(new_size)
+        logger.info(
+            f"Resized image from {orig_width}x{orig_height} to {new_size[0]}x{new_size[1]}"
+        )
+
+    img_array = np.array(image)
+    img_bgr = cv2.cvtColor(img_array, cv2.COLOR_RGB2BGR)
+    gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
+
     face_cascade = cv2.CascadeClassifier(
         cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
     )
-    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5)
+    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=8)
 
-    return [
-        {"xmin": int(x), "ymin": int(y), "xmax": int(x + w), "ymax": int(y + h)}
+    # Scale coordinates back to original image size
+    result = [
+        {
+            "xmin": int(x / scale),
+            "ymin": int(y / scale),
+            "xmax": int((x + w) / scale),
+            "ymax": int((y + h) / scale),
+        }
         for (x, y, w, h) in faces
     ]
+    logger.info(f"Face detection complete: found {len(result)} faces")
+    return result
+
+
+_yolo_model = None
+
+
+def _get_yolo_model():
+    global _yolo_model
+    if _yolo_model is None:
+        from ultralytics import YOLO
+
+        logger.info("Loading YOLO model...")
+        _yolo_model = YOLO("yolov8s.pt")
+        logger.info("YOLO model loaded")
+    return _yolo_model
+
+
+def detect_people(image):
+    """
+    Detect people in an image using YOLOv8.
+
+    Args:
+        image: PIL Image
+
+    Returns:
+        List of dicts with xmin, ymin, xmax, ymax keys
+    """
+    logger.info("Starting people detection")
+    model = _get_yolo_model()
+    results = model(image, verbose=False)
+
+    boxes = []
+    for box in results[0].boxes:
+        if int(box.cls) == 0:  # class 0 = person
+            x1, y1, x2, y2 = box.xyxy[0]
+            boxes.append(
+                {
+                    "xmin": int(x1),
+                    "ymin": int(y1),
+                    "xmax": int(x2),
+                    "ymax": int(y2),
+                }
+            )
+
+    logger.info(f"People detection complete: found {len(boxes)} people")
+    return boxes
 
 
 def redact_image(image_file, plate_recognizer_response):
     """
-    Redact license plates and faces from an image.
+    Redact license plates and people from an image.
 
     Returns:
         BytesIO with redacted image, or None if nothing to redact
     """
+    logger.info("Starting image redaction")
     image_file.seek(0)
-    image_bytes = image_file.read()
+    image = Image.open(image_file)
+    image.load()  # Force full image load before passing to threads
+    if image.mode in ("RGBA", "P"):
+        image = image.convert("RGB")
 
     boxes = []
 
@@ -54,17 +129,21 @@ def redact_image(image_file, plate_recognizer_response):
         for result in plate_recognizer_response.get("results", []):
             if result.get("plate") and result["plate"].get("box"):
                 boxes.append(result["plate"]["box"])
+        logger.info(f"Found {len(boxes)} plates from plate recognizer")
 
-    face_boxes = detect_faces(image_bytes)
-    boxes.extend(face_boxes)
+    from concurrent.futures import ThreadPoolExecutor
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        people_future = executor.submit(detect_people, image)
+        faces_future = executor.submit(detect_faces, image)
+        boxes.extend(people_future.result())
+        boxes.extend(faces_future.result())
 
     if not boxes:
+        logger.info("No redactions needed")
         return None
 
-    image = Image.open(BytesIO(image_bytes))
-    if image.mode in ("RGBA", "P"):
-        image = image.convert("RGB")
-
+    logger.info(f"Applying {len(boxes)} redaction boxes")
     draw = ImageDraw.Draw(image)
     for box in boxes:
         draw.rectangle(
@@ -75,6 +154,7 @@ def redact_image(image_file, plate_recognizer_response):
     output = BytesIO()
     image.save(output, format=image.format or "JPEG")
     output.seek(0)
+    logger.info("Image redaction complete")
     return output
 
 

@@ -7,3 +7,6 @@ class LazerConfig(AppConfig):
 
     def ready(self):
         import lazer.signals  # noqa: F401
+        from lazer.utils import _get_yolo_model
+
+        _get_yolo_model()
