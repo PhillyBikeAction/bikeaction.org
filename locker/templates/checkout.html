@@ -1,0 +1,169 @@
+{% extends 'admin/base_site.html' %}
+{% load static %}
+
+{% block title %}Checkout Items{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+  .form-header h1 {
+    margin: 0 0 20px 0;
+  }
+  
+  .table-container {
+    margin: 20px 0;
+    overflow-x: auto;
+  }
+  
+  .table-container table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .table-container th,
+  .table-container td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .table-container th {
+    background-color: #f5f5f5;
+    font-weight: bold;
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
+  
+  .form-group input,
+  .form-group textarea {
+    width: 100%;
+    max-width: 500px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .submit-row {
+    margin-top: 20px;
+    padding: 10px;
+    background: #f8f8f8;
+    border-top: 1px solid #ddd;
+  }
+  
+  .submit-button {
+    background-color: #417690;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  
+  .submit-button:hover {
+    background-color: #356577;
+  }
+  
+  .secondary-button {
+    background-color: #f5f5f5;
+    color: #333;
+    padding: 10px 20px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    text-decoration: none;
+    display: inline-block;
+    margin-left: 10px;
+  }
+  
+  .secondary-button:hover {
+    background-color: #e0e0e0;
+  }
+</style>
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'organizer_admin:index' %}">Home</a>
+  &rsaquo; <a href="{% url 'organizer_admin:locker_loan_changelist' %}">Loans</a>
+  &rsaquo; Checkout Items
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-start">
+  <form method="post" id="loan_form">
+    {{ formset.management_form }}
+    {% csrf_token %}
+    
+    <div>
+      <fieldset class="module aligned">
+        <h2>Select Items to Checkout</h2>
+        
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Available</th>
+                <th>Withdraw</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for form in formset %}
+                <tr>
+                  <td>{{ form.name.value }}</td>
+                  <td>{{ form.available_quantity.value }}</td>
+                  <td>
+                    {{ form.quantity }}
+                    {{ form.item_id }}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </fieldset>
+      
+      <fieldset class="module aligned">
+        <h2>Checkout Details</h2>
+        
+        <div class="form-row">
+          <div>
+            <label for="id_expected_return" class="required">Expected Return:</label>
+            {{ checkout_form.expected_return }}
+            {% if checkout_form.expected_return.errors %}
+              <p class="errornote">{{ checkout_form.expected_return.errors }}</p>
+            {% endif %}
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div>
+            <label for="id_note">Note:</label>
+            {{ checkout_form.note }}
+            {% if checkout_form.note.errors %}
+              <p class="errornote">{{ checkout_form.note.errors }}</p>
+            {% endif %}
+            <p class="help">Add any notes about the loan (optional)</p>
+          </div>
+        </div>
+      </fieldset>
+    </div>
+    
+    <div class="submit-row">
+      <button type="submit" class="submit-button default">Submit Checkout</button>
+      <a href="{% url 'organizer_admin:locker_loan_changelist' %}" class="secondary-button">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,149 @@
+[
+{
+    "model": "locker.ItemType",
+    "pk": 1,
+    "fields": {
+        "name": "Cargo",
+        "created_at": "2024-11-19T00:10:07.056Z",
+        "updated_at": "2024-11-19T00:27:21.998Z"
+    }
+},
+{
+    "model": "locker.ItemType",
+    "pk": 2,
+    "fields": {
+        "name": "Direct Action",
+        "created_at": "2024-11-19T00:10:07.056Z",
+        "updated_at": "2024-11-19T00:27:21.998Z"
+    }
+},
+{
+    "model": "locker.ItemType",
+    "pk": 3,
+    "fields": {
+        "name": "Cleanup",
+        "created_at": "2024-11-19T00:10:07.056Z",
+        "updated_at": "2024-11-19T00:27:21.998Z"
+    }
+},
+{
+    "model": "locker.ItemType",
+    "pk": 4,
+    "fields": {
+        "name": "Data",
+        "created_at": "2024-11-19T00:10:07.056Z",
+        "updated_at": "2024-11-19T00:27:21.998Z"
+    }
+},
+{
+    "model": "locker.ItemType",
+    "pk": 5,
+    "fields": {
+        "name": "Tabling",
+        "created_at": "2024-11-19T00:10:07.056Z",
+        "updated_at": "2024-11-19T00:27:21.998Z"
+    }
+},
+{
+    "model": "locker.ItemType",
+    "pk": 6,
+    "fields": {
+        "name": "Logo/Brand",
+        "created_at": "2024-11-19T00:10:07.056Z",
+        "updated_at": "2024-11-19T00:27:21.998Z"
+    }
+},
+{
+    "model": "locker.ItemType",
+    "pk": 7,
+    "fields": {
+        "name": "Art Supplies",
+        "created_at": "2024-11-19T00:10:07.056Z",
+        "updated_at": "2024-11-19T00:27:21.998Z"
+    }
+},
+{
+    "model": "locker.Item",
+    "pk": 1,
+    "fields": {
+        "name": "Cargo Trailer",
+        "type": 1,
+        "total_quantity": 1,
+        "available_quantity": 1,
+        "created_at": "2024-11-19T00:10:07.056Z",
+        "updated_at": "2024-11-19T00:27:21.998Z"
+    }
+},
+{
+    "model": "locker.Item",
+    "pk": 2,
+    "fields": {
+        "name": "Pink and Green Cone",
+        "type": 2,
+        "total_quantity": 60,
+        "available_quantity": 60,
+        "created_at": "2024-11-19T00:10:07.056Z",
+        "updated_at": "2024-11-19T00:27:21.998Z"
+    }
+},
+{
+    "model": "locker.Item",
+    "pk": 3,
+    "fields": {
+        "name": "Rakes",
+        "type": 3,
+        "total_quantity": 1,
+        "available_quantity": 1,
+        "created_at": "2024-11-19T00:10:07.056Z",
+        "updated_at": "2024-11-19T00:27:21.998Z"
+    }
+},
+{
+    "model": "locker.Item",
+    "pk": 4,
+    "fields": {
+        "name": "Bicycle Counter",
+        "type": 4,
+        "total_quantity": 1,
+        "available_quantity": 1,
+        "created_at": "2024-11-19T00:10:07.056Z",
+        "updated_at": "2024-11-19T00:27:21.998Z"
+    }
+},
+{
+    "model": "locker.Item",
+    "pk": 5,
+    "fields": {
+        "name": "10x10 canopy",
+        "type": 5,
+        "total_quantity": 1,
+        "available_quantity": 1,
+        "created_at": "2024-11-19T00:10:07.056Z",
+        "updated_at": "2024-11-19T00:27:21.998Z"
+    }
+},
+{
+    "model": "locker.Item",
+    "pk": 6,
+    "fields": {
+        "name": "Clear Tape",
+        "type": 6,
+        "total_quantity": 1,
+        "available_quantity": 1,
+        "created_at": "2024-11-19T00:10:07.056Z",
+        "updated_at": "2024-11-19T00:27:21.998Z"
+    }
+},
+{
+    "model": "locker.Item",
+    "pk": 7,
+    "fields": {
+        "name": "Yellow safety vests",
+        "type": 2,
+        "total_quantity": 3,
+        "available_quantity": 3,
+        "created_at": "2024-11-19T00:10:07.056Z",
+        "updated_at": "2024-11-19T00:27:21.998Z"
+    }
+}
+]

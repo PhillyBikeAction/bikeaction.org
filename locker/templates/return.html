@@ -1,0 +1,186 @@
+{% extends 'admin/base_site.html' %}
+{% load static %}
+
+{% block title %}Return Items{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+  .loans-list {
+    margin: 20px 0;
+  }
+  
+  .loan-item {
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    background: white;
+  }
+  
+  .loan-item:hover {
+    background-color: #f9f9f9;
+  }
+  
+  .loan-item label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    margin: 0;
+  }
+  
+  .loan-item input[type="checkbox"] {
+    margin-right: 15px;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+  }
+  
+  .loan-details strong {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 16px;
+  }
+  
+  .loan-details small {
+    color: #666;
+    display: block;
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
+  
+  .form-group textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    resize: vertical;
+    min-height: 100px;
+  }
+  
+  .submit-row {
+    margin-top: 20px;
+    padding: 10px;
+    background: #f8f8f8;
+    border-top: 1px solid #ddd;
+  }
+  
+  .submit-button {
+    background-color: #417690;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  
+  .submit-button:hover {
+    background-color: #356577;
+  }
+  
+  .secondary-button {
+    background-color: #f5f5f5;
+    color: #333;
+    padding: 10px 20px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    text-decoration: none;
+    display: inline-block;
+    margin-left: 10px;
+  }
+  
+  .secondary-button:hover {
+    background-color: #e0e0e0;
+  }
+  
+  .no-loans {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+    background: #f9f9f9;
+    border-radius: 4px;
+  }
+</style>
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'organizer_admin:index' %}">Home</a>
+  &rsaquo; <a href="{% url 'organizer_admin:locker_loan_changelist' %}">Loans</a>
+  &rsaquo; Return Items
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-start">
+  <form method="post" id="return_form">
+    {% csrf_token %}
+    
+    <div>
+      <fieldset class="module aligned">
+        <h2>Select Items to Return</h2>
+        
+        {% if active_loans %}
+          <div class="loans-list">
+            {% for loan in active_loans %}
+              <div class="loan-item">
+                <label>
+                  <input type="checkbox" name="loans" value="{{ loan.id }}">
+                  <div class="loan-details">
+                    <strong>{{ loan.item.name }}</strong>
+                    <small>
+                      Quantity: {{ loan.quantity }} | 
+                      Borrowed: {{ loan.borrowed_at|date:"M d, Y" }}
+                      {% if loan.expected_return %}
+                        | Due: {{ loan.expected_return|date:"M d, Y" }}
+                      {% endif %}
+                    </small>
+                  </div>
+                </label>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="no-loans">
+            <p>You have no active loans to return.</p>
+          </div>
+        {% endif %}
+      </fieldset>
+      
+      {% if active_loans %}
+      <fieldset class="module aligned">
+        <h2>Return Details</h2>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="id_return_note">Return Note:</label>
+            {{ form.return_note }}
+            <p class="help">Add any notes about the return (optional)</p>
+          </div>
+        </div>
+      </fieldset>
+      {% endif %}
+    </div>
+    
+    <div class="submit-row">
+      {% if active_loans %}
+        <button type="submit" class="submit-button default">Submit Return</button>
+      {% endif %}
+      <a href="{% url 'organizer_admin:locker_loan_changelist' %}" class="secondary-button">
+        {% if active_loans %}Cancel{% else %}Back to Loans{% endif %}
+      </a>
+    </div>
+  </form>
+</div>
+{% endblock %}

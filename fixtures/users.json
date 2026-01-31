@@ -40,5 +40,90 @@
         "verified": true,
         "primary": true
     }
+},
+{
+    "model": "auth.user",
+    "pk": 2,
+    "fields": {
+        "password": "pbkdf2_sha256$320000$oiLFa3hNcJorZl5wuRrh0P$TSnlvjJzDE7V4OWudWmguK5Y+HFFYwNs1423DMDFMD8=",
+        "last_login": "2024-11-19T00:10:07.253Z",
+        "is_superuser": false,
+        "username": "organizer@example.com",
+        "first_name": "One",
+        "last_name": "Organizer",
+        "email": "organizer@example.com",
+        "is_staff": false,
+        "is_active": true,
+        "date_joined": "2024-11-19T00:10:06.937Z",
+        "groups": [],
+        "user_permissions": []
+    }
+},
+{
+    "model": "profiles.profile",
+    "pk": "8914029c-4b23-4978-a489-a33606eca941",
+    "fields": {
+        "mailjet_contact_id": null,
+        "created_at": "2024-11-19T00:10:07.056Z",
+        "updated_at": "2024-11-19T00:27:21.998Z",
+        "user": 2,
+        "street_address": "1300 E Passyunk Ave",
+        "zip_code": "19147",
+        "newsletter_opt_in": true,
+        "location": "SRID=4326;POINT (-75.1584926 39.9341118)"
+    }
+},
+{
+    "model": "account.emailaddress",
+    "pk": 2,
+    "fields": {
+        "user": 2,
+        "email": "organizer@example.com",
+        "verified": true,
+        "primary": true
+    }
+},
+{
+    "model": "auth.user",
+    "pk": 3,
+    "fields": {
+        "password": "pbkdf2_sha256$320000$oiLFa3hNcJorZl5wuRrh0P$TSnlvjJzDE7V4OWudWmguK5Y+HFFYwNs1423DMDFMD8=",
+        "last_login": "2024-11-19T00:10:07.253Z",
+        "is_superuser": false,
+        "username": "organizer2@example.com",
+        "first_name": "two",
+        "last_name": "Organizer",
+        "email": "organizer2@example.com",
+        "is_staff": false,
+        "is_active": true,
+        "date_joined": "2024-11-19T00:10:06.937Z",
+        "groups": [],
+        "user_permissions": []
+    }
+},
+{
+    "model": "profiles.profile",
+    "pk": "8914029c-4b23-4978-a489-a33606eca900",
+    "fields": {
+        "mailjet_contact_id": null,
+        "created_at": "2024-11-19T00:10:07.056Z",
+        "updated_at": "2024-11-19T00:27:21.998Z",
+        "user": 3,
+        "street_address": "1400 E Passyunk Ave",
+        "zip_code": "19147",
+        "newsletter_opt_in": true,
+        "location": "SRID=4326;POINT (-75.1584926 39.9341118)"
+    }
+},
+{
+    "model": "account.emailaddress",
+    "pk": 3,
+    "fields": {
+        "user": 3,
+        "email": "organizer2@example.com",
+        "verified": true,
+        "primary": true
+    }
 }
 ]
+

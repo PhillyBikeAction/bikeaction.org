@@ -37,7 +37,7 @@ for model in app_models:
 
 class OrganizerAccess:
     def has_module_permission(self, request):
-        if request.user and request.user.profile.is_organizer:
+        if request.user.is_authenticated and request.user.profile.is_organizer:
             return True
         return super().has_module_permission(request)
 

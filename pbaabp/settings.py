@@ -124,6 +124,7 @@ INSTALLED_APPS = [
     "organizers",
     "aliases",
     "lazer",
+    "locker",
     "cms",
     "elections",
 ]
