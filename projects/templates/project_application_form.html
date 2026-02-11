@@ -45,6 +45,9 @@
     <span class="prefilled">{{ request.user.first_name }} {{ request.user.last_name }}</span>
   </p>
   <p>
+    <label>Pronouns</label>
+    <span class="prefilled">{{ request.user.profile.pronouns }}</span>
+  <p>
     <label>Discord username</label>
     <span class="prefilled">{{ request.user.profile.discord.extra_data.username }}</span>
   </p>
@@ -87,6 +90,8 @@
   {% include 'snippets/field.html' with field=form.time_and_date %}
   {% include 'snippets/field.html' with field=form.recurring %}
 
+  <h2>Scope</h2>
+  {% include 'snippets/field.html' with field=form.potential_broader_campaign %}
 
   <h2>Resources</h2>
   <p>Successful projects require promotion, volunteer management, and tech support (petitions, emails, etc). Estimating these needs ahead of time ensures a smoother experience and makes it easier to determine if a project is within our scope at a given time.</p>
