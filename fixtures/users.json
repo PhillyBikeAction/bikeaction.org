@@ -24,6 +24,7 @@
         "mailjet_contact_id": null,
         "created_at": "2024-11-19T00:10:07.056Z",
         "updated_at": "2024-11-19T00:27:21.998Z",
+        "pronouns": "any",
         "user": 1,
         "street_address": "1200 E Passyunk Ave",
         "zip_code": "19147",
