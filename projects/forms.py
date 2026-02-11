@@ -89,7 +89,7 @@ class ProjectApplicationForm(forms.Form):
     # scope
     potential_broader_campaign = forms.CharField(
         label="If you expect this project to lead into a broader campaign, please specify possible next steps:",
-        max_length=512,
+        widget=forms.Textarea(attrs={"rows": 3}),
         required=False
     )
 
