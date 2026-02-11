@@ -27,8 +27,7 @@ def project_application_view(request, pk=None):
 
     if not request.user.profile.pronouns:
         message = (
-            "You must set the pronouns field in your "
-            "profile to submit a project application."
+            "You must set the pronouns field in your " "profile to submit a project application."
         )
         messages.add_message(request, messages.ERROR, message)
         return redirect("profile")
@@ -59,8 +58,7 @@ def project_application(request, pk=None):
 
     if not request.user.profile.pronouns:
         message = (
-            "You must set the pronouns field in your "
-            "profile to submit a project application."
+            "You must set the pronouns field in your " "profile to submit a project application."
         )
         messages.add_message(request, messages.ERROR, message)
         return redirect("profile")
