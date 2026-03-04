@@ -34,7 +34,7 @@
 
       {% csrf_token %}
       <p>
-        <input type="text" id="street_address" name="street_address" autocomplete="shipping street-address" placeholder="Your Street Address" required>
+        <input type="text" id="street_address" name="street_address" autocomplete="off" data-1p-ignore data-lpignore="true" data-form-type="other" placeholder="Your Street Address" required>
         {% if not GOOGLE %}
         <span class="helptext">
           <small>

@@ -7,7 +7,6 @@ import pbaabp.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("campaigns", "0004_petition_petitionsignature"),
     ]

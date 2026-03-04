@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("elections", "0007_remove_election_district_seats_count"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),

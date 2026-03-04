@@ -67,7 +67,6 @@ INSTALLED_APPS = [
     "django.contrib.gis",
     # Wagtail
     "wagtail_localize",
-    "wagtail_localize_git",
     "wagtail_localize.locales",
     "wagtail.contrib.forms",
     "wagtail.contrib.redirects",
@@ -128,6 +127,11 @@ INSTALLED_APPS = [
     "elections",
 ]
 
+TESTING = "test" in sys.argv
+
+if DEBUG and not TESTING:
+    INSTALLED_APPS += ["debug_toolbar"]
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
@@ -145,6 +149,12 @@ MIDDLEWARE = [
     "pbaabp.middleware.TimezoneMiddleware",
     "pbaabp.middleware.FooterNewsletterSignupFormMiddleware",
 ]
+
+if DEBUG and not TESTING:
+    MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")
+    DEBUG_TOOLBAR_CONFIG = {
+        "SHOW_TOOLBAR_CALLBACK": lambda request: DEBUG,
+    }
 
 ROOT_URLCONF = "pbaabp.urls"
 

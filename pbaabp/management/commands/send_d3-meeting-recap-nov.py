@@ -7,7 +7,6 @@ SENT = []
 
 
 class Command(BaseCommand):
-
     def handle(self, *args, **options):
         event = ScheduledEvent.objects.get(slug="pba-district-3-monthly-meeting")
 

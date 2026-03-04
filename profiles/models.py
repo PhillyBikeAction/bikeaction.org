@@ -227,9 +227,7 @@ class Profile(models.Model):
         )
 
         # Determine overall eligibility
-        eligible = (
-            donor_sufficient_alone or discord_sufficient_alone or membership_sufficient_alone
-        )
+        eligible = donor_sufficient_alone or discord_sufficient_alone or membership_sufficient_alone
 
         # Generate warnings
         warnings = []
@@ -278,11 +276,11 @@ class Profile(models.Model):
                 if donor_sufficient_alone and not discord_sufficient_alone:
                     if has_discord:
                         warnings.append(
-                            "You're eligible via donation only - " "consider posting on Discord"
+                            "You're eligible via donation only - consider posting on Discord"
                         )
                     else:
                         warnings.append(
-                            "You're eligible via donation only - " "consider connecting Discord"
+                            "You're eligible via donation only - consider connecting Discord"
                         )
                 elif discord_sufficient_alone and not donor_sufficient_alone:
                     warnings.append(

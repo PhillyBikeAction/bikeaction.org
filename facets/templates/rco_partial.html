@@ -48,13 +48,30 @@
 {% if DISTRICT %}
 <hr>
 
-<h2>You are in <u>{{ DISTRICT }}</u></h2>
+<h2>You are in <u>City Council {{ DISTRICT }}</u></h2>
 
 {% endif %}
 {% if POLLING_PLACE %}
-<p><b>You are in Ward {{ WARD }} Division {{ DIVISION }}</b></p>
+<hr>
+
+<p><b>You are in Political Ward {{ WARD }} Division {{ DIVISION }}</b></p>
 
 <small>Your Polling Place for voting is: {{ POLLING_PLACE }}</small>
+{% endif %}
+{% if STATE_HOUSE or STATE_SENATE %}
+<hr>
+
+{% if STATE_HOUSE %}
+<p><b>You are in PA House {{ STATE_HOUSE }}</b></p>
+{% endif %}
+{% if STATE_SENATE %}
+<p><b>You are in PA Senate {{ STATE_SENATE }}</b></p>
+{% endif %}
+{% endif %}
+{% if CONGRESSIONAL %}
+<hr>
+
+<p><b>You are in US Congressional {{ CONGRESSIONAL }}</b></p>
 {% endif %}
 
 <hr>

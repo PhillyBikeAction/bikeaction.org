@@ -21,7 +21,7 @@ def organizer_application_view(request, pk=None):
         return redirect("profile")
 
     if not apps_connected:
-        message = "You must connect your discord account " "to submit a organizer application."
+        message = "You must connect your discord account to submit a organizer application."
         messages.add_message(request, messages.ERROR, message)
         return redirect("profile")
 
@@ -51,7 +51,7 @@ def organizer_application(request, pk=None):
         return redirect("profile")
 
     if not apps_connected:
-        message = "You must connect your discord account " "to submit a organizer application."
+        message = "You must connect your discord account to submit a organizer application."
         messages.add_message(request, messages.ERROR, message)
         return redirect("profile")
 

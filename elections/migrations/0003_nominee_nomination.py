@@ -8,7 +8,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("elections", "0002_election_slug"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),

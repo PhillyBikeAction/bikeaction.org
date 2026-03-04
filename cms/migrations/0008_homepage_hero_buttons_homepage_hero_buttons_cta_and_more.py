@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("cms", "0007_homepage_body_background_homepage_hero_background_and_more"),
     ]

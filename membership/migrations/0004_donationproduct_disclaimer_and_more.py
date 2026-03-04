@@ -8,7 +8,6 @@ import pbaabp.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("membership", "0003_donation"),
     ]

@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("membership", "0003_donation"),
         ("campaigns", "0016_campaign_visible"),

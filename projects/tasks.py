@@ -78,7 +78,7 @@ async def _add_new_project_voting_message_and_thread(project_application_id):
     link = reverse("project_application_view", kwargs={"pk": application.id})
     link = f"https://apps.bikeaction.org{link}"
     await thread.send(
-        f"Project application \"{application.data['shortname']['value']}\" "
+        f'Project application "{application.data["shortname"]["value"]}" '
         f"from {discord_username} has been submitted for vote by {application.vote_initiator}\n\n"
         f"{mention_role.mention} please review and vote with :white_check_mark: or :x:.\n\n"
         f"See discussion at https://discord.com/channels/{guild.id}/{discussion_thread.id}\n\n"
@@ -151,7 +151,7 @@ async def _approve_new_project(
     await project_lead.add_role(role)
     actions.append(f"Assigned {role.name} role to {project_lead.mention}")
 
-    msg = f"Project \"{application.data['shortname']['value']}\" " f"Approved!"
+    msg = f'Project "{application.data["shortname"]["value"]}" Approved!'
     if actions:
         msg += "\n\nActions Taken:\n"
     for action in actions:
@@ -160,8 +160,7 @@ async def _approve_new_project(
     await discussion_thread.send(msg)
 
     msg = (
-        f"Project \"{application.data['shortname']['value']}\" "
-        f"Approved by {application.approved_by}."
+        f'Project "{application.data["shortname"]["value"]}" Approved by {application.approved_by}.'
     )
     if actions:
         msg += "\n\nActions Taken:\n"

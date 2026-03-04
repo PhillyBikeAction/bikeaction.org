@@ -81,7 +81,6 @@ class ScheduledEvent(models.Model):
 
 
 class EventRSVP(models.Model):
-
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     event = models.ForeignKey(ScheduledEvent, to_field="id", on_delete=models.CASCADE)
 

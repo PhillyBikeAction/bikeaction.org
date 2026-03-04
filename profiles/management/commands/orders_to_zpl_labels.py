@@ -6,7 +6,6 @@ from profiles.models import ShirtOrder
 
 
 class Command(BaseCommand):
-
     def handle(self, *args, **options):
         orders_by_email = defaultdict(list)
         emails = set()

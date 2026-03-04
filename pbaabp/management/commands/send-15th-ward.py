@@ -8,7 +8,6 @@ _ward = Ward.objects.get(id="cc5193ae-661b-4528-beab-dfb5e8246a2c")
 
 
 class Command(BaseCommand):
-
     def add_arguments(self, parser):
         parser.add_argument("email_template", nargs="?", type=str)
 

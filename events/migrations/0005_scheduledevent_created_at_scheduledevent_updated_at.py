@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("events", "0004_rename_wordpress_slug_scheduledevent_slug_and_more"),
     ]

@@ -8,7 +8,6 @@ _rco = RegisteredCommunityOrganization.objects.get(id="49588520-93e1-4d70-ae30-8
 
 
 class Command(BaseCommand):
-
     def add_arguments(self, parser):
         parser.add_argument("email_template", nargs="?", type=str)
 

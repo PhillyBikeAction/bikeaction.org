@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("facets", "0004_statehousedistrict_statesenatedistrict"),
         ("profiles", "0021_alter_profile_newsletter_opt_in"),

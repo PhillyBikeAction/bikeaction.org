@@ -75,16 +75,6 @@ class ViolationReport(models.Model):
 
     redacted_image = models.ImageField(null=True, blank=True, upload_to=report_image_upload_to)
 
-    screenshot_before_submit = models.ImageField(
-        null=True, blank=True, upload_to=report_image_upload_to
-    )
-    screenshot_after_submit = models.ImageField(
-        null=True, blank=True, upload_to=report_image_upload_to
-    )
-    screenshot_success = models.ImageField(null=True, blank=True, upload_to=report_image_upload_to)
-    screenshot_error = models.ImageField(null=True, blank=True, upload_to=report_image_upload_to)
-    screenshot_final = models.ImageField(null=True, blank=True, upload_to=report_image_upload_to)
-
     submitted = models.DateTimeField(null=True, blank=True)
     service_id = models.CharField(null=True, blank=True)
     submission_response = models.JSONField(null=True, blank=True)
@@ -98,9 +88,7 @@ class ViolationReport(models.Model):
         return self.submission.created_by
 
     def image_tag_violation_no_href(self):
-        return mark_safe(
-            '<img src="%s" style="max-height: 50px;"/>' % (self.submission.image.url,)
-        )
+        return mark_safe('<img src="%s" style="max-height: 50px;"/>' % (self.submission.image.url,))
 
     image_tag_violation_no_href.short_description = "Image"
 

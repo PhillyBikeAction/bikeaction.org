@@ -1,0 +1,40 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}Export Profiles as CSV{% endblock %}
+
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+    &rsaquo; <a href="{% url 'admin:app_list' app_label %}">{{ app_label|capfirst }}</a>
+    &rsaquo; <a href="{{ changelist_url }}">{{ model_name }}</a>
+    &rsaquo; Export Profiles as CSV
+  </div>
+{% endblock %}
+
+{% block content %}
+  <p>
+    Found <strong>{{ profile_count }}</strong> profile{{ profile_count|pluralize }}
+    within <strong>{{ facet_count }}</strong> selected {{ model_name|lower }}{{ facet_count|pluralize }}: {{ facet_names }}.
+  </p>
+
+  <form method="post" action="{{ form_action_url }}">
+    {% csrf_token %}
+    {% for pk in selected_pks %}
+      <input type="hidden" name="_selected_action" value="{{ pk }}" />
+    {% endfor %}
+    {% if from_action %}
+      <input type="hidden" name="action" value="export_profiles_csv" />
+    {% endif %}
+    <input type="hidden" name="confirm" value="1" />
+
+    <fieldset>
+      <h2>Select columns to include in the CSV:</h2>
+      {{ form.columns }}
+    </fieldset>
+
+    <br />
+    <input type="submit" value="Download CSV" />
+    <a href="{{ cancel_url }}" style="margin-left: 1em;">Cancel</a>
+  </form>
+{% endblock %}

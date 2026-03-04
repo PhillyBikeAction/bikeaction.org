@@ -5,7 +5,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("cms", "0008_homepage_hero_buttons_homepage_hero_buttons_cta_and_more"),
     ]

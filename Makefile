@@ -9,9 +9,9 @@ default:
 	@echo
 	@exit 1
 
-.state/docker-build-base: Dockerfile.dev requirements.txt requirements/base.txt requirements/dev.txt lazer_app/projectLazer/package-lock.json
+.state/docker-build-base: Dockerfile uv.lock lazer_app/projectLazer/package-lock.json
 	# Build our base container for this project.
-	docker compose build --build-arg  USER_ID=$(shell id -u)  --build-arg GROUP_ID=$(shell id -g) --force-rm base
+	docker compose build --build-arg USER_ID=$(shell id -u) --build-arg GROUP_ID=$(shell id -g) --force-rm base
 
 	# Collect static assets
 	#docker compose run --rm web python manage.py collectstatic --noinput
@@ -26,7 +26,7 @@ default:
 
 .state/db-initialized: .state/docker-build-base .state/db-migrated
 	# Mark the state so we don't reload after first launch.
-	docker compose run --rm web ./manage.py loaddata fixtures/*.json fixtures/*.json.gz
+	docker compose run --rm web uv run python manage.py loaddata fixtures/*.json fixtures/*.json.gz
 	mkdir -p .state
 	touch .state/db-initialized
 
@@ -44,27 +44,26 @@ dbshell: .state/db-initialized
 
 manage: .state/db-initialized
 	# Run Django manage to accept arbitrary arguments
-	docker compose run --rm web ./manage.py $(filter-out $@,$(MAKECMDGOALS))
+	docker compose run --rm web uv run python manage.py $(filter-out $@,$(MAKECMDGOALS))
 
 migrations: .state/db-initialized
 	# Run Django makemigrations
-	docker compose run --rm web ./manage.py makemigrations
+	docker compose run --rm web uv run python manage.py makemigrations
 
 migrate: .state/docker-build-base
 	# Run Django migrate
-	docker compose run --rm web ./manage.py migrate $(filter-out $@,$(MAKECMDGOALS))
+	docker compose run --rm web uv run python manage.py migrate $(filter-out $@,$(MAKECMDGOALS))
 
 lint: .state/docker-build-base
-	docker compose run --rm base isort --check-only .
-	docker compose run --rm base black --check .
-	docker compose run --rm base flake8
+	docker compose run --rm base uv run python -m ruff check .
+	docker compose run --rm base uv run python -m ruff format --check .
 
 reformat: .state/docker-build-base
-	docker compose run --rm base isort .
-	docker compose run --rm base black .
+	docker compose run --rm base uv run python -m ruff check --fix .
+	docker compose run --rm base uv run python -m ruff format .
 
 test: .state/docker-build-base
-	docker compose run --rm web ./manage.py test --keepdb $(filter-out $@,$(MAKECMDGOALS))
+	docker compose run --rm web uv run python manage.py test --keepdb $(filter-out $@,$(MAKECMDGOALS))
 
 check: test lint
 

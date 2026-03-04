@@ -133,14 +133,10 @@ class Command(BaseCommand):
                 # Use a normal distribution around the approval_rate with some variance
                 approval_variance = 0.15
                 voter_approval_rate = random.gauss(approval_rate, approval_variance)
-                voter_approval_rate = max(
-                    0.1, min(1.0, voter_approval_rate)
-                )  # Clamp to [0.1, 1.0]
+                voter_approval_rate = max(0.1, min(1.0, voter_approval_rate))  # Clamp to [0.1, 1.0]
 
                 num_approvals = int(len(nominees) * voter_approval_rate)
-                num_approvals = max(
-                    1, min(len(nominees), num_approvals)
-                )  # At least 1, at most all
+                num_approvals = max(1, min(len(nominees), num_approvals))  # At least 1, at most all
 
                 # Randomly select nominees to approve
                 approved_nominees = random.sample(nominees, num_approvals)

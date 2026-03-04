@@ -125,16 +125,13 @@ class OrganizerApplicationForm(forms.Form):
 
     involvement = forms.CharField(
         label=(
-            "How have you been involved in PBA thus far "
-            "that demonstrates consistent engagement?"
+            "How have you been involved in PBA thus far that demonstrates consistent engagement?"
         ),
         widget=forms.Textarea(attrs={"rows": 3}),
         required=True,
     )
     past_experience = forms.CharField(
-        label=(
-            "Please list any past experience that could be relevant " "to PBA/the Organizer role"
-        ),
+        label=("Please list any past experience that could be relevant to PBA/the Organizer role"),
         help_text=(
             "social media management, legal expertise, administrative work, "
             "community organizing, etc"
@@ -143,9 +140,7 @@ class OrganizerApplicationForm(forms.Form):
         required=True,
     )
     current_contribution = forms.ChoiceField(
-        label=(
-            "Are you currently contributing to " "any Active or Pending PBA projects/campaigns?"
-        ),
+        label=("Are you currently contributing to any Active or Pending PBA projects/campaigns?"),
         choices=[(None, "---"), ("yes", "Yes"), ("no", "No")],
     )
     current_contribution_info = forms.CharField(
@@ -157,7 +152,7 @@ class OrganizerApplicationForm(forms.Form):
     online_availability = forms.CharField(
         label="Describe your online availability",
         help_text=(
-            "hours online per day/week, evenings vs weekends, " "flexible daytime schedule etc"
+            "hours online per day/week, evenings vs weekends, flexible daytime schedule etc"
         ),
         widget=forms.Textarea(attrs={"rows": 3}),
         required=True,

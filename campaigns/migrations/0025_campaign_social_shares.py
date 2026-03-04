@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("campaigns", "0024_alter_petition_email_cc_alter_petition_email_to"),
     ]

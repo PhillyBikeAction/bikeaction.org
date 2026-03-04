@@ -10,7 +10,6 @@ import pbaabp.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("campaigns", "0003_campaign_wordpress_id_alter_campaign_content"),
     ]

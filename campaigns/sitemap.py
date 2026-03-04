@@ -5,7 +5,6 @@ from campaigns.models import Campaign
 
 
 class CampaignSitemap(Sitemap):
-
     def items(self):
         return Campaign.objects.filter(
             visible=True, status__in=[Campaign.Status.ACTIVE, Campaign.Status.COMPLETED]

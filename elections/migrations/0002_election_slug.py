@@ -12,7 +12,6 @@ def populate_slugs(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("elections", "0001_initial"),
     ]

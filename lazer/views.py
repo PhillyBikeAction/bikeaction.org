@@ -591,9 +591,7 @@ def generate_wrapped_api(request):
                     "top_zip_codes": wrapped.top_zip_codes,
                     "reports_by_month": wrapped.reports_by_month,
                     "first_report_date": (
-                        wrapped.first_report_date.isoformat()
-                        if wrapped.first_report_date
-                        else None
+                        wrapped.first_report_date.isoformat() if wrapped.first_report_date else None
                     ),
                     "year": wrapped.year,
                     "longest_streak": wrapped.longest_streak,
@@ -608,9 +606,7 @@ def generate_wrapped_api(request):
     # Calculate stats
     stats = calculate_wrapped_stats(request.user, year)
     if stats is None:
-        return JsonResponse(
-            {"success": False, "error": f"No reports found for {year}"}, status=404
-        )
+        return JsonResponse({"success": False, "error": f"No reports found for {year}"}, status=404)
 
     # Create or update wrapped
     if wrapped:

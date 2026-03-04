@@ -1,3 +1,0 @@
--r requirements/base.txt
--r requirements/dev.txt
--r requirements/deploy.txt

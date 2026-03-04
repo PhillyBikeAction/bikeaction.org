@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("membership", "0005_donation_comment"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),

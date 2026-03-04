@@ -6,7 +6,6 @@ import pbaabp.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("campaigns", "0021_petition_call_to_action_header_and_more"),
     ]

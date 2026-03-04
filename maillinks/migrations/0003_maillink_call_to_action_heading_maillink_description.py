@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("maillinks", "0002_maillink_call_to_action_alter_maillink_cc"),
     ]

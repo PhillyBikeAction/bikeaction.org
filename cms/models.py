@@ -159,7 +159,6 @@ def get_collections():
 
 
 class DisplayCardsBlock(StructBlock):
-
     collection = ChoiceBlock(label="Collection to display", required=True, choices=get_collections)
     card_count_description = CharBlock(required=False)
     random_order = BooleanBlock(default=True, required=False)
@@ -177,7 +176,6 @@ class DisplayCardsBlock(StructBlock):
 
 
 class FullSlugFieldPanel(FieldPanel):
-
     def __init__(self, field_name=None, heading=None, help_text=None, read_only=None, **kwargs):
         field_name = "get_url_parts" if not field_name else field_name
         heading = "Full URL" if not heading else heading
@@ -226,7 +224,6 @@ class CollapsibleHeader(StructBlock):
 
 
 class CmsStreamPage(Page):
-
     show_title = models.BooleanField(default=True)
 
     body = StreamField(
@@ -454,7 +451,6 @@ class PostsContainerPage(RoutablePageMixin, Page):
 
 
 class HomePage(Page):
-
     def get_context(self, request):
         context = super().get_context(request)
         context["homepage_newsletter_form"] = NewsletterSignupForm(form_name="homepage")

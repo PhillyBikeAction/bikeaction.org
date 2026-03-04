@@ -8,7 +8,6 @@ from profiles.models import Profile
 
 
 class Command(BaseCommand):
-
     def handle(self, *args, **options):
         for profile in Profile.objects.filter(
             Q(street_address__isnull=True) | Q(zip_code__isnull=True)

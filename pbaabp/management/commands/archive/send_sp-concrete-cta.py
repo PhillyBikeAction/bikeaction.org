@@ -22,7 +22,6 @@ SENT_REMAINDER = []
 
 
 class Command(BaseCommand):
-
     def handle(*args, **kwargs):
         settings.EMAIL_SUBJECT_PREFIX = ""
         for profile in profiles:

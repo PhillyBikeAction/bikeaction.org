@@ -98,7 +98,6 @@ class Command(BaseCommand):
 
         self.stdout.write(
             self.style.SUCCESS(
-                f"Done: {created_count} created, {updated_count} updated, "
-                f"{deleted_count} deleted"
+                f"Done: {created_count} created, {updated_count} updated, {deleted_count} deleted"
             )
         )

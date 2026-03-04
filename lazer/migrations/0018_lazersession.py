@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("lazer", "0017_remove_lazerwrapped_community_top_make_model_and_more"),
     ]

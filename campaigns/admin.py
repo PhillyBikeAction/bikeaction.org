@@ -57,7 +57,6 @@ def pretty_report(modeladmin, request, queryset):
 
 
 class OrganizerCampaignAdmin(CampaignAdmin):
-
     def has_add_permission(self, request):
         return True
 
@@ -133,7 +132,6 @@ class PetitionAdmin(admin.ModelAdmin):
 
 
 class OrganizerPetitionAdmin(admin.ModelAdmin):
-
     def has_add_permission(self, request):
         return True
 
@@ -292,7 +290,6 @@ class PetitionSignatureAdmin(admin.ModelAdmin, ReadOnlyLeafletGeoAdminMixin):
 
 
 class OrganizerPetitionSignatureAdmin(PetitionSignatureAdmin):
-
     def has_add_permission(self, request):
         return False
 

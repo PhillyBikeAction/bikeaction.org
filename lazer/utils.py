@@ -100,7 +100,6 @@ def redact_image(image_file, plate_recognizer_response):
 
 def submit_violation_report_to_ppa(violation_report):
     """Submit a violation report to PPA via Power Automate API."""
-    violation_report.screenshot_error.delete()
 
     if not settings.DEBUG:
         domain = settings.PPA_API_DOMAIN
@@ -242,13 +241,13 @@ def build_embed(violation_report):
     )
     embed.add_field("Date Observed", violation_report.date_observed, inline=True)
     embed.add_field("Time Observed", violation_report.time_observed, inline=True)
-    embed.add_field("\u200B", "\u200B", inline=True)
+    embed.add_field("\u200b", "\u200b", inline=True)
     embed.add_field("Make", violation_report.make, inline=True)
     embed.add_field("Model", violation_report.model, inline=True)
     embed.add_field("Body Style", violation_report.body_style, inline=True)
     embed.add_field("Vehicle Color", violation_report.vehicle_color, inline=True)
-    embed.add_field("\u200B", "\u200B", inline=True)
-    embed.add_field("\u200B", "\u200B", inline=True)
+    embed.add_field("\u200b", "\u200b", inline=True)
+    embed.add_field("\u200b", "\u200b", inline=True)
     embed.add_field("Block Number", violation_report.block_number, inline=True)
     embed.add_field("Street Name", violation_report.street_name, inline=True)
     embed.add_field("Zip Code", violation_report.zip_code, inline=True)

@@ -171,7 +171,6 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
 
 
 class ShirtsAreDoneMixin:
-
     def dispatch(self, request, *args, **kwargs):
         messages.add_message(self.request, messages.INFO, "T-Shirt orders are closed")
         return HttpResponseRedirect(reverse("profile"))

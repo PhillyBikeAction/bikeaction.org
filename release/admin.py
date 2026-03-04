@@ -13,7 +13,6 @@ class ReleaseAdmin(admin.ModelAdmin):
 
 
 class ReleaseSignatureAdmin(admin.ModelAdmin):
-
     readonly_fields = [
         "release",
         "created_at",

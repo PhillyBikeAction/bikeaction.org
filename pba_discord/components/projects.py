@@ -90,7 +90,7 @@ class ProjectApplications(Extension):
     @slash_option(
         name="project_mentor",
         description=(
-            "The discord user name of the organizer who will Mentor the Project Lead, " "if needed"
+            "The discord user name of the organizer who will Mentor the Project Lead, if needed"
         ),
         required=False,
         opt_type=OptionType.USER,

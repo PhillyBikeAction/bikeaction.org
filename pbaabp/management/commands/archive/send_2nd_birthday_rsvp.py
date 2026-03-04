@@ -9,7 +9,6 @@ SENT = []
 
 
 class Command(BaseCommand):
-
     def handle(*args, **kwargs):
         settings.EMAIL_SUBJECT_PREFIX = ""
         for rsvp in EventRSVP.objects.filter(event_id="e93a4037-dc63-4b11-850c-603928aabb80"):

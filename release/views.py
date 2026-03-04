@@ -53,9 +53,7 @@ def release_signature(request, release_slug_or_id):
             form.save()
 
             if request.GET.get("kiosk", False):
-                return redirect(
-                    "release_signature_kiosk_postroll", release_slug_or_id=release.slug
-                )
+                return redirect("release_signature_kiosk_postroll", release_slug_or_id=release.slug)
             else:
                 return HttpResponseRedirect("https://bikeaction.org")
     else:

@@ -81,9 +81,7 @@ class Command(BaseCommand):
             existing = LazerWrapped.objects.filter(user=user, year=year).first()
 
             if existing and not regenerate:
-                self.stdout.write(
-                    f"  SKIP: {user.email} ({report_count} reports) - already exists"
-                )
+                self.stdout.write(f"  SKIP: {user.email} ({report_count} reports) - already exists")
                 skipped_count += 1
                 continue
 
@@ -99,9 +97,7 @@ class Command(BaseCommand):
             # Calculate stats
             stats = calculate_wrapped_stats(user, year)
             if stats is None:
-                self.stdout.write(
-                    self.style.WARNING(f"  WARN: {user.email} - no stats calculated")
-                )
+                self.stdout.write(self.style.WARNING(f"  WARN: {user.email} - no stats calculated"))
                 continue
 
             if existing:

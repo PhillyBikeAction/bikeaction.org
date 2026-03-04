@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("lazer", "0014_lazer_wrapped_community_stats"),
     ]

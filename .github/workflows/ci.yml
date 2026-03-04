@@ -26,8 +26,8 @@ jobs:
               var-cache-apt
               var-lib-apt
               root-npm
-              user-cache-pip
-          key: ${{ runner.os }}-cache-mount-${{ hashFiles('Dockerfile.dev') }}
+              user-cache-uv
+          key: ${{ runner.os }}-cache-mount-${{ hashFiles('Dockerfile') }}
           restore-keys: |
             ${{ runner.os }}-cache-mount-
 
@@ -41,7 +41,7 @@ jobs:
               "var-cache-apt": "/var/cache/apt",
               "var-lib-apt": "/var/lib/apt",
               "root-npm": "/root/.npm",
-              "user-cache-pip": "/home/user/.cache/pip"
+              "user-cache-uv": "/home/user/.cache/uv"
             }
           skip-extraction: ${{ steps.cache.outputs.cache-hit }}
 
@@ -51,7 +51,8 @@ jobs:
           BUILDKIT_PROGRESS: plain
         with:
           context: .
-          file: Dockerfile.dev
+          file: Dockerfile
+          target: dev
           push: false
           load: true
           tags: pbaabp:docker-compose
@@ -88,8 +89,8 @@ jobs:
               var-cache-apt
               var-lib-apt
               root-npm
-              user-cache-pip
-          key: ${{ runner.os }}-cache-mount-${{ hashFiles('Dockerfile.dev') }}
+              user-cache-uv
+          key: ${{ runner.os }}-cache-mount-${{ hashFiles('Dockerfile') }}
           restore-keys: |
             ${{ runner.os }}-cache-mount-
 
@@ -103,7 +104,7 @@ jobs:
               "var-cache-apt": "/var/cache/apt",
               "var-lib-apt": "/var/lib/apt",
               "root-npm": "/root/.npm",
-              "user-cache-pip": "/home/user/.cache/pip"
+              "user-cache-uv": "/home/user/.cache/uv"
             }
           skip-extraction: ${{ steps.cache.outputs.cache-hit }}
 
@@ -126,7 +127,8 @@ jobs:
           BUILDKIT_PROGRESS: plain
         with:
           context: .
-          file: Dockerfile.dev
+          file: Dockerfile
+          target: dev
           push: false
           load: true
           tags: pbaabp:docker-compose
@@ -144,3 +146,35 @@ jobs:
         env:
           DOCKER_BUILDKIT: 1
           BUILDKIT_PROGRESS: plain
+
+  test-lazer-app:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Check for lazer_app changes
+        uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+        id: filter
+        with:
+          filters: |
+            lazer:
+              - 'lazer_app/**'
+
+      - name: Set up Node.js
+        if: steps.filter.outputs.lazer == 'true'
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: lazer_app/projectLazer/package-lock.json
+
+      - name: Install dependencies
+        if: steps.filter.outputs.lazer == 'true'
+        working-directory: lazer_app/projectLazer
+        run: npm ci
+
+      - name: Run Angular tests
+        if: steps.filter.outputs.lazer == 'true'
+        working-directory: lazer_app/projectLazer
+        run: npm test -- --watch=false --browsers=ChromeHeadless

@@ -21,22 +21,22 @@ def parse_html_form(html_content):
         context = html_content[context_start:select_start]
 
         # Find the last label in this context
-        label_matches = list(re.finditer(r'<label[^>]*>(.*?)</label>', context, re.DOTALL))
+        label_matches = list(re.finditer(r"<label[^>]*>(.*?)</label>", context, re.DOTALL))
         if label_matches:
             label_text = label_matches[-1].group(1)
             # Clean up label text (remove HTML tags, extra whitespace, asterisks)
-            label = re.sub(r'<[^>]+>', '', label_text)
-            label = re.sub(r'\s+', ' ', label).strip('*').strip()
+            label = re.sub(r"<[^>]+>", "", label_text)
+            label = re.sub(r"\s+", " ", label).strip("*").strip()
         else:
             label = name
 
         # Extract all option text (skip empty ones)
-        option_pattern = r'<option[^>]*>([^<]+)</option>'
+        option_pattern = r"<option[^>]*>([^<]+)</option>"
         options = []
         for opt_match in re.finditer(option_pattern, select_content):
             text = opt_match.group(1).strip()
             # Skip placeholder/empty options
-            if text and text.lower() not in ['select', 'please select', '---', '']:
+            if text and text.lower() not in ["select", "please select", "---", ""]:
                 options.append(text)
 
         if options and label:

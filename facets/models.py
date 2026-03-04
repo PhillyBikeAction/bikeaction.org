@@ -46,9 +46,7 @@ class District(Facet):
 
 
 class RegisteredCommunityOrganization(Facet):
-    intersecting_zips = Relationship(
-        to="facets.zipcode", predicate=Q(mpoly__intersects=L("mpoly"))
-    )
+    intersecting_zips = Relationship(to="facets.zipcode", predicate=Q(mpoly__intersects=L("mpoly")))
     intersecting_districts = Relationship(
         to="facets.district", predicate=Q(mpoly__intersects=L("mpoly"))
     )
@@ -76,5 +74,24 @@ class StateSenateDistrict(Facet):
     pass
 
 
-class Ward(Facet):
+class CongressionalDistrict(Facet):
     pass
+
+
+class Ward(Facet):
+    class Meta:
+        verbose_name = "Political Ward"
+        verbose_name_plural = "Political Wards"
+
+
+class Division(Facet):
+    ward = models.ForeignKey(Ward, on_delete=models.CASCADE, related_name="divisions", null=True)
+    polling_place_name = models.CharField(max_length=256, blank=True, default="")
+    polling_place_address = models.CharField(max_length=256, blank=True, default="")
+    polling_place_zip = models.CharField(max_length=10, blank=True, default="")
+    polling_place_accessibility = models.CharField(max_length=2, blank=True, default="")
+    polling_place_parking = models.CharField(max_length=2, blank=True, default="")
+
+    class Meta:
+        verbose_name = "Political Division"
+        verbose_name_plural = "Political Divisions"

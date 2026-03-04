@@ -11,7 +11,6 @@ district2 = District.objects.get(name="District 2")
 
 
 class Command(BaseCommand):
-
     def add_arguments(self, parser):
         parser.add_argument("email_template", nargs="?", type=str)
 

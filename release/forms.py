@@ -5,7 +5,6 @@ from release.models import ReleaseSignature
 
 
 class ReleaseSignatureForm(ModelForm):
-
     newsletter_opt_in = BooleanField(
         required=False,
         help_text="Check this box to receive our monthly newsletter",

@@ -5,7 +5,6 @@ from django.conf import settings
 
 
 class WordPressAPI:
-
     def __init__(self, url=None, email=None, password=None):
         self.url = url if url is not None else settings.WP_URL
         self.email = email if email is not None else settings.WP_LOGIN_EMAIL
@@ -83,9 +82,7 @@ class WordPressAPI:
             "start_date": start_datetime.astimezone(tz=ZoneInfo(settings.TIME_ZONE)).isoformat(
                 sep=" "
             ),
-            "end_date": end_datetime.astimezone(tz=ZoneInfo(settings.TIME_ZONE)).isoformat(
-                sep=" "
-            ),
+            "end_date": end_datetime.astimezone(tz=ZoneInfo(settings.TIME_ZONE)).isoformat(sep=" "),
             "timezone": settings.TIME_ZONE,
             "venue": venue_id,
         }
@@ -117,9 +114,7 @@ class WordPressAPI:
             "start_date": start_datetime.astimezone(tz=ZoneInfo(settings.TIME_ZONE)).isoformat(
                 sep=" "
             ),
-            "end_date": end_datetime.astimezone(tz=ZoneInfo(settings.TIME_ZONE)).isoformat(
-                sep=" "
-            ),
+            "end_date": end_datetime.astimezone(tz=ZoneInfo(settings.TIME_ZONE)).isoformat(sep=" "),
             "timezone": settings.TIME_ZONE,
             "venue": venue_id,
         }

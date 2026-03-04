@@ -7,7 +7,6 @@ import lazer.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("lazer", "0005_violationsubmission_submission_id"),
     ]

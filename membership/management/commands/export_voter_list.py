@@ -47,9 +47,7 @@ class Command(BaseCommand):
             import pytz
 
             # Start of day in UTC
-            day_start_utc = datetime.combine(date_obj, datetime.min.time()).replace(
-                tzinfo=pytz.UTC
-            )
+            day_start_utc = datetime.combine(date_obj, datetime.min.time()).replace(tzinfo=pytz.UTC)
             # End of day in UTC
             day_end_utc = datetime.combine(date_obj, datetime.max.time()).replace(tzinfo=pytz.UTC)
         except ValueError:
@@ -178,9 +176,7 @@ class Command(BaseCommand):
         )
 
         # Combine all three criteria with OR
-        members_query = (
-            membership_record_query | discord_activity_query | stripe_subscription_query
-        )
+        members_query = membership_record_query | discord_activity_query | stripe_subscription_query
 
         # Get all users matching the criteria
         members = User.objects.filter(members_query).select_related("profile").distinct()

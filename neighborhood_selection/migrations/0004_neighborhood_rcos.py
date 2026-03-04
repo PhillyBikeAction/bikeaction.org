@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("facets", "0004_statehousedistrict_statesenatedistrict"),
         ("neighborhood_selection", "0003_neighborhood_featured"),

@@ -52,9 +52,9 @@ def petition_signatures(request, petition_slug_or_id):
         except (ValueError, OSError):
             raise Http404
 
-        new_signatures = petition.signatures.filter(
-            created_at__gt=since_dt, visible=True
-        ).order_by("-created_at")
+        new_signatures = petition.signatures.filter(created_at__gt=since_dt, visible=True).order_by(
+            "-created_at"
+        )
 
         # Return signature cards + OOB updates for count/progress
         return render(

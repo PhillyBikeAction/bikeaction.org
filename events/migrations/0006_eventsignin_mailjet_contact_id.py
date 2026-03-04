@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("events", "0005_scheduledevent_created_at_scheduledevent_updated_at"),
     ]

@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("events", "0008_scheduledevent_hidden"),
         ("facets", "0004_statehousedistrict_statesenatedistrict"),

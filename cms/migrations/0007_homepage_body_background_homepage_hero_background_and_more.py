@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("wagtailimages", "0027_image_description"),
         ("cms", "0006_alter_cmsstreampage_body"),

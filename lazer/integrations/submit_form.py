@@ -35,7 +35,7 @@ class FinderEnum(StrEnum):
             for legacy_key, new_value in legacy_mappings.items():
                 if legacy_key.lower() == value_lower:
                     logging.info(
-                        f"Mapping legacy value '{value}' to '{new_value}' " f"for {cls.__name__}"
+                        f"Mapping legacy value '{value}' to '{new_value}' for {cls.__name__}"
                     )
                     # Find and return the enum member with this value
                     for member in cls:
@@ -145,7 +145,6 @@ class VehicleColor(FinderEnum):
 
 @dataclass
 class MobilityAccessViolation:
-
     make: str
     body_style: VehicleType | str
     vehicle_color: VehicleColor | str

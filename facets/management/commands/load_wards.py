@@ -1,50 +1,97 @@
 import json
 import pathlib
-from collections import defaultdict
 
 from django.contrib.gis.geos import GEOSGeometry, MultiPolygon
 from django.core.management.base import BaseCommand
-from shapely import union_all
-from shapely.geometry import mapping, shape
 
 from facets.models import Ward
 
 
 class Command(BaseCommand):
-    help = "Load wards by merging political divisions"
+    help = "Load or update Wards from GeoJSON"
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "--dry-run",
+            action="store_true",
+            help="Preview what would be created or updated without making changes",
+        )
+        parser.add_argument(
+            "--delete-stale",
+            action="store_true",
+            help="Delete Wards not present in the GeoJSON file",
+        )
 
     def handle(self, *args, **options):
+        dry_run = options["dry_run"]
+        delete_stale = options["delete_stale"]
         geojson_path = (
-            pathlib.Path(__file__).parent.parent.parent / "data" / "Political_Divisions.geojson"
+            pathlib.Path(__file__).parent.parent.parent / "data" / "Political_Wards.geojson"
         )
 
         with open(geojson_path) as f:
             data = json.load(f)
 
-        divisions_by_ward = defaultdict(list)
+        if dry_run:
+            self.stdout.write(self.style.WARNING("DRY RUN - no changes will be made"))
+
+        created_count = 0
+        updated_count = 0
+        file_names = set()
+
         for feature in data["features"]:
-            ward_num = feature["properties"]["DIVISION_NUM"][:2]
-            divisions_by_ward[ward_num].append(shape(feature["geometry"]))
+            props = feature["properties"]
+            ward_num = int(props["ward_num"])
+            name = f"Political Ward {ward_num}"
+            file_names.add(name)
 
-        for ward_num in sorted(divisions_by_ward.keys(), key=int):
-            divisions = divisions_by_ward[ward_num]
-            merged = union_all(divisions)
+            existing = Ward.objects.filter(name=name).first()
 
-            geojson = json.dumps(mapping(merged))
+            if dry_run:
+                action = "Would update" if existing else "Would create"
+                if existing:
+                    updated_count += 1
+                else:
+                    created_count += 1
+                self.stdout.write(f"{action} {name}")
+                continue
+
+            geojson = json.dumps(feature["geometry"])
             geos_geom = GEOSGeometry(geojson)
 
             if geos_geom.geom_type == "Polygon":
                 geos_geom = MultiPolygon(geos_geom)
 
             ward, created = Ward.objects.update_or_create(
-                name=f"Ward {int(ward_num)}",
+                name=name,
                 defaults={
                     "mpoly": geos_geom,
-                    "properties": {"ward_number": int(ward_num)},
+                    "properties": props,
                 },
             )
+
+            if created:
+                created_count += 1
+            else:
+                updated_count += 1
 
             action = "Created" if created else "Updated"
             self.stdout.write(f"{action} {ward.name}")
 
-        self.stdout.write(self.style.SUCCESS(f"Loaded {len(divisions_by_ward)} wards"))
+        deleted_count = 0
+        if delete_stale:
+            stale = Ward.objects.exclude(name__in=file_names)
+            for ward in stale:
+                if dry_run:
+                    self.stdout.write(f"Would delete {ward.name}")
+                else:
+                    self.stdout.write(f"Deleted {ward.name}")
+                deleted_count += 1
+            if not dry_run:
+                stale.delete()
+
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"Done: {created_count} created, {updated_count} updated, {deleted_count} deleted"
+            )
+        )

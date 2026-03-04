@@ -6,7 +6,6 @@ import lazer.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("lazer", "0019_violationsubmission_plate_recognizer_response"),
     ]

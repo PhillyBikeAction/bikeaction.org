@@ -8,7 +8,6 @@ signatures = PetitionSignature.objects.filter(petition__title="Build the City Ha
 
 
 class Command(BaseCommand):
-
     def handle(self, *args, **options):
         settings.EMAIL_SUBJECT_PREFIX = ""
         SENT = []

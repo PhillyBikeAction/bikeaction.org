@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("lazer", "0019_banner"),
         ("lazer", "0020_violationreport_redacted_image"),

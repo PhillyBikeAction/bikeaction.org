@@ -23,7 +23,6 @@ class CaptchaResetPasswordForm(ResetPasswordForm):
 
 
 class NewsletterSignupForm(forms.Form):
-
     def __init__(self, *args, form_name=None, show_header=True, **kwargs):
         self.auto_id = f"{form_name}_%s"
         self.form_name = form_name

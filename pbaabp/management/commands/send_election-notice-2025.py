@@ -7,7 +7,6 @@ SENT = []
 
 
 class Command(BaseCommand):
-
     def handle(*args, **kwargs):
         # Get the current/upcoming election (where voting hasn't closed yet)
         from django.utils import timezone

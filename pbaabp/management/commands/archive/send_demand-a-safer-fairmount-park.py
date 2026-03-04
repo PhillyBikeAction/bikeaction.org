@@ -10,7 +10,6 @@ SENT = []
 
 
 class Command(BaseCommand):
-
     def handle(self, *args, **options):
         settings.EMAIL_SUBJECT_PREFIX = ""
         for profile in profiles:

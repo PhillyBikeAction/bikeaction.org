@@ -7,7 +7,6 @@ from neighborhood_selection.tasks import update_neighborhood_role_and_channel
 
 
 class Neighborhood(models.Model):
-
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     discord_role_id = models.CharField(max_length=64, null=True, blank=True)
     discord_channel_id = models.CharField(max_length=64, null=True, blank=True)

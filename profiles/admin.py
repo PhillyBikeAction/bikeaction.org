@@ -292,9 +292,7 @@ class EmailHistory:
         if self.profile and self.profile.user.email:
             return Email.objects.filter(recipients__icontains=self.profile.user.email).order_by(
                 "-date_sent"
-            )[
-                :50
-            ]  # Show last 50 emails
+            )[:50]  # Show last 50 emails
         return Email.objects.none()
 
 
@@ -560,12 +558,8 @@ class ProfileAdmin(ReadOnlyLeafletGeoAdminMixin, admin.ModelAdmin):
             counts_by_date[date] = counts_by_date.get(date, 0) + 1
 
         # Build counts for sparklines
-        counts_prev_60 = ",".join(
-            [str(counts_by_date.get(date, 0)) for date in date_range_prev_60]
-        )
-        counts_last_30 = ",".join(
-            [str(counts_by_date.get(date, 0)) for date in date_range_last_30]
-        )
+        counts_prev_60 = ",".join([str(counts_by_date.get(date, 0)) for date in date_range_prev_60])
+        counts_last_30 = ",".join([str(counts_by_date.get(date, 0)) for date in date_range_last_30])
 
         return mark_safe(
             f"""
@@ -618,8 +612,7 @@ class ProfileAdmin(ReadOnlyLeafletGeoAdminMixin, admin.ModelAdmin):
             "Subject</th>"
         )
         html += (
-            '<th style="padding: 8px; text-align: left; border-bottom: 2px solid #ddd;">'
-            "From</th>"
+            '<th style="padding: 8px; text-align: left; border-bottom: 2px solid #ddd;">From</th>'
         )
         html += "</tr></thead><tbody>"
 
@@ -670,7 +663,7 @@ class ProfileAdmin(ReadOnlyLeafletGeoAdminMixin, admin.ModelAdmin):
             subscription_count = subscriptions.count()
 
             if subscription_count > 0:
-                html += f'<h4 style="margin-top: 0;">' f"Subscriptions ({subscription_count})</h4>"
+                html += f'<h4 style="margin-top: 0;">Subscriptions ({subscription_count})</h4>'
                 html += (
                     '<table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">'
                 )
@@ -702,9 +695,7 @@ class ProfileAdmin(ReadOnlyLeafletGeoAdminMixin, admin.ModelAdmin):
                     if subscription.current_period_start and subscription.current_period_end:
                         period_start = subscription.current_period_start.strftime("%Y-%m-%d")
                         period_end = subscription.current_period_end.strftime("%Y-%m-%d")
-                        html += (
-                            f'<td style="padding: 8px;">' f"{period_start} to {period_end}</td>"
-                        )
+                        html += f'<td style="padding: 8px;">{period_start} to {period_end}</td>'
                     else:
                         html += '<td style="padding: 8px;">-</td>'
                     html += "</tr>"

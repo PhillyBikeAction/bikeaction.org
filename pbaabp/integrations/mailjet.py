@@ -3,7 +3,6 @@ from django.conf import settings
 
 
 class Mailjet:
-
     def __init__(self):
         self.base_url = "https://api.mailjet.com/v3/REST"
         self.api_key = settings.MAILJET_API_KEY
@@ -48,9 +47,7 @@ class Mailjet:
         return response.json()["Data"][0]
 
     def fetch_contact_lists(self, email):
-        response = requests.get(
-            f"{self.base_url}/contact/{email}/getcontactslists", auth=self.auth
-        )
+        response = requests.get(f"{self.base_url}/contact/{email}/getcontactslists", auth=self.auth)
         try:
             response.raise_for_status()
         except requests.exceptions.HTTPError as e:

@@ -1,6 +1,4 @@
 import datetime
-import json
-import pathlib
 
 from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
@@ -12,17 +10,18 @@ from django.shortcuts import render
 from django.utils import timezone
 from django.utils.html import mark_safe
 from email_log.models import Email
-from shapely.geometry import Point, shape
 
-from facets.models import District, RegisteredCommunityOrganization, Ward
+from facets.models import (
+    CongressionalDistrict,
+    District,
+    Division,
+    RegisteredCommunityOrganization,
+    StateHouseDistrict,
+    StateSenateDistrict,
+    Ward,
+)
 from facets.utils import geocode_address
 from profiles.models import Profile
-
-with open(pathlib.Path(__file__).parent / "data" / "Political_Divisions.geojson") as f:
-    DIVISIONS = json.load(f)
-
-with open(pathlib.Path(__file__).parent / "data" / "polling_places.geojson") as f:
-    POLLING_PLACES = json.load(f)
 
 
 def index(request):
@@ -44,12 +43,10 @@ async def query_address(request):
 
     if address is None:
         error = (
-            f"Failed to find address ({submission}) "
-            "be sure to include your entire street address"
+            f"Failed to find address ({submission}) be sure to include your entire street address"
         )
         return HttpResponse(f'<p style="color: red;">{error}</p>')
 
-    point = Point(address.longitude, address.latitude)
     geopoint = GEOPoint(address.longitude, address.latitude)
 
     rcos = []
@@ -71,21 +68,25 @@ async def query_address(request):
     district = await District.objects.filter(mpoly__contains=geopoint).aget()
     district_geojson = mark_safe(district.mpoly.geojson)
 
-    ward, division = None, None
-    for feature in DIVISIONS["features"]:
-        polygon = shape(feature["geometry"])
-        if polygon.contains(point):
-            dn = feature["properties"]["DIVISION_NUM"]
-            ward, division = [int(dn[i : i + 2]) for i in range(0, len(dn), 2)]
-            break
-
-    polling_place = None
-    for feature in POLLING_PLACES["features"]:
-        if feature["properties"]["ward"] == ward and feature["properties"]["division"] == division:
+    ward, division_num, polling_place = None, None, None
+    division_obj = (
+        await Division.objects.filter(mpoly__contains=geopoint).select_related("ward").afirst()
+    )
+    if division_obj:
+        ward_obj = division_obj.ward
+        if ward_obj:
+            ward_num = ward_obj.properties.get("ward_num") or ward_obj.properties.get("ward_number")
+            if ward_num is not None:
+                ward = int(ward_num)
+        division_num = int(division_obj.properties.get("DIVISION_NUM", "0")[2:])
+        if division_obj.polling_place_name:
             polling_place = (
-                f"{feature['properties']['placename']} - {feature['properties']['street_address']}"
+                f"{division_obj.polling_place_name} - {division_obj.polling_place_address}"
             )
-            break
+
+    state_house = await StateHouseDistrict.objects.filter(mpoly__contains=geopoint).afirst()
+    state_senate = await StateSenateDistrict.objects.filter(mpoly__contains=geopoint).afirst()
+    congressional = await CongressionalDistrict.objects.filter(mpoly__contains=geopoint).afirst()
 
     return render(
         request,
@@ -99,8 +100,11 @@ async def query_address(request):
             "OTHER": other,
             "WARDS": wards,
             "WARD": ward,
-            "DIVISION": division,
+            "DIVISION": division_num,
             "POLLING_PLACE": polling_place,
+            "STATE_HOUSE": state_house,
+            "STATE_SENATE": state_senate,
+            "CONGRESSIONAL": congressional,
             "address": address,
             "address_lat": address.latitude,
             "address_long": address.longitude,

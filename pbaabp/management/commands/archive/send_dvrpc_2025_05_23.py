@@ -6,7 +6,6 @@ from profiles.models import Profile
 
 
 class Command(BaseCommand):
-
     def add_arguments(self, parser):
         parser.add_argument("email_template", nargs="?", type=str)
 

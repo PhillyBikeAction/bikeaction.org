@@ -5,7 +5,6 @@ from events.models import ScheduledEvent
 
 
 class ScheduledEventSitemap(Sitemap):
-
     def items(self):
         return ScheduledEvent.objects.filter(
             status__in=[

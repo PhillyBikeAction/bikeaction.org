@@ -439,8 +439,7 @@ def nomination_respond(request, election_slug, pk):
                 nominator_name = get_user_display_name(nomination.nominator)
                 messages.success(
                     request,
-                    f"You have declined the nomination from {nominator_name} "
-                    f"for {election.title}.",
+                    f"You have declined the nomination from {nominator_name} for {election.title}.",
                 )
             else:
                 messages.error(request, "Invalid action.")
@@ -662,9 +661,7 @@ def vote(request, election_slug):
             return redirect(request.path + "?preview=true")
     else:
         # Normal voting mode
-        ballot, ballot_created = Ballot.objects.get_or_create(
-            election=election, voter=request.user
-        )
+        ballot, ballot_created = Ballot.objects.get_or_create(election=election, voter=request.user)
 
         if request.method == "POST":
             # Clear existing votes (allow changes)

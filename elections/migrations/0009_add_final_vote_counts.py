@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("elections", "0008_ballot_elections_b_electio_5c5dc2_idx_and_more"),
     ]
@@ -16,7 +15,7 @@ class Migration(migrations.Migration):
             field=models.BooleanField(
                 blank=True,
                 help_text=(
-                    "Whether this ballot had at least one vote " "(set when election is closed)"
+                    "Whether this ballot had at least one vote (set when election is closed)"
                 ),
                 null=True,
             ),
@@ -27,7 +26,7 @@ class Migration(migrations.Migration):
             field=models.IntegerField(
                 blank=True,
                 help_text=(
-                    "Votes received from nominee's home district " "(set when election is closed)"
+                    "Votes received from nominee's home district (set when election is closed)"
                 ),
                 null=True,
             ),

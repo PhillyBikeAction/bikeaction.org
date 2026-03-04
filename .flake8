@@ -1,4 +1,4 @@
 [flake8]
 ignore = W503, E203
 max-line-length = 99
-exclude = lazer_app,media
+exclude = .venv,lazer_app,media

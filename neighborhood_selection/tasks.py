@@ -58,9 +58,9 @@ async def aupdate_neighborhood_role_and_channel(neighborhood_id):
     await channel.set_permission(guild.default_role, view_channel=False, connect=False)
 
     if settings.NEIGHBORHOOD_SELECTION_NOTIFICATION_DISCORD_CHANNEL_ID:
-        await bot.get_channel(
-            settings.NEIGHBORHOOD_SELECTION_NOTIFICATION_DISCORD_CHANNEL_ID
-        ).send(f"Neighborhood `{neighborhood.name}` approved!")
+        await bot.get_channel(settings.NEIGHBORHOOD_SELECTION_NOTIFICATION_DISCORD_CHANNEL_ID).send(
+            f"Neighborhood `{neighborhood.name}` approved!"
+        )
 
     await NeighborhoodSelection.update_buttons(
         bot, settings.NEIGHBORHOOD_SELECTION_DISCORD_CHANNEL_ID, None

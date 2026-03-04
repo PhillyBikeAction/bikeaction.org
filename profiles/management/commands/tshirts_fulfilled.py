@@ -26,7 +26,6 @@ If you didn't receive it, please reply to this email and we'll work to figure ou
 
 
 class Command(BaseCommand):
-
     def handle(self, *args, **options):
         orders_by_email = defaultdict(list)
         emails = set()

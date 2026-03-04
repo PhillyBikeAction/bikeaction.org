@@ -8,7 +8,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("elections", "0004_alter_nominee_board_responsibilities_acknowledged"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),

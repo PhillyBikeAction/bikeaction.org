@@ -95,7 +95,6 @@ geom = GEOSGeometry(GEOJSON)
 
 
 class Command(BaseCommand):
-
     def handle(self, *args, **options):
         for order in ShirtOrder.objects.all():
             if order.location is None:

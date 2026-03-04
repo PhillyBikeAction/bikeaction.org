@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("neighborhood_selection", "0002_neighborhood_requests"),
     ]

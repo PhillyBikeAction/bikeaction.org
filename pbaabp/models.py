@@ -33,7 +33,6 @@ class ChoiceArrayField(ArrayField):
 
 
 class MarkdownField(_MarkdownField):
-
     def pre_save(self, model_instance, add):
         value = super().pre_save(model_instance, add)
 

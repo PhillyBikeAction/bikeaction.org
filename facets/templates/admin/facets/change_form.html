@@ -1,0 +1,10 @@
+{% extends "admin/change_form.html" %}
+
+{% block object-tools-items %}
+  {{ block.super }}
+  {% if original %}
+    <li>
+      <a href="{% url export_csv_url_name original.pk %}">Export profiles CSV</a>
+    </li>
+  {% endif %}
+{% endblock %}

@@ -7,7 +7,6 @@ SENT = []
 
 
 class Command(BaseCommand):
-
     def handle(*args, **kwargs):
         for profile in Profile.objects.all():
             if profile.user.email not in SENT:

@@ -10,7 +10,6 @@ import lazer.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("lazer", "0011_violationreport_submission_response"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),

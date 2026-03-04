@@ -14,7 +14,6 @@ class ScheduledEventAdmin(admin.ModelAdmin):
 
 
 class OrganizerScheduledEventAdmin(ScheduledEventAdmin):
-
     def has_add_permission(self, request):
         return True
 
@@ -67,7 +66,6 @@ class EventSignInAdmin(admin.ModelAdmin):
 
 
 class OrganizerEventSignInAdmin(EventSignInAdmin):
-
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         q_objects = Q()

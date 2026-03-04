@@ -29,7 +29,7 @@ services:
   base:
     build:
       context: .
-      dockerfile: Dockerfile.dev
+      target: dev
     image: pbaabp:docker-compose
     environment: &base_environment
       DEBUG: "True"
@@ -45,7 +45,7 @@ services:
 
   web:
     image: pbaabp:docker-compose
-    command: python manage.py runserver 0.0.0.0:8000
+    command: uv run python manage.py runserver 0.0.0.0:8000
     environment: *base_environment
     volumes:
       - *base_volumes
@@ -61,8 +61,7 @@ services:
   lazer:
     build:
       context: .
-      dockerfile: Dockerfile.dev
-      target: lazer
+      target: lazer-dev
     command: npx ionic build --baseHref='/laser' --prod --watch
     volumes:
       - *base_volumes
@@ -70,7 +69,7 @@ services:
 
   worker:
     image: pbaabp:docker-compose
-    command: hupper -m celery -A pbaabp worker --beat -l DEBUG
+    command: uv run hupper -m celery -A pbaabp worker --beat -l DEBUG
     environment: *base_environment
     volumes:
       - *base_volumes

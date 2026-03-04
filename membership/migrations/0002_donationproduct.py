@@ -7,7 +7,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("djstripe", "0012_2_8"),
         ("membership", "0001_initial"),

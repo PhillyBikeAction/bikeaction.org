@@ -7,7 +7,6 @@ import cms.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("cms", "0014_alter_cmsstreampage_body"),
     ]

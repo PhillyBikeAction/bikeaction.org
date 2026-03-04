@@ -57,7 +57,7 @@ class ProjectApplicationForm(forms.Form):
     )
     recruitment = forms.CharField(
         label=(
-            "Have you already recruited anyone in PBA to help you with this project?" "If so, who?"
+            "Have you already recruited anyone in PBA to help you with this project?If so, who?"
         ),
         widget=forms.Textarea(attrs={"rows": 3}),
         required=True,

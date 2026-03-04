@@ -9,7 +9,6 @@ profiles = Profile.objects.filter(user__email__in=TO)
 
 
 class Command(BaseCommand):
-
     def add_arguments(self, parser):
         parser.add_argument("email_template", nargs="?", type=str)
 
