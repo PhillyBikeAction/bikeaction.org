@@ -1,13 +1,12 @@
-from functools import partial
-
-import bleach
 import cmarkgfm
-from bleach.linkifier import LinkifyFilter
+import nh3
 from cmarkgfm.cmark import Options as cmarkgfmOptions
 from django import forms
 from django.contrib.postgres.fields import ArrayField
 from markdownfield.models import MarkdownField as _MarkdownField
-from markdownfield.util import blacklist_link, format_link
+from markdownfield.util import process_links
+
+_CLEAN_CONTENT_TAGS = {"script", "style", "iframe"}
 
 
 class ChoiceArrayField(ArrayField):
@@ -44,21 +43,17 @@ class MarkdownField(_MarkdownField):
         dirty = cmarkgfm.github_flavored_markdown_to_html(value, options=options)
 
         if self.validator.sanitize:
-            if self.validator.linkify:
-                cleaner = bleach.Cleaner(
-                    tags=self.validator.allowed_tags,
-                    attributes=self.validator.allowed_attrs,
-                    css_sanitizer=self.validator.css_sanitizer,
-                    filters=[partial(LinkifyFilter, callbacks=[format_link, blacklist_link])],
-                )
-            else:
-                cleaner = bleach.Cleaner(
-                    tags=self.validator.allowed_tags,
-                    attributes=self.validator.allowed_attrs,
-                    css_sanitizer=self.validator.css_sanitizer,
-                )
-
-            clean = cleaner.clean(dirty)
+            clean = nh3.clean(
+                dirty,
+                tags=self.validator.allowed_tags,
+                attributes=self.validator.allowed_attrs,
+                clean_content_tags=_CLEAN_CONTENT_TAGS - self.validator.allowed_tags,
+                link_rel="nofollow noopener noreferrer",
+                filter_style_properties=self.validator.filter_style_properties,
+                generic_attribute_prefixes=self.validator.generic_attribute_prefixes,
+                url_schemes=self.validator.url_schemes,
+            )
+            clean = process_links(clean)
             setattr(model_instance, self.rendered_field, clean)
         else:
             # danger!

@@ -1,7 +1,7 @@
 import csv
 import re
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
@@ -44,12 +44,14 @@ class Command(BaseCommand):
             date_obj = datetime.strptime(as_of_date_str, "%Y-%m-%d").date()
             # Create datetime bounds for the target date in UTC
             # This is needed because Stripe invoice timestamps are in UTC
-            import pytz
-
             # Start of day in UTC
-            day_start_utc = datetime.combine(date_obj, datetime.min.time()).replace(tzinfo=pytz.UTC)
+            day_start_utc = datetime.combine(date_obj, datetime.min.time()).replace(
+                tzinfo=timezone.utc
+            )
             # End of day in UTC
-            day_end_utc = datetime.combine(date_obj, datetime.max.time()).replace(tzinfo=pytz.UTC)
+            day_end_utc = datetime.combine(date_obj, datetime.max.time()).replace(
+                tzinfo=timezone.utc
+            )
         except ValueError:
             self.stderr.write(
                 self.style.ERROR(f"Invalid date format: {as_of_date_str}. Use YYYY-MM-DD")

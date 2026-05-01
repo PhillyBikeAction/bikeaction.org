@@ -5,8 +5,8 @@ import json
 import secrets
 from functools import wraps
 from importlib import import_module
+from zoneinfo import ZoneInfo
 
-import pytz
 from asgiref.sync import sync_to_async
 from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model, logout
@@ -31,6 +31,7 @@ from lazer.session_backend import SessionStore as LazerSessionStore
 # Keep the default session store for backwards compatibility with existing sessions
 DjangoSessionStore = import_module(settings.SESSION_ENGINE).SessionStore
 User = get_user_model()
+LOCAL_TIMEZONE = ZoneInfo("America/New_York")
 
 
 def get_image_from_data_url(data_url):
@@ -233,20 +234,20 @@ def map_data(request):
     if date:
         queryset = queryset.filter(
             submission__captured_at__date=datetime.datetime.strptime(date, "%Y-%m-%d")
-            .astimezone(pytz.timezone("America/New_York"))
+            .astimezone(LOCAL_TIMEZONE)
             .date()
         )
     else:
         if date_gte:
             queryset = queryset.filter(
                 submission__captured_at__gte=datetime.datetime.strptime(date_gte, "%Y-%m-%d")
-                .astimezone(pytz.timezone("America/New_York"))
+                .astimezone(LOCAL_TIMEZONE)
                 .date()
             )
         if date_lte:
             queryset = queryset.filter(
                 submission__captured_at__lte=datetime.datetime.strptime(date_lte, "%Y-%m-%d")
-                .astimezone(pytz.timezone("America/New_York"))
+                .astimezone(LOCAL_TIMEZONE)
                 .date()
             )
 

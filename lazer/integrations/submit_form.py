@@ -3,9 +3,11 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import StrEnum
 from typing import Any, Optional
+from zoneinfo import ZoneInfo
 
 import pyap
-import pytz
+
+LOCAL_TIMEZONE = ZoneInfo("US/Eastern")
 
 
 class FinderEnum(StrEnum):
@@ -237,8 +239,7 @@ class MobilityAccessViolation:
             raise ValueError("Must supply all date/time observed parts or a datetime to parse")
         if self.date_time_observed:
             # convert to est
-            est = pytz.timezone("US/Eastern")
-            self.date_time_observed = self.date_time_observed.astimezone(est)
+            self.date_time_observed = self.date_time_observed.astimezone(LOCAL_TIMEZONE)
 
         # ensure all enum fields are of the correct type
         fields: list[str, FinderEnum] = [
