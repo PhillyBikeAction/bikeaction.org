@@ -73,6 +73,12 @@ class BaseProfileSignupForm(BaseSignupForm):
         help_text=Profile._meta.get_field("newsletter_opt_in").help_text,
     )
 
+    volunteer_opt_in = forms.BooleanField(
+        required=False,
+        initial=False,
+        help_text=Profile._meta.get_field("volunteer_opt_in").help_text,
+    )
+
     def save(self, request):
         user = super().save(request)
         user.username = user.email
@@ -122,6 +128,7 @@ class ProfileSignupForm(BaseProfileSignupForm):
         "email",
         "account_emails",
         "newsletter_opt_in",
+        "volunteer_opt_in",
         "password1",
         "password2",
         "captcha",

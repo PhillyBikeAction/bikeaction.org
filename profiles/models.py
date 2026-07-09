@@ -69,6 +69,12 @@ class Profile(models.Model):
         verbose_name=_("Account Emails"),
         help_text=_("By signing up for Philly Bike Action, you agree to recieve emails regarding your account."),
     )
+    volunteer_opt_in = models.BooleanField(
+        blank=False,
+        default=False,
+        verbose_name=_("Volunteering"),
+        help_text=_("Contact me about Volunteer Opportunities."),
+    )
 
     location = models.PointField(blank=True, null=True, srid=4326)
 
