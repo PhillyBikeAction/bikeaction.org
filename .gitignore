@@ -1,15 +1,2 @@
-/celerybeat-*
-/abp.sql
-db.sqlite3
-venv
-.env
-.venv
-.state
-*.swp
-__pycache__
-/staticfiles
-.DS_Store
-/pull-prod-dump
-/load-prod-dump
-/ngrok.yml
-/media
+# Created by venv; see https://docs.python.org/3/library/venv.html
+*

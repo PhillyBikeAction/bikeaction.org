@@ -59,6 +59,14 @@ class BaseProfileSignupForm(BaseSignupForm):
         ],
         label=_("Zip Code"),
     )
+
+    account_emails = forms.BooleanField(
+        disabled=True,
+        required=True,
+        initial=True,
+        help_text=Profile._meta.get_field("account_emails").help_text,
+    )
+
     newsletter_opt_in = forms.BooleanField(
         required=False,
         initial=True,
@@ -112,6 +120,7 @@ class ProfileSignupForm(BaseProfileSignupForm):
         "street_address",
         "zip_code",
         "email",
+        "account_emails",
         "newsletter_opt_in",
         "password1",
         "password2",
