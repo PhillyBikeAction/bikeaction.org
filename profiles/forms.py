@@ -60,13 +60,6 @@ class BaseProfileSignupForm(BaseSignupForm):
         label=_("Zip Code"),
     )
 
-    account_emails = forms.BooleanField(
-        disabled=True,
-        required=True,
-        initial=True,
-        help_text=Profile._meta.get_field("account_emails").help_text,
-    )
-
     newsletter_opt_in = forms.BooleanField(
         required=False,
         initial=True,
@@ -97,6 +90,16 @@ class BaseProfileSignupForm(BaseSignupForm):
 class ProfileSignupForm(BaseProfileSignupForm):
     captcha = ReCaptchaField(widget=ReCaptchaV2Invisible)
 
+    account_emails = forms.BooleanField(
+        label="Account Emails",
+        help_text=(
+            "By signing up for Philly Bike Action, you agree to recieve emails regarding your account."
+        ),
+        required=True,
+        initial=True,
+        disabled=True,
+    )
+    
     code_of_conduct = forms.BooleanField(
         label="Code of Conduct",
         help_text=(
@@ -126,7 +129,6 @@ class ProfileSignupForm(BaseProfileSignupForm):
         "street_address",
         "zip_code",
         "email",
-        "account_emails",
         "newsletter_opt_in",
         "volunteer_opt_in",
         "password1",
@@ -149,6 +151,7 @@ class ProfileUpdateForm(forms.ModelForm):
             "street_address",
             "zip_code",
             "newsletter_opt_in",
+            "volunteer_opt_in",
         ]
         help_texts = {}
 

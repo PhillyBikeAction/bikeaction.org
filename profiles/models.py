@@ -63,17 +63,12 @@ class Profile(models.Model):
         verbose_name=_("Newsletter"),
         help_text=_("Subscribe to Philly Bike Action's monthly newsletter."),
     )
-    account_emails = models.BooleanField(
-        blank=True,
-        default=True,
-        verbose_name=_("Account Emails"),
-        help_text=_("By signing up for Philly Bike Action, you agree to recieve emails regarding your account."),
-    )
+
     volunteer_opt_in = models.BooleanField(
         blank=False,
         default=False,
         verbose_name=_("Volunteering"),
-        help_text=_("Contact me about Volunteer Opportunities."),
+        help_text=_("Recieve news about volunteer opportunities with Philly Bike Action."),
     )
 
     location = models.PointField(blank=True, null=True, srid=4326)
