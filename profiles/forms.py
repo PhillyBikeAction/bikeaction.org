@@ -99,7 +99,7 @@ class ProfileSignupForm(BaseProfileSignupForm):
         initial=True,
         disabled=True,
     )
-    
+
     code_of_conduct = forms.BooleanField(
         label="Code of Conduct",
         help_text=(
