@@ -86,6 +86,7 @@ class BaseProfileSignupForm(BaseSignupForm):
             zip_code=self.cleaned_data["zip_code"],
             newsletter_opt_in=self.cleaned_data["newsletter_opt_in"],
             pronouns=self.cleaned_data["pronouns"],
+            volunteer_opt_in = self.cleaned_data["volunteer_opt_in"]
         )
         profile.save()
         return user
