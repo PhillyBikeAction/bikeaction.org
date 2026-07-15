@@ -37,7 +37,9 @@ class PronounsWidget(forms.TextInput):
 class BaseProfileSignupForm(BaseSignupForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["email"].help_text = _("By signing up for Philly Bike Action, you agree to recieve emails regarding your account.")
+        self.fields["email"].help_text = _(
+            "By signing up for Philly Bike Action, you agree to recieve emails regarding your account."
+        )
 
     first_name = forms.CharField(required=True, label=_("First Name"))
     last_name = forms.CharField(required=True, label=_("Last Name"))
@@ -86,7 +88,7 @@ class BaseProfileSignupForm(BaseSignupForm):
             zip_code=self.cleaned_data["zip_code"],
             newsletter_opt_in=self.cleaned_data["newsletter_opt_in"],
             pronouns=self.cleaned_data["pronouns"],
-            volunteer_opt_in = self.cleaned_data["volunteer_opt_in"]
+            volunteer_opt_in=self.cleaned_data["volunteer_opt_in"],
         )
         profile.save()
         return user

@@ -157,7 +157,8 @@ class NewsletterSubscriberFilter(admin.SimpleListFilter):
                 newsletter_opt_in=False,
             )
         return queryset
-    
+
+
 class VolunteerSubscriberFilter(admin.SimpleListFilter):
     title = "subscribed to volunteer opportunities"
     parameter_name = "volunteer subscriber"
