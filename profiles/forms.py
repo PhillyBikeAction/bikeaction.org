@@ -35,12 +35,6 @@ class PronounsWidget(forms.TextInput):
 
 
 class BaseProfileSignupForm(BaseSignupForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["email"].help_text = _(
-            "By signing up for Philly Bike Action, you agree to recieve emails regarding your account."
-        )
-
     first_name = forms.CharField(required=True, label=_("First Name"))
     last_name = forms.CharField(required=True, label=_("Last Name"))
     pronouns = forms.CharField(
