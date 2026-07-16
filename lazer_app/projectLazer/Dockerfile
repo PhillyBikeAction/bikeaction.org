@@ -1,4 +1,4 @@
-FROM node:22-bookworm AS build
+FROM node:24-trixie AS build
 
 WORKDIR /code/
 COPY ./ /code/

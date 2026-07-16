@@ -116,7 +116,11 @@
             {% for blast in draft_blasts %}
               <tr>
                 <td class="email-blast-subject">
-                  <a href="{% url 'email_draft_edit' draft_id=blast.id %}">{{ blast.subject }}</a>
+                  {% if blast.submitter == request.user %}
+                    <a href="{% url 'email_draft_edit' draft_id=blast.id %}">{{ blast.subject }}</a>
+                  {% else %}
+                    <a href="{% url 'email_draft_review' draft_id=blast.id %}">{{ blast.subject }}</a>
+                  {% endif %}
                 </td>
                 <td>{{ blast.display_target_name }}</td>
                 <td>{{ blast.display_target_count }}</td>
@@ -124,7 +128,11 @@
                 {% if show_all %}<td>{{ blast.submitter.email|default:"-" }}</td>{% endif %}
                 <td class="email-blast-meta">{{ blast.updated_at }}</td>
                 <td>
-                  <a href="{% url 'email_draft_edit' draft_id=blast.id %}">{% translate "Edit" %}</a>
+                  {% if blast.submitter == request.user %}
+                    <a href="{% url 'email_draft_edit' draft_id=blast.id %}">{% translate "Edit" %}</a>
+                    &middot;
+                  {% endif %}
+                  <a href="{% url 'email_draft_review' draft_id=blast.id %}">{% translate "Review" %}</a>
                 </td>
               </tr>
             {% endfor %}
@@ -157,7 +165,11 @@
             {% for blast in submitted_blasts %}
               <tr>
                 <td class="email-blast-subject">
-                  <a href="{% url 'email_draft_edit' draft_id=blast.id %}">{{ blast.subject }}</a>
+                  {% if blast.status == "submitted" and blast.submitter == request.user %}
+                    <a href="{% url 'email_draft_edit' draft_id=blast.id %}">{{ blast.subject }}</a>
+                  {% else %}
+                    <a href="{% url 'email_draft_review' draft_id=blast.id %}">{{ blast.subject }}</a>
+                  {% endif %}
                 </td>
                 <td>{{ blast.get_status_display }}</td>
                 <td>{{ blast.display_target_name }}</td>
@@ -166,11 +178,11 @@
                 {% if show_all %}<td>{{ blast.submitter.email|default:"-" }}</td>{% endif %}
                 <td class="email-blast-meta">{{ blast.updated_at }}</td>
                 <td>
-                  {% if blast.status == "submitted" or blast.status == "rejected" %}
+                  {% if blast.status == "submitted" and blast.submitter == request.user %}
                     <a href="{% url 'email_draft_edit' draft_id=blast.id %}">{% translate "Edit" %}</a>
-                  {% else %}
-                    <a href="{% url 'email_draft_edit' draft_id=blast.id %}">{% translate "View" %}</a>
+                    &middot;
                   {% endif %}
+                  <a href="{% url 'email_draft_review' draft_id=blast.id %}">{% translate "Review" %}</a>
                 </td>
               </tr>
             {% endfor %}
@@ -201,14 +213,16 @@
           <tbody>
             {% for blast in sent_blasts %}
               <tr>
-                <td class="email-blast-subject">{{ blast.subject }}</td>
+                <td class="email-blast-subject">
+                  <a href="{% url 'email_draft_review' draft_id=blast.id %}">{{ blast.subject }}</a>
+                </td>
                 <td>{{ blast.display_target_name }}</td>
                 <td>{{ blast.display_target_count }}</td>
                 <td>{{ blast.reply_to }}</td>
                 {% if show_all %}<td>{{ blast.submitter.email|default:"-" }}</td>{% endif %}
                 <td class="email-blast-meta">{{ blast.updated_at }}</td>
                 <td>
-                  <a href="{% url 'email_draft_edit' draft_id=blast.id %}">{% translate "View" %}</a>
+                  <a href="{% url 'email_draft_review' draft_id=blast.id %}">{% translate "Review" %}</a>
                 </td>
               </tr>
             {% endfor %}

@@ -330,13 +330,8 @@
 <div class="email-draft-layout">
   <div class="email-draft-panel">
     <h2>{% translate "Compose" %}</h2>
-    {% if is_read_only %}
-      <p class="email-draft-target-help">
-        {% translate "This email blast has been approved or sent and can no longer be edited." %}
-      </p>
-    {% endif %}
     <form id="email-draft-form"
-          class="email-draft-form{% if is_read_only %} email-draft-form-readonly{% endif %}"
+          class="email-draft-form"
           method="post"
           action="{% if draft %}{% url 'email_draft_edit' draft_id=draft.id %}{% else %}{% url 'email_draft' %}{% endif %}"
           hx-post="{% url 'email_draft_preview' %}"
@@ -362,7 +357,6 @@
         {{ form.body.errors }}
         {{ form.body }}
       </p>
-      {% if not is_read_only %}
       <div class="email-draft-image-tools">
         <label for="email-draft-image-upload">{% translate "Embed Image" %}</label>
         <div class="email-draft-image-row">
@@ -375,7 +369,6 @@
           {% translate "Uploads insert Markdown at your cursor and are embedded inline when the blast is sent." %}
         </p>
       </div>
-      {% endif %}
 
       <p class="field-row field-target_name">
         {{ form.target_name.label_tag }}
@@ -396,11 +389,9 @@
       <div class="email-draft-targets">
         <div class="email-draft-targets-header">
           <strong>{% translate "Targets" %}</strong>
-          {% if not is_read_only %}
           <button type="button" class="email-draft-button email-draft-button-primary email-draft-button-small" id="add-email-draft-target">
             {% translate "Add Target" %}
           </button>
-          {% endif %}
         </div>
         <p class="email-draft-target-help">{% translate "Add one target per row. Recipients are deduplicated across all targets." %}</p>
 
@@ -420,7 +411,7 @@
                         rows="6"
                         placeholder="Paste a GeoJSON Polygon, MultiPolygon, Feature, or FeatureCollection"
                         data-target-geojson
-                        {% if is_read_only %}readonly{% endif %}>{{ row.target_geojson }}</textarea>
+                        >{{ row.target_geojson }}</textarea>
               <small class="email-draft-geojson-help">
                 {% translate "Use" %}
                 <a href="https://geojson.io/#map=10.15/40.0024/-75.1704" target="_blank" rel="noopener">geojson.io</a>

@@ -4,8 +4,8 @@ from django.db import IntegrityError, transaction
 from django.utils import timezone
 
 from emailblasts.models import EmailBlast, EmailBlastDelivery
+from emailblasts.targeting import _email_blast_target_profiles
 from emailblasts.utils import email_blast_full_body
-from emailblasts.views import _email_blast_target_profiles
 from pbaabp.email import send_email_message
 from profiles.models import DoNotEmail
 

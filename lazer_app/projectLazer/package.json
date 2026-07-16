@@ -3,6 +3,9 @@
   "version": "0.0.1",
   "author": "Philly Bike Action",
   "homepage": "https://bikeaction.org/laser",
+  "engines": {
+    "node": ">=24.0.0"
+  },
   "scripts": {
     "ionic:build:before": "node scripts/update-version.js",
     "ng": "ng",

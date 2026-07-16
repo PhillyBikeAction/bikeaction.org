@@ -1,5 +1,5 @@
 # ---- Lazer production build ----
-FROM node:22-bookworm AS lazer-build
+FROM node:24-trixie AS lazer-build
 WORKDIR /code/
 COPY ./lazer_app/projectLazer/package.json ./lazer_app/projectLazer/package-lock.json ./
 RUN --mount=type=cache,target=/root/.npm,sharing=locked npm ci
@@ -7,7 +7,7 @@ COPY ./lazer_app/projectLazer/ ./
 RUN npm run ionic:build:before && BUILD_ENV=production npm run build
 
 # ---- Lazer dev (watch mode via docker-compose) ----
-FROM node:22-bookworm AS lazer-dev
+FROM node:24-trixie AS lazer-dev
 WORKDIR /code/lazer_app/projectLazer/
 COPY ./lazer_app/projectLazer/package.json ./lazer_app/projectLazer/package-lock.json ./
 RUN --mount=type=cache,target=/root/.npm,sharing=locked npm install

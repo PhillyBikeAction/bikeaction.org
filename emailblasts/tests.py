@@ -24,9 +24,9 @@ from emailblasts.models import (
     EmailBlastTargetNode,
 )
 from emailblasts.tasks import send_email_blast
+from emailblasts.targeting import _email_blast_target_profiles
 from emailblasts.views import (
     _email_blast_target_object,
-    _email_blast_target_profiles,
     _email_draft_geojson_feature_collection,
     _email_draft_profiles_for_targets,
     _email_draft_target_name,

@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+{% load i18n leaflet_tags %}
+{% block title %}Email Draft Review{% endblock %}
+{% block extra_head %}
+{% leaflet_js %}
+{% leaflet_css %}
+<style>
+  .email-draft-page-link {
+    display: inline-block;
+    margin: 1rem 1rem 0;
+  }
+
+  .email-draft-preview-wrapper {
+    margin: 1rem;
+    min-width: 0;
+    overflow-x: auto;
+  }
+
+  .email-draft-admin-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin: 1rem;
+    padding: 1rem;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+  }
+
+  .email-draft-admin-actions strong {
+    margin-right: 0.25rem;
+  }
+
+  .email-review-button {
+    appearance: none;
+    border: 0;
+    border-radius: 6px;
+    box-sizing: border-box;
+    color: #fff;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    font: inherit;
+    font-weight: 700;
+    line-height: 1.2;
+    min-height: 2.2rem;
+    padding: 0.45rem 0.85rem;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .email-review-button:hover { filter: brightness(0.93); }
+  .email-review-button-approve    { background-color: rgb(131, 189, 86); }
+  .email-review-button-reject     { background-color: #c0392b; }
+  .email-review-button-send       { background-color: #2471a3; }
+  .email-review-button-secondary  { background-color: #666; }
+
+  .email-review-modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .email-review-modal-backdrop.is-open {
+    display: flex;
+  }
+
+  .email-review-modal {
+    background: #fff;
+    border-radius: 8px;
+    padding: 2rem;
+    max-width: 28rem;
+    width: 90%;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+  }
+
+  .email-review-modal h2 {
+    margin: 0 0 0.75rem;
+    font-size: 1.2rem;
+  }
+
+  .email-review-modal p {
+    margin: 0 0 1.5rem;
+  }
+
+  .email-review-modal-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+  }
+</style>
+{% endblock %}
+{% block content %}
+<a class="email-draft-page-link" href="{% url 'email_blast_list' %}">&larr; {% translate "All email blasts" %}</a>
+
+<div class="form-header">
+  <h1>{% translate "Email Draft Review" %}</h1>
+</div>
+
+{% if is_author %}
+<div class="email-draft-admin-actions">
+  <strong>{% translate "Author:" %}</strong>
+  {% if is_mutable %}
+    <a class="email-review-button email-review-button-secondary" href="{% url 'email_draft_edit' draft_id=draft.id %}">{% translate "Edit" %}</a>
+    {% if not is_staff %}
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" name="action" value="send_example" class="email-review-button email-review-button-secondary">
+        {% translate "Send Test to Myself" %}
+      </button>
+    </form>
+    {% endif %}
+  {% else %}
+    <span style="color: #555; font-size: 0.95rem;">
+      {% if draft.status == "approved" %}
+        {% translate "Your submission has been approved and is awaiting sending." %}
+      {% elif draft.status == "sending" %}
+        {% translate "Your email blast is currently being sent." %}
+      {% else %}
+        {% translate "Your email blast has been sent." %}
+      {% endif %}
+    </span>
+  {% endif %}
+</div>
+{% endif %}
+
+{% if is_staff %}
+<div class="email-draft-admin-actions">
+  <strong>{% translate "Admin:" %}</strong>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" name="action" value="send_example" class="email-review-button email-review-button-secondary">
+      {% translate "Send Test to Myself" %}
+    </button>
+  </form>
+  {% if draft.status == "submitted" %}
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" name="action" value="approve" class="email-review-button email-review-button-approve">
+        {% translate "Approve" %}
+      </button>
+    </form>
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" name="action" value="reject" class="email-review-button email-review-button-reject">
+        {% translate "Reject" %}
+      </button>
+    </form>
+  {% elif draft.status == "approved" %}
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" name="action" value="reject" class="email-review-button email-review-button-reject">
+        {% translate "Reject" %}
+      </button>
+    </form>
+    <button type="button" class="email-review-button email-review-button-send" id="send-blast-trigger">
+      {% translate "Send" %}
+    </button>
+  {% endif %}
+</div>
+
+<form method="post" id="send-blast-form" style="display:none;">
+  {% csrf_token %}
+  <input type="hidden" name="action" value="send">
+</form>
+
+<div class="email-review-modal-backdrop" id="send-modal">
+  <div class="email-review-modal">
+    <h2>{% translate "Send Email Blast?" %}</h2>
+    <p>
+      {% blocktranslate with count=target_count|default:"?" %}
+        This will send the blast to {{ count }} recipient(s). This cannot be undone.
+      {% endblocktranslate %}
+    </p>
+    <div class="email-review-modal-actions">
+      <button type="button" class="email-review-button email-review-button-reject" id="send-modal-cancel">
+        {% translate "Cancel" %}
+      </button>
+      <button type="button" class="email-review-button email-review-button-send" id="send-modal-confirm">
+        {% translate "Yes, Send" %}
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const trigger = document.getElementById('send-blast-trigger');
+    const modal = document.getElementById('send-modal');
+    const cancel = document.getElementById('send-modal-cancel');
+    const confirm = document.getElementById('send-modal-confirm');
+    const form = document.getElementById('send-blast-form');
+
+    if (!trigger) return;
+
+    trigger.addEventListener('click', function () {
+      modal.classList.add('is-open');
+    });
+    cancel.addEventListener('click', function () {
+      modal.classList.remove('is-open');
+    });
+    modal.addEventListener('click', function (e) {
+      if (e.target === modal) modal.classList.remove('is-open');
+    });
+    confirm.addEventListener('click', function () {
+      form.submit();
+    });
+  })();
+</script>
+{% endif %}
+
+<div class="email-draft-preview-wrapper">
+  {% include "emailblasts/email_draft_preview.html" %}
+</div>
+{% endblock %}

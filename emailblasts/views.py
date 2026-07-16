@@ -5,16 +5,22 @@ import re
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
-from django.contrib.gis.geos import GEOSGeometry
-from django.db.models.functions import Lower
+from django.db import transaction
+from django.core.exceptions import PermissionDenied
 from django.http import FileResponse, Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
-from campaigns.models import PetitionSignature
 from emailblasts.forms import EmailDraftForm
 from emailblasts.models import EmailBlast, EmailBlastImage, EmailBlastTarget, EmailBlastTargetNode
+from emailblasts.targeting import (
+    _email_blast_target_profiles,
+    _email_draft_geojson_geometry,
+    _email_draft_target_count,
+    _email_draft_target_profiles,
+    _target_primitive_nodes,
+)
+from emailblasts.tasks import send_email_blast
 from emailblasts.utils import email_blast_full_body
-from events.models import EventSignIn
 from pbaabp.email import (
     EMAIL_IMAGE_PATH,
     render_email_html,
@@ -23,13 +29,18 @@ from pbaabp.email import (
 )
 from profiles.models import Profile
 
-EMAIL_PREVIEW_CONTEXT = {
+_EMAIL_PREVIEW_CONTEXT = {
     "first_name": "Sam",
     "last_name": "Cyclist",
     "name": "Sam Cyclist",
     "email": "sam@example.com",
     "target_description": "match the selected audience",
 }
+
+
+def email_preview_context(**overrides):
+    return {**_EMAIL_PREVIEW_CONTEXT, **overrides}
+
 
 MUTABLE_EMAIL_BLAST_STATUSES = {
     EmailBlast.Status.DRAFT,
@@ -73,21 +84,31 @@ def email_blast_list(request):
 @login_required
 @permission_required("profiles.can_organize", raise_exception=True)
 def email_draft(request, draft_id=None):
-    draft = None
-    if draft_id is not None:
-        draft = get_object_or_404(EmailBlast, id=draft_id)
-    is_read_only = draft is not None and draft.status not in MUTABLE_EMAIL_BLAST_STATUSES
+    draft = get_object_or_404(EmailBlast, id=draft_id) if draft_id else None
+
+    if draft and draft.submitter != request.user:
+        if request.method == "POST":
+            raise PermissionDenied
+        return redirect("email_draft_review", draft_id=draft.id)
+
+    if draft and draft.status not in MUTABLE_EMAIL_BLAST_STATUSES:
+        if request.method == "POST":
+            messages.error(request, "This email blast can no longer be edited.")
+        return redirect("email_draft_review", draft_id=draft.id)
 
     if request.method == "POST":
-        if is_read_only:
-            messages.error(request, "Sent or approved email blasts cannot be edited.")
-            return redirect("email_draft_edit", draft_id=draft.id)
         form = EmailDraftForm(request.POST)
         if form.is_valid():
             action = request.POST.get("action")
             if action == "send_example":
                 try:
-                    _send_email_blast_example(form, request.user)
+                    _send_email_blast_example(
+                        subject=form.cleaned_data["subject"],
+                        body=form.cleaned_data["body"],
+                        target_description=form.cleaned_data["target_description"],
+                        reply_to=form.cleaned_data["reply_to"],
+                        user=request.user,
+                    )
                     messages.success(request, f"Sent a test email to {request.user.email}.")
                 except ValueError as error:
                     messages.error(request, str(error))
@@ -96,7 +117,6 @@ def email_draft(request, draft_id=None):
                     request,
                     form=form,
                     draft=draft,
-                    is_read_only=is_read_only,
                     target_rows=target_rows,
                 )
 
@@ -129,19 +149,12 @@ def email_draft(request, draft_id=None):
                 request,
                 f"{message} for {target_name} ({target_count} targeted profiles).",
             )
-            return redirect("email_draft_edit", draft_id=draft.id)
+            if action == "save_draft":
+                return redirect("email_draft_edit", draft_id=draft.id)
+            return redirect("email_draft_review", draft_id=draft.id)
         target_rows = _email_draft_target_rows_from_post(request.POST)
     elif draft is not None:
         form = EmailDraftForm(initial=_email_draft_initial(draft))
-        if is_read_only:
-            for field_name in (
-                "subject",
-                "reply_to",
-                "target_name",
-                "target_description",
-                "body",
-            ):
-                form.fields[field_name].widget.attrs["readonly"] = "readonly"
         target_rows = _email_draft_initial_target_rows(draft)
     else:
         form = EmailDraftForm()
@@ -151,20 +164,127 @@ def email_draft(request, draft_id=None):
         request,
         form=form,
         draft=draft,
-        is_read_only=is_read_only,
         target_rows=target_rows,
     )
 
 
-def _render_email_draft(request, form, draft, is_read_only, target_rows):
+@login_required
+@permission_required("profiles.can_organize", raise_exception=True)
+def email_draft_review(request, draft_id):
+    draft = get_object_or_404(EmailBlast, id=draft_id)
+    is_author = request.user == draft.submitter
+    is_mutable = draft.status in MUTABLE_EMAIL_BLAST_STATUSES
+
+    if request.method == "POST":
+        action = request.POST.get("action")
+        if action == "send_example" and (is_author or request.user.is_staff):
+            try:
+                _send_email_blast_example(
+                    subject=draft.subject,
+                    body=draft.body,
+                    target_description=draft.target.description if draft.target else "",
+                    reply_to=draft.reply_to,
+                    user=request.user,
+                )
+                messages.success(request, f"Sent a test email to {request.user.email}.")
+            except ValueError as error:
+                messages.error(request, str(error))
+        elif request.user.is_staff:
+            if action == "approve" and draft.status == EmailBlast.Status.SUBMITTED:
+                draft.status = EmailBlast.Status.APPROVED
+                draft.save(update_fields=["status", "updated_at"])
+                messages.success(request, "Email blast approved.")
+            elif action == "reject" and draft.status in (
+                EmailBlast.Status.SUBMITTED,
+                EmailBlast.Status.APPROVED,
+            ):
+                draft.status = EmailBlast.Status.REJECTED
+                draft.save(update_fields=["status", "updated_at"])
+                messages.success(request, "Email blast rejected.")
+            elif action == "send" and draft.status == EmailBlast.Status.APPROVED:
+                transaction.on_commit(lambda: send_email_blast.delay(draft.id))
+                messages.success(request, "Email blast queued to send.")
+        return redirect("email_draft_review", draft_id=draft.id)
+
+    return render(
+        request,
+        "emailblasts/email_draft_review.html",
+        {
+            "draft": draft,
+            "is_author": is_author,
+            "is_mutable": is_mutable,
+            "is_staff": request.user.is_staff,
+            **_draft_preview_context(draft),
+        },
+    )
+
+
+def _draft_preview_context(draft):
+    target_description = draft.target.description if draft.target else ""
+    target_count = None
+    target_name = ""
+    target_geojson = ""
+    if draft.target:
+        target_count = _email_draft_target_count(_email_blast_target_profiles(draft.target))
+        target_name = draft.target.name
+        target_geojson = _email_draft_geojson_feature_collection(
+            [
+                {
+                    "target_type": node.primitive_type,
+                    "target_name": node.primitive_name,
+                    "target_geojson": node.primitive_geojson,
+                }
+                for node in _target_primitive_nodes(draft.target)
+            ]
+        )
+    return _build_preview_context(
+        subject=draft.subject or "",
+        body=draft.body,
+        target_description=target_description,
+        target_count=target_count,
+        target_name=target_name,
+        target_geojson=target_geojson,
+    )
+
+
+def _build_preview_context(
+    *, subject, body, target_description, target_count, target_name, target_geojson
+):
+    prefix = getattr(settings, "EMAIL_SUBJECT_PREFIX", "")
+    if prefix and subject:
+        subject = f"{prefix} {subject}".strip()
+
+    preview_html = ""
+    preview_errors = []
+    if body:
+        full_body = email_blast_full_body(body, target_description)
+        try:
+            rendered = template_from_string(full_body).render(
+                email_preview_context(target_description=target_description)
+            )
+            preview_html = render_email_html(rendered, for_preview=True)
+        except Exception as error:
+            preview_errors.append(f"Template error: {error}")
+
+    return {
+        "preview_subject": subject,
+        "preview_html": preview_html,
+        "target_count": target_count,
+        "has_target_count": target_count is not None,
+        "target_name": target_name,
+        "target_geojson": target_geojson,
+        "target_errors": preview_errors,
+    }
+
+
+def _render_email_draft(request, form, draft, target_rows):
     return render(
         request,
         "emailblasts/email_draft.html",
         {
             "form": form,
             "draft": draft,
-            "is_read_only": is_read_only,
-            "preview_context": EMAIL_PREVIEW_CONTEXT,
+            "preview_context": email_preview_context(),
             "target_choice_groups": form.target_choices,
             "target_rows": target_rows,
             "target_type_choices": form.target_type_choices(),
@@ -172,14 +292,11 @@ def _render_email_draft(request, form, draft, is_read_only, target_rows):
     )
 
 
-def _send_email_blast_example(form, user):
+def _send_email_blast_example(subject, body, target_description, reply_to, user):
     if not user.email:
         raise ValueError("User does not have an email address.")
 
-    body = email_blast_full_body(
-        form.cleaned_data["body"],
-        form.cleaned_data["target_description"],
-    )
+    full_body = email_blast_full_body(body, target_description)
     send_email_message(
         template_name=None,
         from_=settings.DEFAULT_FROM_EMAIL,
@@ -189,11 +306,11 @@ def _send_email_blast_example(form, user):
             "last_name": user.last_name,
             "name": user.get_full_name(),
             "email": user.email,
-            "target_description": form.cleaned_data["target_description"],
+            "target_description": target_description,
         },
-        subject=f"[TEST] {form.cleaned_data['subject']}",
-        message=body,
-        reply_to=[form.cleaned_data["reply_to"]],
+        subject=f"[TEST] {subject}",
+        message=full_body,
+        reply_to=[reply_to],
     )
 
 
@@ -250,51 +367,22 @@ def _email_draft_target_rows_from_post(post_data):
 @login_required
 @permission_required("profiles.can_organize", raise_exception=True)
 def email_draft_preview(request):
-    subject = request.POST.get("subject", "")
-    body = request.POST.get("body", "")
-    target_count = None
-    target_name = ""
-    target_errors = []
-    target_geojson = ""
-    preview_errors = []
-
-    if hasattr(settings, "EMAIL_SUBJECT_PREFIX") and subject:
-        subject = f"{settings.EMAIL_SUBJECT_PREFIX} {subject}"
-
-    preview_html = ""
-    if body:
-        target_description = request.POST.get("target_description", "")
-        preview_context = {
-            **EMAIL_PREVIEW_CONTEXT,
-            "target_description": target_description,
-        }
-        full_body = email_blast_full_body(body, target_description)
-        try:
-            rendered_body = template_from_string(full_body).render(preview_context)
-            preview_html = render_email_html(rendered_body, for_preview=True)
-        except Exception as error:
-            preview_errors.append(f"Fix the template syntax before submitting: {error}")
-
     target_queryset, target_name, target_errors, target_geojson = _email_draft_target_from_post(
         request.POST
     )
-    target_errors = [*preview_errors, *target_errors]
-    if target_queryset is not None:
-        target_count = _email_draft_target_count(target_queryset)
-
-    return render(
-        request,
-        "emailblasts/email_draft_preview.html",
-        {
-            "preview_subject": subject,
-            "preview_html": preview_html,
-            "target_count": target_count,
-            "has_target_count": target_count is not None,
-            "target_name": target_name,
-            "target_errors": target_errors,
-            "target_geojson": target_geojson,
-        },
+    target_count = (
+        _email_draft_target_count(target_queryset) if target_queryset is not None else None
     )
+    context = _build_preview_context(
+        subject=request.POST.get("subject", ""),
+        body=request.POST.get("body", ""),
+        target_description=request.POST.get("target_description", ""),
+        target_count=target_count,
+        target_name=target_name,
+        target_geojson=target_geojson,
+    )
+    context["target_errors"] = [*context["target_errors"], *target_errors]
+    return render(request, "emailblasts/email_draft_preview.html", context)
 
 
 @login_required
@@ -452,41 +540,6 @@ def _email_draft_profiles_for_targets(target_data, operator=EmailBlastTargetNode
     return Profile.objects.filter(pk__in=profile_ids)
 
 
-def _email_draft_target_profiles(target):
-    if target["target_type"] == EmailBlastTargetNode.TargetType.ALL_PROFILES:
-        return Profile.objects.all()
-    if target["target_type"] == EmailBlastTargetNode.TargetType.GEOJSON:
-        return _email_draft_geojson_profiles(json.dumps(target["target_geojson"]))
-    if target["target_type"] == EmailBlastTargetNode.TargetType.PETITION:
-        signer_emails = (
-            PetitionSignature.objects.filter(petition_id=target["target_id"])
-            .exclude(email__isnull=True)
-            .exclude(email="")
-            .annotate(email_lower=Lower("email"))
-            .values_list("email_lower", flat=True)
-        )
-        return Profile.objects.annotate(user_email_lower=Lower("user__email")).filter(
-            user_email_lower__in=signer_emails
-        )
-    if target["target_type"] == EmailBlastTargetNode.TargetType.EVENT_SIGNIN:
-        sign_in_emails = (
-            EventSignIn.objects.filter(event_id=target["target_id"])
-            .exclude(email__isnull=True)
-            .exclude(email="")
-            .annotate(email_lower=Lower("email"))
-            .values_list("email_lower", flat=True)
-        )
-        return Profile.objects.annotate(user_email_lower=Lower("user__email")).filter(
-            user_email_lower__in=sign_in_emails
-        )
-    if target["target_type"] == EmailBlastTargetNode.TargetType.LEGACY:
-        return Profile.objects.none()
-
-    field_name = EmailDraftForm.TARGET_FIELD_BY_TYPE.get(target["target_type"])
-    model = EmailDraftForm.MODEL_BY_TARGET_FIELD[field_name]
-    return model.objects.get(pk=target["target_id"]).contained_profiles.all()
-
-
 def _email_blast_list_items(blasts):
     items = []
     for blast in blasts.select_related("target").prefetch_related("target__nodes"):
@@ -507,56 +560,6 @@ def _email_blast_target_root_operator(target):
     return root.operator if root and root.operator else EmailBlastTargetNode.Operator.OR
 
 
-def _target_primitive_nodes(target):
-    if target is None:
-        return []
-    root = target.nodes.filter(parent__isnull=True).order_by("position", "id").first()
-    if root and root.operator:
-        return list(root.children.order_by("position", "id"))
-    return list(target.nodes.filter(operator="").order_by("position", "id"))
-
-
-def _email_blast_target_profiles(target):
-    root = target.nodes.filter(parent__isnull=True).order_by("position", "id").first()
-    if root is None:
-        return Profile.objects.none()
-    profile_ids = _email_blast_target_node_profile_ids(root)
-    return Profile.objects.filter(pk__in=profile_ids)
-
-
-def _email_blast_target_node_profile_ids(node):
-    if node.operator:
-        child_sets = [
-            _email_blast_target_node_profile_ids(child)
-            for child in node.children.order_by("position", "id")
-        ]
-        if not child_sets:
-            return set()
-        if node.operator == EmailBlastTargetNode.Operator.AND:
-            return set.intersection(*child_sets)
-        return set.union(*child_sets)
-
-    return set(
-        _email_draft_target_profiles(_target_data_from_node(node)).values_list("pk", flat=True)
-    )
-
-
-def _target_data_from_node(node):
-    return {
-        "target_type": node.primitive_type,
-        "target_id": node.primitive_id,
-        "target_name": node.primitive_name,
-        "target_geojson": node.primitive_geojson,
-    }
-
-
-def _email_draft_geojson_profiles(geojson):
-    geometry = _email_draft_geojson_geometry(geojson)
-    geom = GEOSGeometry(json.dumps(geometry))
-    geom.srid = 4326
-    return Profile.objects.filter(location__within=geom)
-
-
 def _email_draft_geojson_feature_collection(target_data):
     features = []
     for target in target_data:
@@ -573,12 +576,3 @@ def _email_draft_geojson_feature_collection(target_data):
     if not features:
         return ""
     return json.dumps({"type": "FeatureCollection", "features": features})
-
-
-def _email_draft_geojson_geometry(geojson):
-    data = json.loads(geojson)
-    return EmailDraftForm().geojson_geometry(data)
-
-
-def _email_draft_target_count(queryset):
-    return queryset.exclude(user__email="").values("user__email").distinct().count()
