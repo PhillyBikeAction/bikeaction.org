@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static markdownify %}
+{% load static markdownify share_tags qr_code %}
 
 {% block content %}
 
@@ -14,6 +14,19 @@
   <a class="cta-button submit-button" href="{{ mail_link }}">Send Now!</a>
   <br><small>This will open your email client with a draft email for you to edit and send.</small>
 </p>
+
+<div class="calendar-subscribe">
+  <div>Share:</div>
+  {% with share_url=request.build_absolute_uri %}
+  {% with share_title="Philly Bike Action: "|add:maillink.title %}
+  <span class="calendar-share">{% post_to_reddit share_title share_url "<i class=\"fa-brands fa-reddit\"></i> Reddit" %}</span>
+  <span class="calendar-share">{% post_to_bluesky share_title share_url "<i class=\"fa-brands fa-bluesky\"></i> Bluesky" %}</span>
+  <span class="calendar-share"><a href="{% qr_url_from_text share_url image_format='png' %}" download="qr-code-{{ maillink.slug }}.png"><i class="fa-solid fa-qrcode"></i> QR Code</a></span>
+  <span class="calendar-share">{% copy_to_clipboard share_url "<i class=\"fa-solid fa-copy\"></i> Copy URL" %}</span>
+  {% endwith %}
+  {% endwith %}
+  {% add_copy_script %}
+</div>
 
 <table class="email">
   <tr><td>Subject:</td><td><b>{{ maillink.subject }}</b></td></tr>
