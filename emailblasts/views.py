@@ -13,9 +13,9 @@ from django.shortcuts import get_object_or_404, redirect, render
 from emailblasts.forms import EmailDraftForm
 from emailblasts.models import EmailBlast, EmailBlastImage, EmailBlastTarget, EmailBlastTargetNode
 from emailblasts.targeting import (
-    _email_blast_target_profiles,
+    _email_blast_target_recipient_count,
     _email_draft_geojson_geometry,
-    _email_draft_target_count,
+    _email_draft_target_recipient_count,
     _email_draft_target_profiles,
     _target_primitive_nodes,
 )
@@ -120,7 +120,7 @@ def email_draft(request, draft_id=None):
                     target_rows=target_rows,
                 )
 
-            target_queryset, target_name, target_data = _email_draft_target(form)
+            _, target_name, target_data = _email_draft_target(form)
             target = _email_blast_target_object(
                 form.cleaned_data["target_name"],
                 form.cleaned_data["target_description"],
@@ -139,7 +139,10 @@ def email_draft(request, draft_id=None):
             draft.target = target
             draft.status = status
             draft.save()
-            target_count = _email_draft_target_count(target_queryset)
+            target_count = _email_draft_target_recipient_count(
+                target_data,
+                form.cleaned_data["target_operator"],
+            )
             message = (
                 "Draft email blast saved"
                 if status == EmailBlast.Status.DRAFT
@@ -147,7 +150,7 @@ def email_draft(request, draft_id=None):
             )
             messages.success(
                 request,
-                f"{message} for {target_name} ({target_count} targeted profiles).",
+                f"{message} for {target_name} ({target_count} targeted recipients).",
             )
             if action == "save_draft":
                 return redirect("email_draft_edit", draft_id=draft.id)
@@ -224,31 +227,43 @@ def _draft_preview_context(draft):
     target_count = None
     target_name = ""
     target_geojson = ""
+    target_summary_items = []
     if draft.target:
-        target_count = _email_draft_target_count(_email_blast_target_profiles(draft.target))
+        target_rows = [
+            {
+                "target_type": node.primitive_type,
+                "target_name": node.primitive_name,
+                "target_geojson": node.primitive_geojson,
+            }
+            for node in _target_primitive_nodes(draft.target)
+        ]
+        target_count = _email_blast_target_recipient_count(draft.target)
         target_name = draft.target.name
-        target_geojson = _email_draft_geojson_feature_collection(
-            [
-                {
-                    "target_type": node.primitive_type,
-                    "target_name": node.primitive_name,
-                    "target_geojson": node.primitive_geojson,
-                }
-                for node in _target_primitive_nodes(draft.target)
-            ]
+        target_summary_items = _email_draft_target_summary_items(
+            target_rows,
+            _email_blast_target_root_operator(draft.target),
         )
+        target_geojson = _email_draft_geojson_feature_collection(target_rows)
     return _build_preview_context(
         subject=draft.subject or "",
         body=draft.body,
         target_description=target_description,
         target_count=target_count,
         target_name=target_name,
+        target_summary_items=target_summary_items,
         target_geojson=target_geojson,
     )
 
 
 def _build_preview_context(
-    *, subject, body, target_description, target_count, target_name, target_geojson
+    *,
+    subject,
+    body,
+    target_description,
+    target_count,
+    target_name,
+    target_geojson,
+    target_summary_items=None,
 ):
     prefix = getattr(settings, "EMAIL_SUBJECT_PREFIX", "")
     if prefix and subject:
@@ -272,6 +287,7 @@ def _build_preview_context(
         "target_count": target_count,
         "has_target_count": target_count is not None,
         "target_name": target_name,
+        "target_summary_items": target_summary_items or [],
         "target_geojson": target_geojson,
         "target_errors": preview_errors,
     }
@@ -367,11 +383,8 @@ def _email_draft_target_rows_from_post(post_data):
 @login_required
 @permission_required("profiles.can_organize", raise_exception=True)
 def email_draft_preview(request):
-    target_queryset, target_name, target_errors, target_geojson = _email_draft_target_from_post(
-        request.POST
-    )
-    target_count = (
-        _email_draft_target_count(target_queryset) if target_queryset is not None else None
+    target_count, target_name, target_summary_items, target_errors, target_geojson = (
+        _email_draft_target_from_post(request.POST)
     )
     context = _build_preview_context(
         subject=request.POST.get("subject", ""),
@@ -379,6 +392,7 @@ def email_draft_preview(request):
         target_description=request.POST.get("target_description", ""),
         target_count=target_count,
         target_name=target_name,
+        target_summary_items=target_summary_items,
         target_geojson=target_geojson,
     )
     context["target_errors"] = [*context["target_errors"], *target_errors]
@@ -455,16 +469,20 @@ def _email_draft_target_from_post(post_data):
     form.full_clean()
     target_errors = list(form.errors.get("__all__", []))
     if target_errors:
-        return None, "", target_errors, ""
+        return None, "", "", target_errors, ""
 
     try:
-        target_queryset, target_name, target_data = _email_draft_target(form)
+        _, target_name, target_data = _email_draft_target(form)
     except Exception:
-        return None, "", ["Selected target was not found."], ""
+        return None, "", "", ["Selected target was not found."], ""
 
     return (
-        target_queryset,
+        _email_draft_target_recipient_count(
+            target_data,
+            form.cleaned_data["target_operator"],
+        ),
         target_name,
+        _email_draft_target_summary_items(target_data, form.cleaned_data["target_operator"]),
         [],
         _email_draft_geojson_feature_collection(target_data),
     )
@@ -485,6 +503,24 @@ def _email_draft_target_name(target_data, operator=EmailBlastTargetNode.Operator
     if len(target_names) > 3:
         summary = f"{summary}{joiner}..."
     return summary[:255]
+
+
+def _email_draft_target_summary_items(target_data, operator=EmailBlastTargetNode.Operator.OR):
+    if not target_data:
+        return []
+
+    type_labels = dict(EmailBlastTargetNode.TargetType.choices)
+    prefix = "Must also match" if operator == EmailBlastTargetNode.Operator.AND else "Includes"
+    items = []
+    for target in target_data:
+        target_type = target["target_type"]
+        target_label = type_labels.get(target_type, target_type)
+        if target_type == EmailBlastTargetNode.TargetType.ALL_PROFILES:
+            items.append("Includes everyone with a PBA profile")
+        else:
+            items.append(f'{prefix} {target_label.lower()} "{target["target_name"]}"')
+
+    return items
 
 
 def _email_blast_target_object(
@@ -544,11 +580,14 @@ def _email_blast_list_items(blasts):
     items = []
     for blast in blasts.select_related("target").prefetch_related("target__nodes"):
         blast.display_target_name = blast.target.name if blast.target else "No target"
-        blast.display_target_count = (
-            _email_draft_target_count(_email_blast_target_profiles(blast.target))
-            if blast.target
-            else 0
-        )
+        if blast.status == EmailBlast.Status.SENT:
+            blast.display_target_count = (
+                blast.deliveries.filter(sent_at__isnull=False).values("email").distinct().count()
+            )
+        else:
+            blast.display_target_count = (
+                _email_blast_target_recipient_count(blast.target) if blast.target else 0
+            )
         items.append(blast)
     return items
 

@@ -23,6 +23,7 @@ class EmailDraftForm(forms.Form):
         EmailBlastTargetNode.TargetType.DIVISION: "division",
         EmailBlastTargetNode.TargetType.GEOJSON: "geojson",
         EmailBlastTargetNode.TargetType.PETITION: "petition",
+        EmailBlastTargetNode.TargetType.EVENT_RSVP: "event_rsvp",
         EmailBlastTargetNode.TargetType.EVENT_SIGNIN: "event_signin",
     }
     MODEL_BY_TARGET_FIELD = {
@@ -32,6 +33,7 @@ class EmailDraftForm(forms.Form):
         "ward": Ward,
         "division": Division,
         "petition": Petition,
+        "event_rsvp": ScheduledEvent,
         "event_signin": ScheduledEvent,
     }
 
@@ -108,6 +110,9 @@ class EmailDraftForm(forms.Form):
             ),
             "petition": self._model_choices(
                 Petition.objects.all(), key=lambda petition: petition.title
+            ),
+            "event_rsvp": self._model_choices(
+                ScheduledEvent.objects.all(), key=lambda event: event.start_datetime
             ),
             "event_signin": self._model_choices(
                 ScheduledEvent.objects.all(), key=lambda event: event.start_datetime

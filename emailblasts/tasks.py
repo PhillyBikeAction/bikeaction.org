@@ -4,7 +4,7 @@ from django.db import IntegrityError, transaction
 from django.utils import timezone
 
 from emailblasts.models import EmailBlast, EmailBlastDelivery
-from emailblasts.targeting import _email_blast_target_profiles
+from emailblasts.targeting import _email_blast_target_recipients
 from emailblasts.utils import email_blast_full_body
 from pbaabp.email import send_email_message
 from profiles.models import DoNotEmail
@@ -31,18 +31,12 @@ def send_email_blast(email_blast_id):
         return f"Email blast {email_blast_id} has no target."
 
     body = email_blast_full_body(blast.body, blast.target.description)
-    profiles = (
-        _email_blast_target_profiles(blast.target)
-        .select_related("user")
-        .exclude(user__email__isnull=True)
-        .exclude(user__email="")
-    )
+    recipients = _email_blast_target_recipients(blast.target, exclude_suppressed=False)
 
     sent_count = 0
     suppressed_count = 0
-    for profile in profiles:
-        email = profile.user.email.strip()
-        email_key = email.lower()
+    for recipient in recipients:
+        email_key = recipient.email
         if DoNotEmail.objects.filter(email__iexact=email_key).exists():
             suppressed_count += 1
             continue
@@ -51,7 +45,7 @@ def send_email_blast(email_blast_id):
             with transaction.atomic():
                 EmailBlastDelivery.objects.create(
                     email_blast=blast,
-                    profile=profile,
+                    profile=recipient.profile,
                     email=email_key,
                 )
         except IntegrityError:
@@ -65,9 +59,9 @@ def send_email_blast(email_blast_id):
                 from_=settings.DEFAULT_FROM_EMAIL,
                 to=[email_key],
                 context={
-                    "first_name": profile.user.first_name,
-                    "last_name": profile.user.last_name,
-                    "name": profile.user.get_full_name(),
+                    "first_name": recipient.first_name,
+                    "last_name": recipient.last_name,
+                    "name": recipient.name,
                     "email": email_key,
                     "target_description": blast.target.description,
                 },
@@ -92,6 +86,6 @@ def send_email_blast(email_blast_id):
     blast.save(update_fields=["status", "updated_at"])
 
     return (
-        f"Sent email blast {email_blast_id} to {sent_count} profiles; "
+        f"Sent email blast {email_blast_id} to {sent_count} recipients; "
         f"skipped {suppressed_count} suppressed recipients."
     )

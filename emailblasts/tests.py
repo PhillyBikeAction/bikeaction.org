@@ -24,14 +24,16 @@ from emailblasts.models import (
     EmailBlastTargetNode,
 )
 from emailblasts.tasks import send_email_blast
-from emailblasts.targeting import _email_blast_target_profiles
+from emailblasts.targeting import _email_blast_target_profiles, _email_draft_target_count
 from emailblasts.views import (
+    _email_blast_list_items,
     _email_blast_target_object,
     _email_draft_geojson_feature_collection,
     _email_draft_profiles_for_targets,
+    _email_draft_target_summary_items,
     _email_draft_target_name,
 )
-from events.models import EventSignIn, ScheduledEvent
+from events.models import EventRSVP, EventSignIn, ScheduledEvent
 from facets.models import District, ZipCode
 from pbaabp.email import render_email_html, send_email_message
 from profiles.models import DoNotEmail, Profile
@@ -70,6 +72,32 @@ class EmailBlastSendTaskTests(TestCase):
             status=EmailBlast.Status.APPROVED,
         )
 
+    def create_target_blast(self, target_type, target_id, target_name="Target"):
+        user = User.objects.create_user(
+            username="organizer@example.com", email="organizer@example.com"
+        )
+        target = _email_blast_target_object(
+            target_name,
+            "match the selected audience",
+            EmailBlastTargetNode.Operator.OR,
+            [
+                {
+                    "target_type": target_type,
+                    "target_id": str(target_id),
+                    "target_name": target_name,
+                    "target_geojson": None,
+                }
+            ],
+            user,
+        )
+        return EmailBlast.objects.create(
+            subject="Targeted blast",
+            body="Main message",
+            reply_to="organizer@bikeaction.org",
+            target=target,
+            status=EmailBlast.Status.APPROVED,
+        )
+
     @patch("emailblasts.tasks.send_email_message")
     def test_second_queued_task_does_not_send_duplicate_blast(self, mock_send_email):
         self.create_profile("one@example.com", first_name="One")
@@ -100,6 +128,155 @@ class EmailBlastSendTaskTests(TestCase):
         self.assertIn("skipped 1 suppressed recipients", result)
         blast.refresh_from_db()
         self.assertEqual(blast.status, EmailBlast.Status.SENT)
+
+    @patch("emailblasts.tasks.send_email_message")
+    def test_duplicate_recipient_emails_are_sent_once_case_insensitively(self, mock_send_email):
+        self.create_profile("Duplicate@example.com", first_name="First")
+        self.create_profile("duplicate@example.com", first_name="Second")
+        blast = self.create_all_profiles_blast()
+
+        result = send_email_blast(blast.id)
+
+        self.assertEqual(mock_send_email.call_count, 1)
+        self.assertEqual(mock_send_email.call_args.kwargs["to"], ["duplicate@example.com"])
+        self.assertEqual(EmailBlastDelivery.objects.filter(email_blast=blast).count(), 1)
+        self.assertIn("to 1 recipients", result)
+
+    @patch("emailblasts.tasks.send_email_message")
+    def test_petition_target_sends_to_signature_without_profile(self, mock_send_email):
+        petition = Petition.objects.create(title="Safer Streets")
+        PetitionSignature.objects.create(
+            petition=petition,
+            first_name="Signer",
+            last_name="Person",
+            email="signer@example.com",
+        )
+        blast = self.create_target_blast(
+            EmailBlastTargetNode.TargetType.PETITION,
+            petition.pk,
+            str(petition),
+        )
+
+        send_email_blast(blast.id)
+
+        self.assertEqual(mock_send_email.call_count, 1)
+        self.assertEqual(mock_send_email.call_args.kwargs["to"], ["signer@example.com"])
+        self.assertEqual(mock_send_email.call_args.kwargs["context"]["first_name"], "Signer")
+        self.assertEqual(
+            EmailBlastDelivery.objects.get(email_blast=blast).profile,
+            None,
+        )
+
+    @patch("emailblasts.tasks.send_email_message")
+    def test_event_rsvp_target_sends_to_rsvp_without_profile(self, mock_send_email):
+        event = ScheduledEvent.objects.create(
+            title="May Meetup",
+            status=ScheduledEvent.Status.SCHEDULED,
+            start_datetime=timezone.now(),
+        )
+        EventRSVP.objects.create(
+            event=event,
+            first_name="Guest",
+            last_name="Person",
+            email="guest@example.com",
+        )
+        blast = self.create_target_blast(
+            EmailBlastTargetNode.TargetType.EVENT_RSVP,
+            event.pk,
+            str(event),
+        )
+
+        send_email_blast(blast.id)
+
+        self.assertEqual(mock_send_email.call_count, 1)
+        self.assertEqual(mock_send_email.call_args.kwargs["to"], ["guest@example.com"])
+        self.assertEqual(mock_send_email.call_args.kwargs["context"]["first_name"], "Guest")
+        self.assertEqual(
+            EmailBlastDelivery.objects.get(email_blast=blast).profile,
+            None,
+        )
+
+    @patch("emailblasts.tasks.send_email_message")
+    def test_profile_and_petition_recipient_email_is_sent_once(self, mock_send_email):
+        self.create_profile("duplicate@example.com")
+        petition = Petition.objects.create(title="Safer Streets")
+        PetitionSignature.objects.create(
+            petition=petition,
+            first_name="Duplicate",
+            email="Duplicate@example.com",
+        )
+        user = User.objects.create_user(
+            username="organizer@example.com", email="organizer@example.com"
+        )
+        target = _email_blast_target_object(
+            "Mixed target",
+            "match the selected audience",
+            EmailBlastTargetNode.Operator.OR,
+            [
+                {
+                    "target_type": EmailBlastTargetNode.TargetType.ALL_PROFILES,
+                    "target_id": "",
+                    "target_name": EmailBlastTargetNode.TargetType.ALL_PROFILES.label,
+                    "target_geojson": None,
+                },
+                {
+                    "target_type": EmailBlastTargetNode.TargetType.PETITION,
+                    "target_id": str(petition.pk),
+                    "target_name": str(petition),
+                    "target_geojson": None,
+                },
+            ],
+            user,
+        )
+        blast = EmailBlast.objects.create(
+            subject="Targeted blast",
+            body="Main message",
+            reply_to="organizer@bikeaction.org",
+            target=target,
+            status=EmailBlast.Status.APPROVED,
+        )
+
+        send_email_blast(blast.id)
+
+        self.assertEqual(mock_send_email.call_count, 1)
+        self.assertEqual(mock_send_email.call_args.kwargs["to"], ["duplicate@example.com"])
+        self.assertEqual(EmailBlastDelivery.objects.filter(email_blast=blast).count(), 1)
+
+    def test_sent_blast_list_count_uses_actual_sent_deliveries(self):
+        first_profile = self.create_profile("sent@example.com")
+        self.create_profile("new-after-send@example.com")
+        blast = self.create_all_profiles_blast()
+        blast.status = EmailBlast.Status.SENT
+        blast.save(update_fields=["status"])
+        EmailBlastDelivery.objects.create(
+            email_blast=blast,
+            profile=first_profile,
+            email="sent@example.com",
+            sent_at=timezone.now(),
+        )
+
+        item = _email_blast_list_items(EmailBlast.objects.filter(id=blast.id))[0]
+
+        self.assertEqual(item.display_target_count, 1)
+
+    def test_blast_list_count_includes_petition_signatures_without_profiles(self):
+        petition = Petition.objects.create(title="Safer Streets")
+        PetitionSignature.objects.create(
+            petition=petition,
+            first_name="Signer",
+            email="signer@example.com",
+        )
+        blast = self.create_target_blast(
+            EmailBlastTargetNode.TargetType.PETITION,
+            petition.pk,
+            str(petition),
+        )
+        blast.status = EmailBlast.Status.DRAFT
+        blast.save(update_fields=["status"])
+
+        item = _email_blast_list_items(EmailBlast.objects.filter(id=blast.id))[0]
+
+        self.assertEqual(item.display_target_count, 1)
 
     @patch("emailblasts.tasks.send_email_message")
     def test_failed_recipient_send_can_be_retried(self, mock_send_email):
@@ -389,6 +566,22 @@ class EmailBlastExampleSendTests(TestCase):
         data.update(overrides)
         return data
 
+    def test_draft_page_exposes_event_rsvp_target_selector(self):
+        ScheduledEvent.objects.create(
+            title="May Meetup",
+            status=ScheduledEvent.Status.SCHEDULED,
+            start_datetime=timezone.now(),
+        )
+
+        response = self.client.get(reverse("email_draft"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'value="event_rsvp"')
+        self.assertContains(
+            response,
+            '.email-draft-target-row[data-target-kind="event_rsvp"] .email-draft-target-value',
+        )
+
     @patch("emailblasts.views.send_email_message")
     def test_send_example_emails_current_user_without_saving_blast(self, mock_send_email):
         response = self.client.post(reverse("email_draft"), self.form_data())
@@ -509,6 +702,35 @@ class EmailBlastTargetingTests(TestCase):
             "District 1 AND District 2",
         )
 
+    def test_target_summary_items_describe_all_target_components(self):
+        district = self.create_district("District 1", 0, 0, 2, 2)
+        petition = Petition.objects.create(title="Safer Streets")
+        targets = [
+            self.target_data(
+                EmailBlastTargetNode.TargetType.DISTRICT,
+                district.pk,
+                str(district),
+            ),
+            self.target_data(
+                EmailBlastTargetNode.TargetType.PETITION,
+                petition.pk,
+                str(petition),
+            ),
+        ]
+
+        summary_items = _email_draft_target_summary_items(
+            targets,
+            EmailBlastTargetNode.Operator.AND,
+        )
+
+        self.assertEqual(
+            summary_items,
+            [
+                'Must also match district "District 1"',
+                'Must also match petition signers "Safer Streets"',
+            ],
+        )
+
     def test_all_profiles_target_overrides_other_targets(self):
         first = self.create_profile("first@example.com", 0.5, 0.5)
         second = self.create_profile("second@example.com", 10, 10)
@@ -529,6 +751,25 @@ class EmailBlastTargetingTests(TestCase):
         profiles = _email_draft_profiles_for_targets(targets)
 
         self.assertCountEqual(profiles, [first, second])
+
+    def test_target_count_deduplicates_normalized_recipient_emails(self):
+        self.create_profile("Duplicate@example.com", 0.5, 0.5)
+        self.create_profile("duplicate@example.com", 1.5, 1.5)
+
+        count = _email_draft_target_count(Profile.objects.all())
+
+        self.assertEqual(count, 1)
+
+    def test_target_count_excludes_suppressed_recipient_emails_case_insensitively(self):
+        self.create_profile("Suppressed@example.com", 0.5, 0.5)
+        DoNotEmail.objects.create(
+            email="suppressed@example.com",
+            reason=DoNotEmail.Reason.ACCOUNT_DELETION,
+        )
+
+        count = _email_draft_target_count(Profile.objects.all())
+
+        self.assertEqual(count, 0)
 
     def test_zip_code_target_matches_profiles_inside_zip_code_facet(self):
         inside = self.create_profile("inside@example.com", 0.5, 0.5)

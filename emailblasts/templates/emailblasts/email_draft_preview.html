@@ -3,7 +3,14 @@
 <p><strong>{% translate "Subject:" %}</strong> {{ preview_subject }}</p>
 {% endif %}
 {% if has_target_count %}
-<p><strong>{% translate "Target:" %}</strong> {{ target_name }} ({{ target_count }} {% translate "profiles" %})</p>
+<p><strong>{% translate "Target:" %}</strong> {{ target_name }} ({{ target_count }} {% translate "recipients" %})</p>
+{% if target_summary_items %}
+<ul>
+  {% for target_summary_item in target_summary_items %}
+  <li>{{ target_summary_item }}</li>
+  {% endfor %}
+</ul>
+{% endif %}
 {% if target_geojson %}
 <div id="email-draft-target-map" style="height: 280px; width: 100%; margin-bottom: 1rem; z-index: 1;"></div>
 <script>
