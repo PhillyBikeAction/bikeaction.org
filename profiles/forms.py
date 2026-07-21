@@ -65,7 +65,7 @@ class BaseProfileSignupForm(BaseSignupForm):
         initial=True,
         help_text=Profile._meta.get_field("newsletter_opt_in").help_text,
     )
-    # CICD
+    
     volunteer_opt_in = forms.BooleanField(
         required=False,
         initial=False,
