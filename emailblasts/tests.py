@@ -582,6 +582,26 @@ class EmailBlastExampleSendTests(TestCase):
             '.email-draft-target-row[data-target-kind="event_rsvp"] .email-draft-target-value',
         )
 
+    def test_draft_page_clear_fields_resets_all_composer_state(self):
+        response = self.client.get(reverse("email_draft"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "document.getElementById('id_subject').value = '';")
+        self.assertContains(response, "document.getElementById('id_body').value = '';")
+        self.assertContains(response, "document.getElementById('id_reply_to').value = '';")
+        self.assertContains(response, "document.getElementById('id_target_name').value = '';")
+        self.assertContains(
+            response,
+            "document.getElementById('id_target_description').value = '';",
+        )
+        self.assertContains(
+            response,
+            "document.getElementById('id_target_operator').value = DEFAULT_TARGET_OPERATOR;",
+        )
+        self.assertContains(response, "imageInput.value = '';")
+        self.assertContains(response, "targetRows.innerHTML = '';")
+        self.assertContains(response, "addTargetRow();")
+
     @patch("emailblasts.views.send_email_message")
     def test_send_example_emails_current_user_without_saving_blast(self, mock_send_email):
         response = self.client.post(reverse("email_draft"), self.form_data())

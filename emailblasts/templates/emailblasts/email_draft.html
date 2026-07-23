@@ -473,6 +473,8 @@
   const COOKIE_DAYS = 7;
   const HAS_DRAFT = {% if draft %}true{% else %}false{% endif %};
   const DRAFT_ID = '{% if draft %}{{ draft.id }}{% endif %}';
+  const DEFAULT_TARGET_OPERATOR = 'or';
+  const DEFAULT_IMAGE_STATUS = document.getElementById('email-draft-image-status').textContent.trim();
   const TARGET_CHOICES = JSON.parse(document.getElementById('email-draft-target-choices').textContent);
   const TARGET_TYPE_CHOICES = [
     {% for value, label in target_type_choices %}
@@ -571,6 +573,20 @@
     document.getElementById('id_subject').value = '';
     document.getElementById('id_body').value = '';
     document.getElementById('id_reply_to').value = '';
+    document.getElementById('id_target_name').value = '';
+    document.getElementById('id_target_description').value = '';
+    document.getElementById('id_target_operator').value = DEFAULT_TARGET_OPERATOR;
+
+    const imageInput = document.getElementById('email-draft-image-upload');
+    const imageStatus = document.getElementById('email-draft-image-status');
+    if (imageInput) imageInput.value = '';
+    if (imageStatus) imageStatus.textContent = DEFAULT_IMAGE_STATUS;
+
+    const targetRows = document.getElementById('email-draft-target-rows');
+    targetRows.innerHTML = '';
+    addTargetRow();
+    renumberTargetRows();
+
     deleteCookie('email_draft_subject');
     deleteCookie('email_draft_body');
     deleteCookie('email_draft_reply_to');
