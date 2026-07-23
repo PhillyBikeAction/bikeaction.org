@@ -17,20 +17,54 @@ from projects.tasks import (
 )
 
 
-class ProjectApprovalMessageTests(SimpleTestCase):
-    def test_project_application_discord_messages_decode_ampersands_only(self):
-        messages = format_project_application_discord_messages(
-            "```\n"
-            "Indego &amp; SEPTA coordination\n"
-            "Literal Discord mention markup stays escaped: &lt;@123&gt;\n"
-            "```"
+class ProjectApplicationDiscordMarkdownTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="projectuser",
+            email="project@example.com",
+            password="password",
+            first_name="Project",
+            last_name="User",
         )
+        self.profile = Profile.objects.create(
+            user=self.user,
+            street_address="123 Market St",
+            zip_code="19107",
+        )
+        SocialAccount.objects.create(
+            user=self.user,
+            provider="discord",
+            uid="discord-projectuser",
+            extra_data={"username": "projectuser"},
+        )
+
+    def project_data(self):
+        form = ProjectApplicationForm()
+        data = {
+            field.name: {"label": field.label, "value": f"{field.name} value"} for field in form
+        }
+        data["shortname"]["value"] = "Project Details"
+        data["quick_summary"]["value"] = "Indego & SEPTA coordination <@123>"
+        return data
+
+    def test_discord_messages_decode_ampersands_after_markdown_rendering_only(self):
+        application = ProjectApplication(
+            submitter=self.user,
+            data=self.project_data(),
+        )
+
+        application.render_markdown()
+        messages = format_project_application_discord_messages(application.markdown)
         message = "".join(messages)
 
+        self.assertIn("Indego &amp; SEPTA coordination", application.markdown)
+        self.assertIn("&lt;@123&gt;", application.markdown)
         self.assertIn("Indego & SEPTA coordination", message)
         self.assertNotIn("Indego &amp; SEPTA coordination", message)
         self.assertIn("&lt;@123&gt;", message)
 
+
+class ProjectApprovalMessageTests(SimpleTestCase):
     @override_settings(PROJECT_LEAD_CHEAT_SHEET_URL="https://example.com/cheat-sheet")
     def test_approved_channel_message_includes_project_lead_cheat_sheet(self):
         message = build_project_approved_channel_message(
