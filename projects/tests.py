@@ -12,11 +12,25 @@ from projects.tasks import (
     build_project_archive_message,
     build_project_approved_channel_message,
     build_project_lead_cheat_sheet_dm_message,
+    format_project_application_discord_messages,
     get_project_archive_mention_role_id,
 )
 
 
 class ProjectApprovalMessageTests(SimpleTestCase):
+    def test_project_application_discord_messages_decode_ampersands_only(self):
+        messages = format_project_application_discord_messages(
+            "```\n"
+            "Indego &amp; SEPTA coordination\n"
+            "Literal Discord mention markup stays escaped: &lt;@123&gt;\n"
+            "```"
+        )
+        message = "".join(messages)
+
+        self.assertIn("Indego & SEPTA coordination", message)
+        self.assertNotIn("Indego &amp; SEPTA coordination", message)
+        self.assertIn("&lt;@123&gt;", message)
+
     @override_settings(PROJECT_LEAD_CHEAT_SHEET_URL="https://example.com/cheat-sheet")
     def test_approved_channel_message_includes_project_lead_cheat_sheet(self):
         message = build_project_approved_channel_message(
