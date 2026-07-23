@@ -24,6 +24,43 @@ from facets.utils import geocode_address
 from profiles.models import Profile
 
 
+EMAIL_REPORT_TIME_WINDOWS = (
+    ("30", "30 days", 30),
+    ("90", "90 days", 90),
+    ("365", "1 year", 365),
+    ("all", "All time", None),
+)
+DEFAULT_EMAIL_REPORT_TIME_WINDOW = "30"
+
+
+def _email_report_time_window(selected, *, now=None):
+    selected_windows = {value: (label, days) for value, label, days in EMAIL_REPORT_TIME_WINDOWS}
+    selected = selected if selected in selected_windows else DEFAULT_EMAIL_REPORT_TIME_WINDOW
+    label, days = selected_windows[selected]
+
+    start_at = None
+    date_range = label
+    now = now or timezone.now()
+
+    if days is not None:
+        start_at = now - datetime.timedelta(days=days)
+        date_range = f"Last {label} (since {start_at.date()})"
+
+    return {
+        "selected": selected,
+        "start_at": start_at,
+        "date_range": date_range,
+        "options": [
+            {
+                "value": value,
+                "label": option_label,
+                "selected": value == selected,
+            }
+            for value, option_label, _ in EMAIL_REPORT_TIME_WINDOWS
+        ],
+    }
+
+
 def index(request):
     return render(
         request, "rcosearch.html", context={"GOOGLE": settings.GOOGLE_MAPS_API_KEY is not None}
@@ -124,7 +161,7 @@ def report(request):
 
 @staff_member_required
 def email_report(request):
-    thirty_days_ago = timezone.now() - datetime.timedelta(days=30)
+    time_window = _email_report_time_window(request.GET.get("time_window"))
 
     all_profiles = Profile.objects.filter(
         user__email__isnull=False, location__isnull=False
@@ -134,9 +171,10 @@ def email_report(request):
 
     email_counts = {}
 
-    recent_emails = Email.objects.filter(date_sent__gte=thirty_days_ago).values_list(
-        "recipients", flat=True
-    )
+    recent_emails = Email.objects.all()
+    if time_window["start_at"] is not None:
+        recent_emails = recent_emails.filter(date_sent__gte=time_window["start_at"])
+    recent_emails = recent_emails.values_list("recipients", flat=True)
 
     for recipients_field in recent_emails:
         if recipients_field:
@@ -194,7 +232,8 @@ def email_report(request):
     context = {
         "districts": districts_data,
         "rcos": rcos_data,
-        "date_range": f"Last 30 days (since {thirty_days_ago.date()})",
+        "date_range": time_window["date_range"],
+        "time_window_options": time_window["options"],
     }
 
     return render(request, "facets_email_report.html", context=context)

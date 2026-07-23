@@ -2,6 +2,21 @@
 
 {% block content %}
 <h1>Email Report by Geography</h1>
+
+<form method="get">
+  <label for="email-report-time-window">Time window</label>
+  <select id="email-report-time-window" name="time_window" onchange="this.form.submit()">
+    {% for option in time_window_options %}
+      <option value="{{ option.value }}"{% if option.selected %} selected{% endif %}>
+        {{ option.label }}
+      </option>
+    {% endfor %}
+  </select>
+  <noscript>
+    <button class="submit-button" type="submit">Update</button>
+  </noscript>
+</form>
+
 <p>{{ date_range }}</p>
 
 <h2>Districts by Average Emails Received</h2>
