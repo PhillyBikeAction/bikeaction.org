@@ -34,4 +34,11 @@ describe('HomePage', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('handles a null geolocation watch update without throwing', () => {
+    component.handleGeolocationWatchUpdate(null);
+
+    expect(component.geoPerms).toBeFalse();
+    expect(component.violationPosition).toBeNull();
+  });
 });

@@ -63,15 +63,7 @@ export class HomePage implements OnInit {
     }
     this.geoWatchId = await Geolocation.watchPosition(
       { enableHighAccuracy: true, maximumAge: 10000 },
-      (coordinates) => {
-        if (coordinates!.coords!.accuracy < 50) {
-          this.violationPosition = coordinates;
-          this.geoPerms = true;
-          if (this.geoWatchId !== null) {
-            Geolocation.clearWatch({ id: this.geoWatchId });
-          }
-        }
-      },
+      (coordinates) => this.handleGeolocationWatchUpdate(coordinates),
     );
     //this.violationPosition = {
     //  timestamp: 123,
@@ -85,6 +77,22 @@ export class HomePage implements OnInit {
     //    altitudeAccuracy: null,
     //  },
     //};
+  }
+
+  handleGeolocationWatchUpdate(coordinates: Position | null) {
+    if (!coordinates?.coords) {
+      this.violationPosition = null;
+      this.geoPerms = false;
+      return;
+    }
+
+    if (coordinates.coords.accuracy < 50) {
+      this.violationPosition = coordinates;
+      this.geoPerms = true;
+      if (this.geoWatchId !== null) {
+        Geolocation.clearWatch({ id: this.geoWatchId });
+      }
+    }
   }
 
   async takePicture() {
