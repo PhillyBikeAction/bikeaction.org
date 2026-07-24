@@ -44,7 +44,9 @@ class ProjectApplicationDiscordMarkdownTests(TestCase):
             field.name: {"label": field.label, "value": f"{field.name} value"} for field in form
         }
         data["shortname"]["value"] = "Project Details"
-        data["quick_summary"]["value"] = "Indego & SEPTA <bikes> <@123>"
+        data["quick_summary"]["value"] = (
+            "Indego & SEPTA <bikes> <@123> <@&456> <#789> @everyone @here"
+        )
         return data
 
     def test_discord_messages_decode_sanitized_html_entities_without_mentions(self):
@@ -59,12 +61,22 @@ class ProjectApplicationDiscordMarkdownTests(TestCase):
         self.assertIn("Indego &amp; SEPTA", application.markdown)
         self.assertIn("&lt;bikes&gt;", application.markdown)
         self.assertIn("&lt;@123&gt;", application.markdown)
+        self.assertIn("&lt;@&amp;456&gt;", application.markdown)
+        self.assertIn("&lt;#789&gt;", application.markdown)
         self.assertIn("Indego & SEPTA <bikes>", message)
         self.assertNotIn("&amp;", message)
         self.assertNotIn("&lt;bikes&gt;", message)
         self.assertNotIn("&lt;@123&gt;", message)
         self.assertNotIn("<@123>", message)
+        self.assertNotIn("<@&456>", message)
+        self.assertNotIn("<#789>", message)
+        self.assertNotIn("@everyone", message)
+        self.assertNotIn("@here", message)
         self.assertIn("<@\u200b123>", message)
+        self.assertIn("<@\u200b&456>", message)
+        self.assertIn("<#\u200b789>", message)
+        self.assertIn("@\u200beveryone", message)
+        self.assertIn("@\u200bhere", message)
 
 
 class ProjectApprovalMessageTests(SimpleTestCase):
