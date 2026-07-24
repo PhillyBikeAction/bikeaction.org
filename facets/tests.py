@@ -1,8 +1,15 @@
 import datetime
 
-from django.test import SimpleTestCase
+from django.contrib.auth.models import User
+from django.contrib.gis.geos import MultiPolygon, Point, Polygon
+from django.test import SimpleTestCase, TestCase
+from django.urls import reverse
+from django.utils import timezone
+from email_log.models import Email
 
+from facets.models import District, RegisteredCommunityOrganization
 from facets.views import _email_report_time_window
+from profiles.models import Profile
 
 
 class EmailReportTimeWindowTests(SimpleTestCase):
@@ -55,3 +62,68 @@ class EmailReportTimeWindowTests(SimpleTestCase):
                 {"value": "all", "label": "All time", "selected": False},
             ],
         )
+
+
+class EmailReportViewTests(TestCase):
+    def setUp(self):
+        self.staff_user = User.objects.create_user(
+            username="staff",
+            email="staff@example.com",
+            password="password",
+            is_staff=True,
+        )
+        self.client.force_login(self.staff_user)
+
+    def create_facet(self, model, name):
+        polygon = Polygon(
+            (
+                (0, 0),
+                (2, 0),
+                (2, 2),
+                (0, 2),
+                (0, 0),
+            ),
+            srid=4326,
+        )
+        return model.objects.create(
+            name=name,
+            mpoly=MultiPolygon(polygon, srid=4326),
+            properties={},
+            targetable=True,
+        )
+
+    def create_profile(self):
+        user = User.objects.create_user(username="rider", email="rider@example.com")
+        return Profile.objects.create(user=user, location=Point(1, 1, srid=4326))
+
+    def create_email(self, *, date_sent):
+        email = Email.objects.create(
+            from_email="organizer@example.com",
+            recipients="Rider <rider@example.com>",
+            subject="Project update",
+            body="Message",
+            date_sent=date_sent,
+        )
+        Email.objects.filter(pk=email.pk).update(date_sent=date_sent)
+        email.refresh_from_db()
+        return email
+
+    def test_selected_time_window_updates_district_and_rco_email_totals(self):
+        self.create_facet(District, "District 1")
+        self.create_facet(RegisteredCommunityOrganization, "RCO 1")
+        self.create_profile()
+        self.create_email(date_sent=timezone.now() - datetime.timedelta(days=20))
+        self.create_email(date_sent=timezone.now() - datetime.timedelta(days=60))
+
+        default_response = self.client.get(reverse("rco_email_report"))
+        ninety_day_response = self.client.get(
+            reverse("rco_email_report"),
+            {"time_window": "90"},
+        )
+
+        self.assertEqual(default_response.status_code, 200)
+        self.assertEqual(ninety_day_response.status_code, 200)
+        self.assertEqual(default_response.context["districts"][0]["total_emails"], 1)
+        self.assertEqual(default_response.context["rcos"][0]["total_emails"], 1)
+        self.assertEqual(ninety_day_response.context["districts"][0]["total_emails"], 2)
+        self.assertEqual(ninety_day_response.context["rcos"][0]["total_emails"], 2)
