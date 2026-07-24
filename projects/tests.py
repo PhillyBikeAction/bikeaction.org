@@ -12,8 +12,59 @@ from projects.tasks import (
     build_project_archive_message,
     build_project_approved_channel_message,
     build_project_lead_cheat_sheet_dm_message,
+    format_project_application_discord_messages,
     get_project_archive_mention_role_id,
 )
+
+
+class ProjectApplicationDiscordMarkdownTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="projectuser",
+            email="project@example.com",
+            password="password",
+            first_name="Project",
+            last_name="User",
+        )
+        self.profile = Profile.objects.create(
+            user=self.user,
+            street_address="123 Market St",
+            zip_code="19107",
+        )
+        SocialAccount.objects.create(
+            user=self.user,
+            provider="discord",
+            uid="discord-projectuser",
+            extra_data={"username": "projectuser"},
+        )
+
+    def project_data(self):
+        form = ProjectApplicationForm()
+        data = {
+            field.name: {"label": field.label, "value": f"{field.name} value"} for field in form
+        }
+        data["shortname"]["value"] = "Project Details"
+        data["quick_summary"]["value"] = "Indego & SEPTA <bikes> <@123>"
+        return data
+
+    def test_discord_messages_decode_sanitized_html_entities_without_mentions(self):
+        application = ProjectApplication(
+            submitter=self.user,
+            data=self.project_data(),
+        )
+
+        application.render_markdown()
+        message = "".join(format_project_application_discord_messages(application.markdown))
+
+        self.assertIn("Indego &amp; SEPTA", application.markdown)
+        self.assertIn("&lt;bikes&gt;", application.markdown)
+        self.assertIn("&lt;@123&gt;", application.markdown)
+        self.assertIn("Indego & SEPTA <bikes>", message)
+        self.assertNotIn("&amp;", message)
+        self.assertNotIn("&lt;bikes&gt;", message)
+        self.assertNotIn("&lt;@123&gt;", message)
+        self.assertNotIn("<@123>", message)
+        self.assertIn("<@\u200b123>", message)
 
 
 class ProjectApprovalMessageTests(SimpleTestCase):

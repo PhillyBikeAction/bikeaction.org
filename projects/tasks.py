@@ -1,4 +1,6 @@
+import html
 import logging
+import re
 
 from asgiref.sync import async_to_sync, sync_to_async
 from celery import shared_task
@@ -12,6 +14,10 @@ from projects.models import ProjectApplication
 logger = logging.getLogger(__name__)
 
 REIMBURSEMENT_FORM_URL = "https://forms.gle/tex8Pm7j1dSad6Xu9"
+DISCORD_MESSAGE_CHARACTER_LIMIT = 1990
+DISCORD_BROADCAST_MENTION_RE = re.compile(r"@(?=everyone\b|here\b)")
+DISCORD_TAG_MENTION_RE = re.compile(r"<(@[!&]?\d+|#\d+)>")
+ZERO_WIDTH_SPACE = "\u200b"
 
 
 def get_project_lead_cheat_sheet_link_text():
@@ -70,6 +76,46 @@ def build_project_lead_cheat_sheet_dm_message(
     return msg
 
 
+def neutralize_discord_mentions(text):
+    def replace_tag(match):
+        value = match.group(1)
+        if value.startswith("@"):
+            value = value.replace("@", f"@{ZERO_WIDTH_SPACE}", 1)
+        elif value.startswith("#"):
+            value = value.replace("#", f"#{ZERO_WIDTH_SPACE}", 1)
+        return f"<{value}>"
+
+    text = DISCORD_TAG_MENTION_RE.sub(replace_tag, text)
+    return DISCORD_BROADCAST_MENTION_RE.sub(f"@{ZERO_WIDTH_SPACE}", text)
+
+
+def format_project_application_discord_line(line):
+    return neutralize_discord_mentions(html.unescape(line))
+
+
+def format_project_application_discord_messages(markdown):
+    messages = []
+    msg = ""
+    in_response = False
+    for line in markdown.split("\n"):
+        line = format_project_application_discord_line(line)
+        if line == "```":
+            if in_response:
+                in_response = False
+            else:
+                in_response = True
+        if len(msg) + len(line) >= DISCORD_MESSAGE_CHARACTER_LIMIT:
+            if in_response:
+                msg += "```\n"
+            messages.append(msg)
+            msg = ""
+            if in_response:
+                msg += "```\n"
+        msg += line + "\n"
+    messages.append(msg)
+    return messages
+
+
 def build_project_archive_message(guild_id, archived_by, board_role_mention):
     return (
         f"This project has been marked complete by {archived_by}, "
@@ -104,23 +150,8 @@ async def _add_new_project_message_and_thread(project_application_id):
     )
     if not application.markdown:
         await sync_to_async(application.render_markdown)()
-    msg = ""
-    in_response = False
-    for line in application.markdown.split("\n"):
-        if line == "```":
-            if in_response:
-                in_response = False
-            else:
-                in_response = True
-        if len(msg) + len(line) >= 1990:
-            if in_response:
-                msg += "```\n"
-            await thread.send(msg)
-            msg = ""
-            if in_response:
-                msg += "```\n"
-        msg += line + "\n"
-    await thread.send(msg)
+    for msg in format_project_application_discord_messages(application.markdown):
+        await thread.send(msg)
     link = reverse("project_application_view", kwargs={"pk": application.id})
     link = f"https://apps.bikeaction.org{link}"
     await thread.send(
