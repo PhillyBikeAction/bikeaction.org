@@ -36,6 +36,10 @@
           <td>{% if profile.newsletter_opt_in %}{% translate "Subscribed" %}{% else %}{% translate "Not Subscribed" %}{% endif %}</td>
         </tr>
         <tr>
+          <th>{% translate "Volunteer Opportunities" %}</th>
+          <td>{% if profile.volunteer_opt_in %}{% translate "Subscribed" %}{% else %}{% translate "Not Subscribed" %}{% endif %}</td>
+        </tr>
+        <tr>
           <th>{% translate "Discord" %}</th>
           <td>
             {% if profile.discord %}

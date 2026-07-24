@@ -159,6 +159,31 @@ class NewsletterSubscriberFilter(admin.SimpleListFilter):
         return queryset
 
 
+class VolunteerSubscriberFilter(admin.SimpleListFilter):
+    title = "subscribed to volunteer opportunities"
+    parameter_name = "volunteer subscriber"
+
+    def lookups(self, request, model_admin):
+        return ((True, "Yes"), (False, "No"))
+
+    def queryset(self, request, queryset):
+        if self.value() in (
+            "True",
+            True,
+        ):
+            return queryset.filter(
+                volunteer_opt_in=True,
+            )
+        elif self.value() in (
+            "False",
+            False,
+        ):
+            return queryset.filter(
+                volunteer_opt_in=False,
+            )
+        return queryset
+
+
 class GeolocatedFilter(admin.SimpleListFilter):
     title = "geolocated"
     parameter_name = "geolocated"
@@ -424,6 +449,7 @@ class ProfileAdmin(ExtraButtonsMixin, ReadOnlyLeafletGeoAdminMixin, admin.ModelA
         MemberByDiscordActivityFilter,
         MemberBySpecialRecognitionFilter,
         NewsletterSubscriberFilter,
+        VolunteerSubscriberFilter,
         AppsConnectedFilter,
         GeolocatedFilter,
         DistrictFilter,
@@ -933,7 +959,7 @@ class ProfileAdmin(ExtraButtonsMixin, ReadOnlyLeafletGeoAdminMixin, admin.ModelA
         ),
         (
             "Preferences",
-            {"fields": ["newsletter_opt_in"]},
+            {"fields": ["newsletter_opt_in", "volunteer_opt_in"]},
         ),
         (
             "Internal",
@@ -955,7 +981,7 @@ class ProfileAdmin(ExtraButtonsMixin, ReadOnlyLeafletGeoAdminMixin, admin.ModelA
         ),
         (
             "Preferences",
-            {"fields": ["newsletter_opt_in"]},
+            {"fields": ["newsletter_opt_in", "volunteer_opt_in"]},
         ),
         (
             "Internal",
@@ -1246,7 +1272,7 @@ class OrganizerProfileAdmin(OrganizerPerms, ProfileAdmin):
         ),
         (
             "Preferences",
-            {"fields": ["newsletter_opt_in"]},
+            {"fields": ["newsletter_opt_in", "volunteer_opt_in"]},
         ),
         (
             "Donations",

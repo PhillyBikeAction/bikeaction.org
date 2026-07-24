@@ -64,6 +64,13 @@ class Profile(models.Model):
         help_text=_("Subscribe to Philly Bike Action's monthly newsletter."),
     )
 
+    volunteer_opt_in = models.BooleanField(
+        blank=False,
+        default=False,
+        verbose_name=_("Volunteering"),
+        help_text=_("Recieve news about volunteer opportunities with Philly Bike Action."),
+    )
+
     location = models.PointField(blank=True, null=True, srid=4326)
 
     def save(self, *args, **kwargs):

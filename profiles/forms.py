@@ -59,10 +59,17 @@ class BaseProfileSignupForm(BaseSignupForm):
         ],
         label=_("Zip Code"),
     )
+
     newsletter_opt_in = forms.BooleanField(
         required=False,
         initial=True,
         help_text=Profile._meta.get_field("newsletter_opt_in").help_text,
+    )
+
+    volunteer_opt_in = forms.BooleanField(
+        required=False,
+        initial=False,
+        help_text=Profile._meta.get_field("volunteer_opt_in").help_text,
     )
 
     def save(self, request):
@@ -75,6 +82,7 @@ class BaseProfileSignupForm(BaseSignupForm):
             zip_code=self.cleaned_data["zip_code"],
             newsletter_opt_in=self.cleaned_data["newsletter_opt_in"],
             pronouns=self.cleaned_data["pronouns"],
+            volunteer_opt_in=self.cleaned_data["volunteer_opt_in"],
         )
         profile.save()
         return user
@@ -113,6 +121,7 @@ class ProfileSignupForm(BaseProfileSignupForm):
         "zip_code",
         "email",
         "newsletter_opt_in",
+        "volunteer_opt_in",
         "password1",
         "password2",
         "captcha",
@@ -133,6 +142,7 @@ class ProfileUpdateForm(forms.ModelForm):
             "street_address",
             "zip_code",
             "newsletter_opt_in",
+            "volunteer_opt_in",
         ]
         help_texts = {}
 
