@@ -3,6 +3,7 @@ from django.urls import reverse
 from django.utils.html import format_html
 
 from maillinks.models import MailLink
+from pbaabp.admin import OrganizerPerms, organizer_admin
 
 
 class MailLinkAdmin(admin.ModelAdmin):
@@ -21,4 +22,16 @@ class MailLinkAdmin(admin.ModelAdmin):
         )
 
 
+class OrganizerMailLinkAdmin(OrganizerPerms, MailLinkAdmin):
+    def has_add_permission(self, request):
+        return self.has_module_permission(request)
+
+    def has_change_permission(self, request, obj=None):
+        return self.has_module_permission(request)
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
 admin.site.register(MailLink, MailLinkAdmin)
+organizer_admin.register(MailLink, OrganizerMailLinkAdmin)
