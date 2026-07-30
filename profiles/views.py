@@ -12,6 +12,7 @@ from django.views.generic import CreateView, DeleteView, DetailView, UpdateView
 from djstripe.models import Customer, Price
 
 from organizers.models import OrganizerApplication
+from community_fund.models import CommunityActionFundApplication
 from pbaabp.integrations.mailjet import Mailjet
 from profiles.forms import ProfileUpdateForm
 from profiles.models import DoNotEmail, Profile, ShirtOrder
@@ -319,8 +320,13 @@ class ProfileDeleteView(LoginRequiredMixin, DeleteView):
         context["has_organizer_applications"] = OrganizerApplication.objects.filter(
             submitter=self.request.user
         ).exists()
+        context["has_community_action_fund_applications"] = (
+            CommunityActionFundApplication.objects.filter(submitter=self.request.user).exists()
+        )
         context["has_applications"] = (
-            context["has_project_applications"] or context["has_organizer_applications"]
+            context["has_project_applications"]
+            or context["has_organizer_applications"]
+            or context["has_community_action_fund_applications"]
         )
 
         profile = self.request.user.profile
@@ -351,12 +357,13 @@ class ProfileDeleteView(LoginRequiredMixin, DeleteView):
 
         project_apps = ProjectApplication.objects.filter(submitter=request.user)
         organizer_apps = OrganizerApplication.objects.filter(submitter=request.user)
+        community_fund_apps = CommunityActionFundApplication.objects.filter(submitter=request.user)
 
-        if project_apps.exists() or organizer_apps.exists():
+        if project_apps.exists() or organizer_apps.exists() or community_fund_apps.exists():
             messages.add_message(
                 request,
                 messages.ERROR,
-                "You cannot delete your account while you have project or organizer applications. "
+                "You cannot delete your account while you have project, organizer, or Community Action Fund applications. "
                 "Please contact apps@bikeaction.org for assistance.",
             )
             return HttpResponseRedirect(reverse("profile"))

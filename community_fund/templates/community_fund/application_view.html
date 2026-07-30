@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% load markdownify %}
+
+{% block content %}
+<div class="form-header"><h1>Community Action Fund Application</h1></div>
+<div class="form-container project-application">{{ application.markdown|markdownify }}</div>
+{% endblock %}

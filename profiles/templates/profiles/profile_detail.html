@@ -420,6 +420,50 @@
 </div>
 {% endif %}
 
+{% if request.user.profile.community_action_fund_application_drafts %}
+<hr>
+<div class="form-header">
+  <h2>Community Action Fund Application Drafts</h2>
+  <div class="table-container">
+    <table>
+      <tr><th>Project</th><th>Last Updated</th><th>Actions</th></tr>
+      {% for application in request.user.profile.community_action_fund_application_drafts %}
+      <tr>
+        <td>{{ application.data.project_title.value|truncatechars:64 }}</td>
+        <td>{{ application.updated_at|date }}</td>
+        <td>
+          <a class="smol-button" href="{% url 'community_action_fund_application_edit' pk=application.id %}">Edit/Submit</a>
+          <form class="table-action-form" method="post" action="{% url 'community_action_fund_application_delete' pk=application.id %}">
+            {% csrf_token %}<button class="smol-button danger" type="submit">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+{% endif %}
+
+{% if request.user.profile.community_action_fund_applications %}
+<hr>
+<div class="form-header">
+  <h2>Community Action Fund Applications</h2>
+  <div class="table-container">
+    <table>
+      <tr><th>Project</th><th>Submitted</th><th>Status</th><th>Actions</th></tr>
+      {% for application in request.user.profile.community_action_fund_applications %}
+      <tr>
+        <td>{{ application.data.project_title.value|truncatechars:64 }}</td>
+        <td>{{ application.created_at|date }}</td>
+        <td>{{ application.get_decision_display|default:"Pending" }}</td>
+        <td><a href="{% url 'community_action_fund_application_view' pk=application.id %}">View</a></td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+{% endif %}
+
 {% if request.user.profile.organizer_application_draft %}
 <hr>
 <div class="form-header">

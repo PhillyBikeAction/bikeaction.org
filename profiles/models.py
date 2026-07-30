@@ -15,6 +15,7 @@ from facets.models import (
 )
 from membership.models import Membership
 from organizers.models import OrganizerApplication
+from community_fund.models import CommunityActionFundApplication
 from profiles.tasks import geocode_profile, sync_to_mailjet
 from projects.models import ProjectApplication
 
@@ -332,6 +333,14 @@ class Profile(models.Model):
     @property
     def organizer_application(self):
         return OrganizerApplication.objects.filter(submitter=self.user, draft=False).all()
+
+    @property
+    def community_action_fund_application_drafts(self):
+        return CommunityActionFundApplication.objects.filter(submitter=self.user, draft=True)
+
+    @property
+    def community_action_fund_applications(self):
+        return CommunityActionFundApplication.objects.filter(submitter=self.user, draft=False)
 
     @property
     def district(self):

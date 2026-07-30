@@ -673,6 +673,48 @@ form.application-form .form-errors {
   text-align: center;
 }
 
+.community-fund-application .funding-needs-intro p {
+  text-align: left;
+  line-height: 1.45;
+}
+
+.community-fund-application .funding-preference-field > .formfield > p {
+  text-align: left;
+}
+
+.community-fund-application .funding-preference-field label {
+  align-items: center;
+  display: flex;
+  gap: .5em;
+  margin: .25em 0;
+  width: auto;
+}
+
+.community-fund-application .funding-preference-field input[type=radio] {
+  flex: 0 0 auto;
+  margin: 0;
+  width: auto;
+}
+
+.community-fund-application .certification-field p {
+  text-align: left;
+}
+
+.community-fund-application .certification-field label {
+  align-items: flex-start;
+  display: flex;
+  gap: .75em;
+  line-height: 1.35;
+  margin: 0;
+  width: auto;
+}
+
+.community-fund-application .certification-field input[type=checkbox] {
+  flex: 0 0 auto;
+  margin: .2em 0 0;
+  width: auto;
+}
+
 .button-holder {
   text-align: center;
   padding: 1em;
