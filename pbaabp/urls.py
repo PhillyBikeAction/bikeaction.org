@@ -47,6 +47,7 @@ urlpatterns = [
     path("rcos/", include("facets.urls")),
     path("projects/", include("projects.urls")),
     path("organizers/", include("organizers.urls")),
+    path("community-fund/", include("community_fund.urls")),
     path(
         "_partials/_newsletter_signup_partial/",
         _newsletter_signup_partial,

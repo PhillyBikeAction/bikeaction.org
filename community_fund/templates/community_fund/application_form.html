@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="form-header">
+  <h1>PBA Community Action Fund Application</h1>
+  <div style="text-align: left;">
+    <p>Thank you for your interest in our Community Action Fund. This program supports community-led projects that make biking in Philadelphia safer, easier, and more accessible.</p>
+    <p>Awards range from $250–$2,000. Projects must be completed within six months of receiving funding.</p>
+  </div>
+</div>
+<div class="form-container community-fund-application">
+  <form class="application-form" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% if form.errors %}<div class="form-errors"><p><b>Form invalid!</b> Please correct the errors below.</p></div>{% endif %}
+    {{ form.non_field_errors }}
+
+    <h2>Contact Information</h2>
+    {% include "snippets/field.html" with field=form.primary_contact_name %}
+    {% include "snippets/field.html" with field=form.organization %}
+    {% include "snippets/field.html" with field=form.email %}
+    {% include "snippets/field.html" with field=form.phone %}
+
+    <h2>Tell Us About Your Project</h2>
+    {% include "snippets/field.html" with field=form.project_title %}
+    {% include "snippets/field.html" with field=form.project_description %}
+    <h2>Community Impact</h2>
+    {% include "snippets/field.html" with field=form.community_impact %}
+    <h2>Project Readiness</h2>
+    {% include "snippets/field.html" with field=form.project_readiness %}
+    <h2>Budget</h2>
+    {% include "snippets/field.html" with field=form.amount_requested %}
+    {% include "snippets/field.html" with field=form.estimated_total_project_cost %}
+    <h2>Funding Needs</h2>
+    <div class="funding-needs-intro">
+      <p>Our standard practice is to reimburse project expenses after they are incurred. We also recognize that this approach doesn't work for every project. If selected, we'll work with recipients to determine the most appropriate funding arrangement. Your answer will have no bearing on your funding decision.</p>
+    </div>
+    <div class="funding-preference-field">
+      {% include "snippets/field.html" with field=form.funding_preference %}
+    </div>
+    {% include "snippets/field.html" with field=form.funding_preference_explanation %}
+    <h2>Supporting Materials</h2>
+    {% include "snippets/field.html" with field=form.supporting_materials %}
+    {% if existing_materials %}
+    <p>Files already uploaded:</p>
+    <ul>
+      {% for material in existing_materials %}<li><a href="{{ material.file.url }}">{{ material.filename }}</a></li>{% endfor %}
+    </ul>
+    {% endif %}
+    <h2>Certification</h2>
+    <div class="formfield certification-field">
+      <p>
+        {{ form.certification.errors }}
+        <label for="{{ form.certification.id_for_label }}">
+          {{ form.certification }}
+          <span>{{ form.certification.label }}{% if form.certification.field.required %} *{% endif %}</span>
+        </label>
+      </p>
+    </div>
+
+    <div class="button-holder">
+      <button class="secondary-button" type="submit" name="save-draft" value="Save Draft" formnovalidate>Save Draft</button>
+      <button class="submit-button" type="submit" name="submit-application" value="Submit">Submit</button>
+      <span class="helptext">Use “Save Draft” to store your responses without validation and return later. Submitted applications cannot be edited.</span>
+    </div>
+  </form>
+</div>
+{% endblock %}

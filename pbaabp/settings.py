@@ -125,6 +125,7 @@ INSTALLED_APPS = [
     "facets",
     "projects",
     "organizers",
+    "community_fund",
     "aliases",
     "lazer",
     "cms",
@@ -453,6 +454,14 @@ NEW_PROJECT_REVIEW_DISCORD_VOTE_CHANNEL_ID = env(
 )
 NEW_PROJECT_REVIEW_DISCORD_ROLE_VOTE_MENTION_ID = env(
     "NEW_PROJECT_REVIEW_DISCORD_ROLE_VOTE_MENTION_ID", default=None
+)
+
+# Community Action Fund Application Notifications
+COMMUNITY_ACTION_FUND_REVIEW_DISCORD_CHANNEL_ID = env(
+    "COMMUNITY_ACTION_FUND_REVIEW_DISCORD_CHANNEL_ID", default=None
+)
+COMMUNITY_ACTION_FUND_REVIEW_DISCORD_ROLE_MENTION_ID = env(
+    "COMMUNITY_ACTION_FUND_REVIEW_DISCORD_ROLE_MENTION_ID", default=None
 )
 
 # New Project Application Notifications
