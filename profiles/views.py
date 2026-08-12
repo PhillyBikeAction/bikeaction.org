@@ -335,7 +335,7 @@ class ProfileDeleteView(LoginRequiredMixin, DeleteView):
         mailjet = Mailjet()
         contact_lists = mailjet.fetch_contact_lists(self.request.user.email)
         context["mailjet_subscribed"] = any(
-            cl["ListID"] == int(settings.MAILJET_CONTACT_LIST_ID) and cl["IsUnsub"] is False
+            cl["ListID"] == int(settings.MAILJET_NEWSLETTER_LIST_ID) and cl["IsUnsub"] is False
             for cl in contact_lists.get("Data", [])
         )
 
@@ -374,7 +374,7 @@ class ProfileDeleteView(LoginRequiredMixin, DeleteView):
             email=user.email, defaults={"reason": DoNotEmail.Reason.ACCOUNT_DELETION}
         )
 
-        list_id = settings.MAILJET_CONTACT_LIST_ID
+        list_id = settings.MAILJET_NEWSLETTER_LIST_ID
         url = f"https://api.mailjet.com/v3/REST/contactslist/{list_id}/managecontact"
 
         requests.post(
@@ -387,6 +387,8 @@ class ProfileDeleteView(LoginRequiredMixin, DeleteView):
             json={"Action": "unsub", "Email": user.email},
             auth=(settings.MAILJET_API_KEY, settings.MAILJET_SECRET_KEY),
         )
+
+        # TODO: Add in unsubscribe for volunteering emails if they are opted in
 
         return super().post(request, *args, **kwargs)
 

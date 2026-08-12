@@ -7,7 +7,8 @@ class Mailjet:
         self.base_url = "https://api.mailjet.com/v3/REST"
         self.api_key = settings.MAILJET_API_KEY
         self.secret_key = settings.MAILJET_SECRET_KEY
-        self.contact_list_id = settings.MAILJET_CONTACT_LIST_ID
+        self.newsletter_list_id = settings.MAILJET_NEWSLETTER_LIST_ID
+        self.volunteering_list = settings.MAILJET_VOLUNTEERING_LIST_ID
         self.auth = (self.api_key, self.secret_key)
 
     def create_contact(self, email):
@@ -58,9 +59,9 @@ class Mailjet:
 
         return response.json()
 
-    def add_contact_to_list(self, email, subscribed=True):
+    def add_contact_to_list(self, email, list, subscribed=True):
         response = requests.post(
-            f"{self.base_url}/contactslist/{self.contact_list_id}/managecontact",
+            f"{self.base_url}/contactslist/{list}/managecontact",
             json={"Action": "addforce" if subscribed else "remove", "Email": email},
             auth=self.auth,
         )

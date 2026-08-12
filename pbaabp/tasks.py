@@ -102,7 +102,26 @@ def subscribe_to_newsletter(email, first_name=None, last_name=None, tags=None):
             "name": name,
         },
     )
-    mailjet.add_contact_to_list(email, subscribed=True)
+    mailjet.add_contact_to_list(email, Mailjet.newsletter_list_id, subscribed=True)
+
+@shared_task
+def subscribe_to_volunteering(email, first_name=None, last_name=None, tags=None):
+    name = ""
+    if first_name:
+        name += first_name
+    if last_name:
+        name += f" {last_name}"
+    mailjet = Mailjet()
+    mailjet.fetch_contact(email)
+    mailjet.update_contact_data(
+        email,
+        {
+            "first_name": first_name,
+            "last_name": last_name,
+            "name": name,
+        },
+    )
+    mailjet.add_contact_to_list(email, Mailjet.newsletter_list_id, subscribed=True)
 
 
 @shared_task
