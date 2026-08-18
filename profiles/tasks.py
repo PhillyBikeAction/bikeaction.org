@@ -71,7 +71,6 @@ def sync_to_mailjet(profile_id):
             "name": profile.user.first_name + " " + profile.user.last_name,
         },
     )
-    # TODO: Add logic to handle subscribing to newsletter vs volunteering
     mailjet.add_contact_to_list(profile.user.email, subscribed=profile.newsletter_opt_in)
     profile.mailjet_contact_id = response["ID"]
     profile.save()
@@ -91,14 +90,12 @@ def add_mailjet_subscriber(email, first_name, last_name, name):
             "name": name,
         },
     )
-    # TODO: Add logic to handle subscribing to newsletter vs volunteering
     mailjet.add_contact_to_list(email, subscribed=True)
 
 
 @shared_task
 def unsubscribe_mailjet_email(list_id, email):
-    if int(list_id) == int(settings.MAILJET_NEWSLETTER_LIST_ID):
+    if int(list_id) == int(settings.MAILJET_CONTACT_LIST_ID):
         from profiles.models import Profile
 
         Profile.objects.filter(user__email=email).update(newsletter_opt_in=False)
-    # TODO: Add support for unsubscribing volunteers

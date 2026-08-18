@@ -10,7 +10,6 @@ def sync_to_mailjet(event_signin_id):
     event_sign_in = EventSignIn.objects.get(id=event_signin_id)
 
     print(event_sign_in, event_sign_in.newsletter_opt_in)
-    # TODO: Add logic to handle volunteer opt in emails
     if event_sign_in.newsletter_opt_in:
         mailjet = Mailjet()
         if event_sign_in.mailjet_contact_id is None:
