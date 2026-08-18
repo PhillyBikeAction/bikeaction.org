@@ -827,8 +827,8 @@ class EmailBlastTargetingTests(TestCase):
         self.assertCountEqual(profiles, [signer])
 
     def test_volunteers_profiles_by_opt_in(self):
-        volunteer = self.create_profile("volunteer@Example.com",0,0, volunteer_opt_in=True)
-        other = self.create_profile("nonvolunteer@Example.com",0,0, volunteer_opt_in=False)
+        volunteer = self.create_profile("volunteer@Example.com", 0, 0, volunteer_opt_in=True)
+        self.create_profile("nonvolunteer@Example.com", 0, 0, volunteer_opt_in=False)
         target = self.target_data(
             EmailBlastTargetNode.TargetType.VOLUNTEERS,
             "",
@@ -836,7 +836,6 @@ class EmailBlastTargetingTests(TestCase):
         )
 
         profiles = _email_draft_profiles_for_targets([target])
-
         self.assertCountEqual(profiles, [volunteer])
 
     def test_event_signin_target_matches_profiles_by_signin_email_case_insensitively(self):
