@@ -27,6 +27,7 @@ class EmailBlastTargetNode(models.Model):
         EVENT_RSVP = "event_rsvp", "Event RSVPs"
         EVENT_SIGNIN = "event_signin", "Event sign-ins"
         LEGACY = "legacy", "Legacy/custom targeting"
+        VOLUNTEERS = "volunteers", "Volunteering Opt Ins"
 
     class Operator(models.TextChoices):
         AND = "and", "All of these"

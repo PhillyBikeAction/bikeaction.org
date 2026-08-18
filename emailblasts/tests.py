@@ -596,9 +596,13 @@ class EmailBlastExampleSendTests(TestCase):
 
 
 class EmailBlastTargetingTests(TestCase):
-    def create_profile(self, email, longitude, latitude):
+    def create_profile(self, email, longitude, latitude, volunteer_opt_in=False):
         user = User.objects.create_user(username=email, email=email)
-        return Profile.objects.create(user=user, location=Point(longitude, latitude, srid=4326))
+        return Profile.objects.create(
+            user=user,
+            location=Point(longitude, latitude, srid=4326),
+            volunteer_opt_in=volunteer_opt_in,
+        )
 
     def create_district(self, name, min_x, min_y, max_x, max_y):
         return self.create_facet(District, name, min_x, min_y, max_x, max_y)
@@ -821,6 +825,19 @@ class EmailBlastTargetingTests(TestCase):
         profiles = _email_draft_profiles_for_targets([target])
 
         self.assertCountEqual(profiles, [signer])
+
+    def test_volunteers_profiles_by_opt_in(self):
+        volunteer = self.create_profile("volunteer@Example.com",0,0, volunteer_opt_in=True)
+        other = self.create_profile("nonvolunteer@Example.com",0,0, volunteer_opt_in=False)
+        target = self.target_data(
+            EmailBlastTargetNode.TargetType.VOLUNTEERS,
+            "",
+            EmailBlastTargetNode.TargetType.VOLUNTEERS.label,
+        )
+
+        profiles = _email_draft_profiles_for_targets([target])
+
+        self.assertCountEqual(profiles, [volunteer])
 
     def test_event_signin_target_matches_profiles_by_signin_email_case_insensitively(self):
         attendee = self.create_profile("Attendee@Example.com", 0, 0)

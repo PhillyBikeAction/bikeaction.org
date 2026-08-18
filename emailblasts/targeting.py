@@ -43,6 +43,8 @@ def _email_draft_geojson_profiles(geojson):
 def _email_draft_target_profiles(target):
     if target["target_type"] == EmailBlastTargetNode.TargetType.ALL_PROFILES:
         return Profile.objects.all()
+    if target["target_type"] == EmailBlastTargetNode.TargetType.VOLUNTEERS:
+        return Profile.objects.filter(volunteer_opt_in=True)
     if target["target_type"] == EmailBlastTargetNode.TargetType.GEOJSON:
         return _email_draft_geojson_profiles(json.dumps(target["target_geojson"]))
     if target["target_type"] == EmailBlastTargetNode.TargetType.PETITION:
