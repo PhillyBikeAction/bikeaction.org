@@ -45,6 +45,6 @@
 {% if application.supporting_materials.exists %}
 ## Supporting Materials
 {% for material in application.supporting_materials.all %}
-- [{{ material.filename }}](<{{ site_url }}{{ material.file.url }}>)
+- [{{ material.filename }}](<{{ material.file.url }}>)
 {% endfor %}
 {% endif %}
