@@ -22,7 +22,7 @@ class Campaign(OrderedModel):
     class Status(models.TextChoices):
         DRAFT = "draft"
         ACTIVE = "active"
-        COMPLETED = "completed"
+        COMPLETED = "past"
         CANCELED = "canceled"
         SUSPENDED = "suspended"
         UNKNOWN = "unknown"
@@ -58,6 +58,8 @@ class Campaign(OrderedModel):
 
     content = MarkdownField(rendered_field="content_rendered", validator=VALIDATOR_NULL)
     content_rendered = RenderedMarkdownField()
+
+    update = models.TextField(null=True, blank=True)
 
     wordpress_id = models.CharField(max_length=64, null=True, blank=True)
 

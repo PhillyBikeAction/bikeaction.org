@@ -34,6 +34,7 @@ class CampaignAdmin(OrderedModelAdmin):
         help_texts = {
             "donation_action": "Encourage one-time donation",
             "subscription_action": "Encourage recurring donation",
+            "update": 'If defined, displays after a campaign is marked as completed; prefixed with "UPDATE" in bold.',
         }
         kwargs.update({"help_texts": help_texts})
         return super().get_form(*args, **kwargs)

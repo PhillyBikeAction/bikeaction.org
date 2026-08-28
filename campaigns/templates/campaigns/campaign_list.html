@@ -29,10 +29,10 @@
 {% for status, campaigns in campaigns_by_status %}
 {% if status == "draft" %}
 {% if request.user.is_staff %}
-<h2>{{ status|title }} Campaigns</h2>
+<h2>{{ status|title }} Petitions</h2>
 {% endif %}
 {% else %}
-<h2>{{ status|title }} Campaigns</h2>
+<h2>{{ status|title }} Petitions</h2>
 {% endif %}
 
 <div class="campaigns-container">
@@ -53,7 +53,12 @@
     <a href="{% url 'campaign' slug=campaign.slug %}">
       <h2>{{ campaign.title }}</h2>
       {% if campaign.cover %}<img class="campaign-card-img" src="{{ campaign.cover|thumbnail_url:'small' }}">{% endif %}
-      <p>{{ campaign.description }}</p>
+      <i>{{ campaign.created_at|date:"F Y" }} </i>
+      <p>
+        {% if campaign.status == "past" and campaign.update %}
+        <p><b>UPDATE:</b> {{ campaign.update }}</p>
+        {% endif %}
+        {{ campaign.description }}</p>
     </a>
   </div>
   {% endif %}
