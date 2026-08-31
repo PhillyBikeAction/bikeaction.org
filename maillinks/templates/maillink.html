@@ -4,6 +4,14 @@
 {% block content %}
 
 <div style="max-width: 40em; margin: 0 auto;">
+{% if not maillink.active %}
+<div class="messages" role="status">
+  <div class="alert">
+    <strong>Organizer preview:</strong> This maillink is inactive. The public will receive a
+    404 response; you can see it because you are signed in as an organizer.
+  </div>
+</div>
+{% endif %}
 <h1>{{ maillink.title }}</h1>
 
 {% if maillink.description%}

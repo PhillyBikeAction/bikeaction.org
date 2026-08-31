@@ -6,7 +6,9 @@ from maillinks.models import MailLink
 
 
 class MailLinkAdmin(admin.ModelAdmin):
-    list_display = ["title", "flyer", "page"]
+    list_display = ["title", "active", "flyer", "page"]
+    list_editable = ["active"]
+    list_filter = ["active"]
 
     @admin.display(description="Flyer")
     def flyer(self, obj):
