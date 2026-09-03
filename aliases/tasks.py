@@ -14,7 +14,6 @@ def sync_alias_to_mailgun(alias_id):
 
     url = "https://api.mailgun.net/v3/routes"
     auth = ("api", settings.MAILGUN_API_KEY)
-    headers = {"Content-Type": "multipart/form-data"}
     data = {
         "priority": 0,
         "description": f"apps managed DO NOT EDIT - {alias.alias}@{alias.domain}",
@@ -26,16 +25,13 @@ def sync_alias_to_mailgun(alias_id):
     if recipients:
         if alias.mailgun_id:
             url += f"/{alias.mailgun_id}"
-            data["id"] = alias.mailgun_id
-            response = requests.put(url, params=data, headers=headers, auth=auth)
-            response.raise_for_status()
-            data = response.json()
-            _mailgun_id = data["id"]
+            response = requests.put(url, data=data, auth=auth, timeout=30)
         else:
-            response = requests.post(url, params=data, headers=headers, auth=auth)
-            response.raise_for_status()
-            data = response.json()
-            _mailgun_id = data["route"]["id"]
+            response = requests.post(url, data=data, auth=auth, timeout=30)
+        response.raise_for_status()
+        response_data = response.json()
+        route = response_data.get("route", response_data)
+        _mailgun_id = route["id"]
 
     _mailgun_smtp_password = None
     if alias.enable_smtp:
@@ -43,9 +39,8 @@ def sync_alias_to_mailgun(alias_id):
             _mailgun_smtp_password = alias.mailgun_smtp_password
         else:
             url = f"https://api.mailgun.net/v3/domains/{alias.domain}/credentials"
-            headers = {}
             data = {"login": f"{alias.alias}@{alias.domain}"}
-            response = requests.post(url, params=data, headers=headers, auth=auth)
+            response = requests.post(url, data=data, auth=auth, timeout=30)
             response.raise_for_status()
             data = response.json()
             _mailgun_smtp_password = data["credentials"][f"{alias.alias}@{alias.domain}"]
