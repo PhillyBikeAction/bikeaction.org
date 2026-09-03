@@ -1,10 +1,13 @@
+from types import SimpleNamespace
 from unittest.mock import PropertyMock, patch
 
 from django.contrib.auth import get_user_model
-from django.test import TestCase
+from django.test import RequestFactory, SimpleTestCase, TestCase
 from django.urls import reverse
 
+from maillinks.admin import OrganizerMailLinkAdmin
 from maillinks.models import MailLink
+from pbaabp.admin import organizer_admin
 from profiles.models import Profile
 
 User = get_user_model()
@@ -12,6 +15,37 @@ User = get_user_model()
 
 def _patch_is_organizer(value):
     return patch.object(Profile, "is_organizer", new_callable=PropertyMock, return_value=value)
+
+
+class OrganizerMailLinkAdminTests(SimpleTestCase):
+    def setUp(self):
+        self.model_admin = organizer_admin._registry[MailLink]
+        self.request = RequestFactory().get("/organizer/maillinks/maillink/")
+
+    def set_organizer(self, is_organizer):
+        self.request.user = SimpleNamespace(
+            is_authenticated=True,
+            profile=SimpleNamespace(is_organizer=is_organizer),
+        )
+
+    def test_mail_links_are_registered_in_organizer_admin(self):
+        self.assertIsInstance(self.model_admin, OrganizerMailLinkAdmin)
+
+    def test_organizers_can_view_create_and_change_but_not_delete(self):
+        self.set_organizer(True)
+
+        self.assertTrue(self.model_admin.has_view_permission(self.request))
+        self.assertTrue(self.model_admin.has_add_permission(self.request))
+        self.assertTrue(self.model_admin.has_change_permission(self.request))
+        self.assertFalse(self.model_admin.has_delete_permission(self.request))
+
+    def test_non_organizers_do_not_receive_mail_link_permissions(self):
+        self.set_organizer(False)
+
+        self.assertFalse(self.model_admin.has_view_permission(self.request))
+        self.assertFalse(self.model_admin.has_add_permission(self.request))
+        self.assertFalse(self.model_admin.has_change_permission(self.request))
+        self.assertFalse(self.model_admin.has_delete_permission(self.request))
 
 
 class MailLinkActiveAccessTests(TestCase):
