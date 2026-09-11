@@ -13,6 +13,11 @@
 {{ application.submitter.first_name }} {{ application.submitter.last_name }}
 ```
 
+**Pronouns**:
+```
+{{ application.submitter.pronouns }}
+```
+
 **Discord username**:
 ```
 {{ application.submitter.profile.discord.extra_data.username }}
