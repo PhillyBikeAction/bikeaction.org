@@ -43,24 +43,8 @@ def _event_signin_data_from_signin(signin):
         "first_name": signin.first_name,
         "last_name": signin.last_name,
         "email": signin.email,
-        "zip_code": signin.zip_code,
         "newsletter_opt_in": signin.newsletter_opt_in,
     }
-
-
-def _event_signin_district_from_profile(profile):
-    district = profile.district
-    if district is None:
-        return None
-
-    match = re.search(r"\d+", district.name)
-    if match is None:
-        return None
-
-    district_number = int(match.group())
-    if district_number in EventSignIn.District.values:
-        return district_number
-    return None
 
 
 def _event_signin_data_from_user(user):
@@ -73,7 +57,6 @@ def _event_signin_data_from_user(user):
         "first_name": user.first_name,
         "last_name": user.last_name,
         "email": user.email,
-        "zip_code": profile.zip_code if profile is not None else "",
         "newsletter_opt_in": profile.newsletter_opt_in if profile is not None else False,
     }
 
@@ -150,7 +133,6 @@ def _save_event_signin(event, signin_data):
 
     existing_signin.first_name = signin_data["first_name"]
     existing_signin.last_name = signin_data["last_name"]
-    existing_signin.zip_code = signin_data["zip_code"]
     existing_signin.newsletter_opt_in = signin_data["newsletter_opt_in"]
     existing_signin.save()
     return existing_signin

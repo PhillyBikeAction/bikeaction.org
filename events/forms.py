@@ -29,16 +29,7 @@ class EventSignInForm(forms.ModelForm):
             "last_name",
             "email",
             "newsletter_opt_in",
-            "zip_code",
         ]
         labels = {
             "newsletter_opt_in": "Receive our Newsletter?",
-        }
-        help_texts = {
-            "zip_code": (
-                "Optionally provide your Postal / Zip Code "
-                "If you're unsure of your district, "
-                "or just to help us get a better idea of "
-                "the distribution of our attendees throughout the city."
-            ),
         }
