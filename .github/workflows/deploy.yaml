@@ -12,36 +12,40 @@ on:
 jobs:
   deploy:
     permissions:
+      contents: read
       deployments: write
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Cloning repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
       - name: Start deployment
-        uses: bobheadxi/deployments@v1
+        uses: chrnorm/deployment-action@500aa6a23c81ffa1acf71072aee3cfa2cc2e556a # v2.0.8
         id: deployment
         with:
-          step: start
           token: ${{ secrets.GITHUB_TOKEN }}
-          env: bikeaction.org
+          environment: bikeaction.org
+          initial-status: in_progress
+          transient-environment: false
+          production-environment: true
+          log-url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
       - name: Push to dokku
-        uses: dokku/github-action@master
+        uses: dokku/github-action@cc7dec1d2b9fed249a14ae462bc953bba436f78c # v1.10.0
         with:
           git_remote_url: 'ssh://dokku@dokku.bikeaction.org:22/apps-bikeaction-org'
           branch: main
           ssh_private_key: ${{ secrets.DEPLOY_SSH_KEY }}
 
       - name: Update deployment status
-        uses: bobheadxi/deployments@v1
-        if: always()
+        uses: chrnorm/deployment-status@6df8d036fd2fee9eb82936733953da1f8382b41e # v2.0.4
+        if: ${{ always() && steps.deployment.outputs.deployment_id != '' }}
         with:
-          step: finish
           token: ${{ secrets.GITHUB_TOKEN }}
-          status: ${{ job.status }}
-          env: ${{ steps.deployment.outputs.env }}
-          deployment_id: ${{ steps.deployment.outputs.deployment_id }}
+          deployment-id: ${{ steps.deployment.outputs.deployment_id }}
+          state: ${{ job.status == 'cancelled' && 'inactive' || job.status }}
+          auto-inactive: false
+          log-url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
