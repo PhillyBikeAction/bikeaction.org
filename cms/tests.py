@@ -3,6 +3,7 @@ from django.test import TestCase
 from wagtail.coreutils import get_supported_content_language_variant
 from wagtail.models import Locale, Page, Site
 
+from campaigns.models import Campaign
 from cms.models import CmsStreamPage, HomePage, NavigationContainerPage
 
 
@@ -61,6 +62,18 @@ class BreadcrumbsTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, '<a href="/">Home</a>')
         self.assertContains(response, '<strong aria-current="page">Events</strong>')
+
+    def test_campaign_detail_page(self):
+        Campaign.objects.create(
+            title="Demand a Safer Market Street",
+            slug="market-street",
+            status=Campaign.Status.ACTIVE,
+            content="Sign the petition.",
+        )
+        response = self.client.get("/campaigns/market-street/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '<a href="/campaigns/">Campaigns</a>')
+        self.assertContains(response, '<strong aria-current="page">Market Street</strong>')
 
     def test_separator_is_hidden_from_screen_readers(self):
         response = self.client.get("/resources/report-obstructions/")
