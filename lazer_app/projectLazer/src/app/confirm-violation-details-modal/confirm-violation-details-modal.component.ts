@@ -312,15 +312,15 @@ export class ConfirmViolationDetailsModalComponent implements OnInit {
     }
     const addressParser = new AddressParser();
     const parsedAddress = addressParser.parseLocation(this.violation.address);
-    this.blockNumber = parsedAddress.number as string;
+    this.blockNumber = (parsedAddress?.number as string) || '';
 
     // Street Name and Zip Code are now free-text fields - no fuzzy matching needed
     const inputStreetName =
-      `${parsedAddress.prefix || ''} ${parsedAddress.street || ''} ${parsedAddress.type || ''}`
+      `${parsedAddress?.prefix || ''} ${parsedAddress?.street || ''} ${parsedAddress?.type || ''}`
         .trim()
         .replace(/\s+/g, ' ');
     this.streetName = inputStreetName.toUpperCase();
-    this.zipCode = (parsedAddress.postal_code as string) || '';
+    this.zipCode = (parsedAddress?.postal_code as string) || '';
 
     // Use fuzzy matching for dropdown fields only
     if (this.violation.vehicle!.vehicle?.props?.make_model[0].make) {
