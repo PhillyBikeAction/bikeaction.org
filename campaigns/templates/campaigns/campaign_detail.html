@@ -39,19 +39,19 @@
   {% block content %}
   <div class="campaign-container content-container">
 
-  {% if campaign.has_actions and not campaign.status == "completed" %}
+  {% if campaign.has_actions and not campaign.status == "past" %}
     <div class="button-holder">
       <a href="#action" class="cta-button submit-button" >{% if campaign.call_to_action %}{{ campaign.call_to_action }}{% else %}{% translate "Take Action Now!" %}{% endif %}</a>
     </div>
   {% endif %}
 
-  {% if campaign.status == "completed" %}
+  {% if campaign.status == "past" %}
     <p style="font-size: smaller; color: grey; width: 100%; text-align: center;">{% translate "This campaign has been completed." %}</p>
   {% endif %}
 
   {{ campaign.content_rendered|safe }}
 
-  {% if campaign.has_actions and not campaign.status == "completed" %}
+  {% if campaign.has_actions and not campaign.status == "past" %}
     <span id="action"></span>
     {% if campaign.call_to_action_header %}
     <h2>{% if campaign.call_to_action %}{{ campaign.call_to_action }}{% else %}{% translate "Take Action Now!" %}{% endif %}</h2>
@@ -81,7 +81,7 @@
     </div>
   {% endif %}
 
-  {% if campaign.subscription_action and not campaign.status == "completed" %}
+  {% if campaign.subscription_action and not campaign.status == "past" %}
     {% with request.user.djstripe_customers.first as customer %}
     {% if customer.active_subscriptions.all %}
     <div id="subscription" class="button-holder">
@@ -97,7 +97,7 @@
     {% endwith %}
   {% endif %}
 
-  {% if campaign.future_events.all and not campaign.status == "completed" %}
+  {% if campaign.future_events.all and not campaign.status == "past" %}
     <h3>{% translate "Attend an event" %}</h3>
     <div id="events">
       {% for event in campaign.future_events.all|dictsort:"start_datetime" %}
@@ -123,7 +123,7 @@
   </div>
   {% endif %}
 
-  {% if campaign.petitions.all and not campaign.status == "completed" %}
+  {% if campaign.petitions.all and not campaign.status == "past" %}
     <div id="petitions">
     {% for petition in campaign.petitions.all %}
       {% if campaign.petitions.all|length > 0 %}<h2>{{ petition.title }}</h2>{% endif %}
@@ -147,7 +147,7 @@
       {% endif %}
     {% endfor %}
     </div>
-  {% elif campaign.petitions.all and campaign.status == "completed" %}
+  {% elif campaign.petitions.all and campaign.status == "past" %}
     <div id="petitions">
     {% for petition in campaign.petitions.all %}
       {% if campaign.petitions.all|length > 0 %}<h2>{{ petition.title }}</h2>{% endif %}
