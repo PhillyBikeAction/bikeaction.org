@@ -116,7 +116,6 @@ class EventSignIn(models.Model):
     first_name = models.CharField(max_length=64, null=False, blank=False)
     last_name = models.CharField(max_length=64, null=False, blank=False)
     email = models.EmailField(null=False, blank=False)
-    council_district = models.IntegerField(null=False, blank=False, choices=District.choices)
     zip_code = models.CharField(
         max_length=10,
         validators=[
