@@ -712,9 +712,9 @@ msgstr ""
 
 #: templates/base.html:150
 #, fuzzy
-#| msgid "©️ 2024 Philly Bike Action. All rights reserved."
-msgid "2025 Philly Bike Action. All rights reserved."
-msgstr "©️ 2024 Philly Bike Action. Todos los derechos reservados."
+#| msgid "©️ 2026 Philly Bike Action. All rights reserved."
+msgid "2026 Philly Bike Action. All rights reserved."
+msgstr "©️ 2026 Philly Bike Action. Todos los derechos reservados."
 
 #~ msgid "N/A - I do not live in Philadelphia"
 #~ msgstr "N/A - No vivo en Filadelfia"
