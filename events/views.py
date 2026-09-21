@@ -1,5 +1,4 @@
 import datetime
-import re
 import uuid
 from urllib.parse import quote_plus
 
@@ -44,6 +43,7 @@ def _event_signin_data_from_signin(signin):
         "last_name": signin.last_name,
         "email": signin.email,
         "newsletter_opt_in": signin.newsletter_opt_in,
+        "volunteer_opt_in": signin.volunteer_opt_in,
     }
 
 
@@ -58,6 +58,7 @@ def _event_signin_data_from_user(user):
         "last_name": user.last_name,
         "email": user.email,
         "newsletter_opt_in": profile.newsletter_opt_in if profile is not None else False,
+        "volunteer_opt_in": profile.volunteer_opt_in if profile is not None else False,
     }
 
 
@@ -134,6 +135,7 @@ def _save_event_signin(event, signin_data):
     existing_signin.first_name = signin_data["first_name"]
     existing_signin.last_name = signin_data["last_name"]
     existing_signin.newsletter_opt_in = signin_data["newsletter_opt_in"]
+    existing_signin.volunteer_opt_in = signin_data["volunteer_opt_in"]
     existing_signin.save()
     return existing_signin
 

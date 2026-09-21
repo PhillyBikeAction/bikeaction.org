@@ -847,7 +847,6 @@ class EmailBlastTargetingTests(TestCase):
             first_name="Attendee",
             last_name="Person",
             email="attendee@example.com",
-            council_district=EventSignIn.District.DISTRICT_1,
         )
         target = self.target_data(
             EmailBlastTargetNode.TargetType.EVENT_SIGNIN,

@@ -52,6 +52,7 @@ class EventSignInAdmin(admin.ModelAdmin):
         "last_name",
         "email",
         "newsletter_opt_in",
+        "volunteer_opt_in",
     ]
 
     csvexport_selected_fields = [
@@ -78,12 +79,14 @@ class OrganizerEventSignInAdmin(OrganizerPerms, EventSignInAdmin):
         "first_name",
         "last_name",
         "newsletter_opt_in",
+        "volunteer_opt_in",
     ]
     readonly_fields = [
         "event",
         "first_name",
         "last_name",
         "newsletter_opt_in",
+        "volunteer_opt_in",
     ]
 
     def has_add_permission(self, request):
