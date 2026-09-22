@@ -7,7 +7,6 @@ from profiles.signals import ORGANIZER_GROUP_NAME
 
 
 class Command(BaseCommand):
-
     def handle(self, *args, **options):
         users = (
             get_user_model()
