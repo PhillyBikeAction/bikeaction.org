@@ -31,8 +31,6 @@ class EventSignInRememberedIdentityTests(TestCase):
             "first_name": "Ada",
             "last_name": "Lovelace",
             "email": "ada@example.com",
-            "council_district": EventSignIn.District.DISTRICT_3,
-            "zip_code": "19107",
             "newsletter_opt_in": "on",
         }
         data.update(overrides)
@@ -81,14 +79,13 @@ class EventSignInRememberedIdentityTests(TestCase):
             email="grace@example.com",
             password="password",
             first_name="Grace",
-            last_name="Hopper",
         )
         self.client.force_login(user)
 
         get_response = self.client.get(reverse("event_signin", args=[event.slug]))
         self.assertNotContains(get_response, "would you like to sign in?")
         self.assertContains(get_response, 'value="Grace"')
-        self.assertContains(get_response, 'value="Hopper"')
+        self.assertNotContains(get_response, 'value="Hopper"')
         self.assertContains(get_response, 'value="grace@example.com"')
 
         response = self.client.post(
@@ -134,7 +131,6 @@ class EventSignInRememberedIdentityTests(TestCase):
             email="grace@example.com",
             password="password",
             first_name="Grace",
-            last_name="Hopper",
         )
         self.client.cookies[EVENT_SIGNIN_COOKIE_NAME] = encrypt_event_signin_payload(
             {"type": EVENT_SIGNIN_COOKIE_TYPE_USER, "id": user.id}
@@ -143,7 +139,7 @@ class EventSignInRememberedIdentityTests(TestCase):
         get_response = self.client.get(reverse("event_signin", args=[event.slug]))
         self.assertNotContains(get_response, "would you like to sign in?")
         self.assertContains(get_response, 'value="Grace"')
-        self.assertContains(get_response, 'value="Hopper"')
+        self.assertNotContains(get_response, 'value="Hopper"')
         self.assertContains(get_response, 'value="grace@example.com"')
 
     def test_anonymous_user_cookie_does_not_fall_back_to_email_localpart_as_first_name(self):
