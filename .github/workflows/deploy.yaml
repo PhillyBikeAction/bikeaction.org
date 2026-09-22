@@ -11,6 +11,9 @@ on:
 
 jobs:
   deploy:
+    concurrency:
+      group: deploy-bikeaction-org
+      cancel-in-progress: false
     permissions:
       contents: read
       deployments: write
