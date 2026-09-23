@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load humanize i18n thumbnail share_tags qr_code %}
+{% load humanize i18n pba_tags thumbnail share_tags qr_code %}
 
 {% block title %} {{ campaign.title }} - Philly Bike Action {% endblock %}
 
@@ -38,6 +38,7 @@
 
   {% block content %}
   <div class="campaign-container content-container">
+  {% breadcrumbs %}
 
   {% if campaign.has_actions and not campaign.status == "completed" %}
     <div class="button-holder">

@@ -1,4 +1,4 @@
-{% load django_htmx sitetree static i18n wagtailimages_tags %}
+{% load django_htmx pba_tags sitetree static i18n wagtailimages_tags %}
 {% get_current_language as LANGUAGE_CODE %}
 <!DOCTYPE html>
 <html lang="en">
@@ -94,6 +94,7 @@
 
       {% block content_container %}
       <div class="content-container">
+      {% breadcrumbs %}
       {% block content %}
       {% endblock %}
       </div>
