@@ -96,6 +96,13 @@ server {
   {{ if $.LINGERING_TIMEOUT }}lingering_timeout {{ $.LINGERING_TIMEOUT }};{{end}}
   {{ if $.SEND_TIMEOUT }}send_timeout {{ $.SEND_TIMEOUT }};{{end}}
 
+  # After changing this policy, deploy it before updating the _mta-sts TXT id.
+  # See README.md for DNS, certificate setup, and the enforcement rollout.
+  location = /.well-known/mta-sts.txt {
+    default_type text/plain;
+    return 200 "version: STSv1\nmode: testing\nmx: mxa.mailgun.org\nmx: mxb.mailgun.org\nmax_age: 86400\n";
+  }
+
   location /wp-content/ {
     proxy_ssl_server_name on;
     proxy_pass https://{{ var "AWS_S3_CUSTOM_DOMAIN" }};
