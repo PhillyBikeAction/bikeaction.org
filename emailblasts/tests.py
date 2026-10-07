@@ -1,7 +1,10 @@
 import json
 import shutil
 import tempfile
+from datetime import timedelta
 from unittest.mock import Mock, patch
+
+from allauth.socialaccount.models import SocialAccount
 
 from django.contrib.auth.models import Permission
 from django.contrib.auth.models import User
@@ -14,6 +17,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from campaigns.models import Petition, PetitionSignature
+from elections.models import Ballot, Election
 from emailblasts.admin import send_selected_email_blasts
 from emailblasts.forms import EmailDraftForm
 from emailblasts.models import (
@@ -36,7 +40,7 @@ from emailblasts.views import (
 from events.models import EventRSVP, EventSignIn, ScheduledEvent
 from facets.models import District, ZipCode
 from pbaabp.email import render_email_html, send_email_message
-from profiles.models import DoNotEmail, Profile
+from profiles.models import DiscordActivity, DoNotEmail, Profile
 
 
 class EmailBlastSendTaskTests(TestCase):
@@ -923,3 +927,134 @@ class EmailBlastTargetingTests(TestCase):
         )
 
         self.assertIn('"type": "MultiPolygon"', feature_collection)
+
+
+class ElectionEmailTargetTests(TestCase):
+    def setUp(self):
+        discord_role = patch("profiles.signals.add_user_to_connected_role.delay")
+        discord_role.start()
+        self.addCleanup(discord_role.stop)
+        self.now = timezone.now()
+        clock = patch("emailblasts.targeting.timezone.now", return_value=self.now)
+        clock.start()
+        self.addCleanup(clock.stop)
+        self.deadline = self.now - timedelta(days=45)
+        self.members = []
+        for name in ("first", "second", "late"):
+            user = User.objects.create_user(username=name, email=f"{name}@example.com")
+            profile = Profile.objects.create(user=user)
+            SocialAccount.objects.create(user=user, provider="discord", uid=name)
+            # The late member is active now, but was not eligible at the cutoff.
+            activity_date = self.now.date() if name == "late" else self.deadline.date()
+            DiscordActivity.objects.create(profile=profile, date=activity_date, count=1)
+            self.members.append(profile)
+        self.types = EmailBlastTargetNode.TargetType
+
+    def election(self, closes, deadline=None):
+
+        return Election.objects.create(
+            title="Board election",
+            slug=f"election-{Election.objects.count()}",
+            membership_eligibility_deadline=deadline or self.deadline,
+            nominations_open=self.now - timedelta(days=30),
+            nominations_close=self.now - timedelta(days=20),
+            voting_opens=self.now - timedelta(days=10),
+            voting_closes=closes,
+        )
+
+    def target(self, kind):
+        return {
+            "target_type": kind,
+            "target_id": "",
+            "target_name": kind.label,
+            "target_geojson": None,
+        }
+
+    def profiles(self, kind):
+        from emailblasts.targeting import _email_draft_target_profiles
+
+        return set(_email_draft_target_profiles(self.target(kind)))
+
+    def test_no_election_returns_no_recipients(self):
+        for kind in (self.types.ELECTION_ELIGIBLE, self.types.ELECTION_NOT_VOTED):
+            self.assertEqual(self.profiles(kind), set())
+
+    def test_eligibility_is_at_election_deadline_not_today(self):
+
+        self.election(self.now + timedelta(days=5))
+        self.assertEqual(self.profiles(self.types.ELECTION_ELIGIBLE), set(self.members[:2]))
+
+    def test_ten_day_grace_period_boundary(self):
+
+        election = self.election(self.now)
+        for age, expected in (
+            (timedelta(0), set(self.members[:2])),
+            (timedelta(days=10) - timedelta(microseconds=1), set(self.members[:2])),
+            (timedelta(days=10), set()),
+            (timedelta(days=11), set()),
+        ):
+            with self.subTest(age=age):
+                election.voting_closes = self.now - age
+                election.save()
+                self.assertEqual(self.profiles(self.types.ELECTION_ELIGIBLE), expected)
+
+    def test_recently_closed_election_remains_selected_until_grace_period_ends(self):
+
+        previous = self.election(self.now - timedelta(days=9))
+        self.election(self.now + timedelta(days=10), deadline=self.now)
+        self.assertEqual(self.profiles(self.types.ELECTION_ELIGIBLE), set(self.members[:2]))
+        previous.voting_closes = self.now - timedelta(days=10)
+        previous.save()
+        self.assertEqual(self.profiles(self.types.ELECTION_ELIGIBLE), {self.members[2]})
+
+    def test_selects_earliest_closing_upcoming_election(self):
+
+        self.election(self.now + timedelta(days=20), deadline=self.now)
+        self.election(self.now + timedelta(days=5))
+        self.assertEqual(self.profiles(self.types.ELECTION_ELIGIBLE), set(self.members[:2]))
+
+    def test_reminder_excludes_blank_ballots_but_not_other_elections_ballots(self):
+
+        election = self.election(self.now + timedelta(days=5))
+        other = self.election(self.now + timedelta(days=20))
+        Ballot.objects.create(election=other, voter=self.members[1].user)
+        self.assertEqual(self.profiles(self.types.ELECTION_NOT_VOTED), set(self.members[:2]))
+        Ballot.objects.create(election=election, voter=self.members[0].user)
+        self.assertEqual(self.profiles(self.types.ELECTION_NOT_VOTED), {self.members[1]})
+        self.assertEqual(self.profiles(self.types.ELECTION_ELIGIBLE), set(self.members[:2]))
+
+    def test_form_accepts_both_targets_without_an_election_id(self):
+        for kind in (self.types.ELECTION_ELIGIBLE, self.types.ELECTION_NOT_VOTED):
+            with self.subTest(kind=kind):
+                form = EmailDraftForm(
+                    data={
+                        "subject": "Election",
+                        "reply_to": "organizer@example.com",
+                        "target_name": "Election recipients",
+                        "target_description": "are eligible to vote",
+                        "target_operator": "or",
+                        "body": "Election update",
+                        "target_type_0": kind,
+                    }
+                )
+                self.assertTrue(form.is_valid(), form.errors)
+                self.assertEqual(form.cleaned_data["target_rows"], [self.target(kind)])
+
+    def test_saved_target_resolves_live_ballots_and_honors_suppression(self):
+        from emailblasts.targeting import _email_blast_target_recipients
+
+        election = self.election(self.now + timedelta(days=5))
+        target = _email_blast_target_object(
+            "Election reminder",
+            "are eligible to vote",
+            "or",
+            [self.target(self.types.ELECTION_NOT_VOTED)],
+            self.members[0].user,
+        )
+        self.assertEqual(len(_email_blast_target_recipients(target)), 2)
+        Ballot.objects.create(election=election, voter=self.members[0].user)
+        self.assertEqual(
+            [r.email for r in _email_blast_target_recipients(target)], [self.members[1].user.email]
+        )
+        DoNotEmail.objects.create(email=self.members[1].user.email)
+        self.assertEqual(_email_blast_target_recipients(target), [])

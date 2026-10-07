@@ -202,11 +202,15 @@ class EmailDraftForm(forms.Form):
         if target_type not in valid_target_types:
             raise ValidationError(_(f"Target {index + 1}: select a target type."))
 
-        if target_type == EmailBlastTargetNode.TargetType.ALL_PROFILES:
+        if target_type in {
+            EmailBlastTargetNode.TargetType.ALL_PROFILES,
+            EmailBlastTargetNode.TargetType.ELECTION_ELIGIBLE,
+            EmailBlastTargetNode.TargetType.ELECTION_NOT_VOTED,
+        }:
             return {
                 "target_type": target_type,
                 "target_id": "",
-                "target_name": EmailBlastTargetNode.TargetType.ALL_PROFILES.label,
+                "target_name": EmailBlastTargetNode.TargetType(target_type).label,
                 "target_geojson": None,
             }
 
