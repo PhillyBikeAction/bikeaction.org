@@ -517,6 +517,11 @@ def _email_draft_target_summary_items(target_data, operator=EmailBlastTargetNode
         target_label = type_labels.get(target_type, target_type)
         if target_type == EmailBlastTargetNode.TargetType.ALL_PROFILES:
             items.append("Includes everyone with a PBA profile")
+        elif target_type in {
+            EmailBlastTargetNode.TargetType.ELECTION_ELIGIBLE,
+            EmailBlastTargetNode.TargetType.ELECTION_NOT_VOTED,
+        }:
+            items.append(f"{prefix} {target_label.lower()}")
         else:
             items.append(f'{prefix} {target_label.lower()} "{target["target_name"]}"')
 
