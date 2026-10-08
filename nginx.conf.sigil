@@ -100,7 +100,7 @@ server {
   # See README.md for DNS, certificate setup, and the enforcement rollout.
   location = /.well-known/mta-sts.txt {
     default_type text/plain;
-    return 200 "version: STSv1\nmode: testing\nmx: mxa.mailgun.org\nmx: mxb.mailgun.org\nmax_age: 86400\n";
+    return 200 "version: STSv1\nmode: enforce\nmx: mxa.mailgun.org\nmx: mxb.mailgun.org\nmax_age: 86400\n";
   }
 
   location /wp-content/ {
