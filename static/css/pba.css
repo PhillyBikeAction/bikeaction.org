@@ -1756,6 +1756,30 @@ body {
   margin-top: 1em;
 }
 
+.breadcrumbs {
+  margin: 1em auto 0;
+  max-width: 40em;
+  padding-left: 1em;
+  padding-right: 1em;
+  font-size: 0.9em;
+}
+
+.breadcrumbs ol {
+  display: flex;
+  flex-wrap: wrap;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.breadcrumbs li {
+  display: inline;
+}
+
+.breadcrumb-separator {
+  padding: 0 0.5em;
+}
+
 .cms-content h2[id]:hover::after {
 }
 
