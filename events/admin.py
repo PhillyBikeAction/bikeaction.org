@@ -41,9 +41,9 @@ class OrganizerScheduledEventAdmin(OrganizerPerms, ScheduledEventAdmin):
 
 class EventSignInAdmin(admin.ModelAdmin):
     actions = [csvexport]
-    list_display = ["get_name", "get_event", "council_district", "newsletter_opt_in"]
-    list_filter = ["event__title", "council_district", "zip_code"]
-    search_fields = ["first_name", "last_name", "email", "zip_code"]
+    list_display = ["get_name", "get_event", "newsletter_opt_in"]
+    list_filter = ["event__title"]
+    search_fields = ["first_name", "last_name", "email"]
     ordering = ["-updated_at"]
     readonly_fields = [
         "event",
@@ -51,17 +51,14 @@ class EventSignInAdmin(admin.ModelAdmin):
         "first_name",
         "last_name",
         "email",
-        "zip_code",
-        "council_district",
         "newsletter_opt_in",
+        "volunteer_opt_in",
     ]
 
     csvexport_selected_fields = [
         "first_name",
         "last_name",
         "email",
-        "get_council_district_display",
-        "zip_code",
         "event.title",
     ]
 
@@ -74,24 +71,22 @@ class EventSignInAdmin(admin.ModelAdmin):
 
 class OrganizerEventSignInAdmin(OrganizerPerms, EventSignInAdmin):
     actions = []
-    list_display = ["get_name", "get_event", "council_district", "newsletter_opt_in"]
-    list_filter = ["event__title", "council_district", "zip_code"]
-    search_fields = ["first_name", "last_name", "zip_code"]
+    list_display = ["get_name", "get_event", "newsletter_opt_in"]
+    list_filter = ["event__title"]
+    search_fields = ["first_name", "last_name"]
     fields = [
         "event",
         "first_name",
         "last_name",
-        "zip_code",
-        "council_district",
         "newsletter_opt_in",
+        "volunteer_opt_in",
     ]
     readonly_fields = [
         "event",
         "first_name",
         "last_name",
-        "zip_code",
-        "council_district",
         "newsletter_opt_in",
+        "volunteer_opt_in",
     ]
 
     def has_add_permission(self, request):

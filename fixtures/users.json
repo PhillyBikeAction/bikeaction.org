@@ -28,6 +28,7 @@
         "street_address": "1200 E Passyunk Ave",
         "zip_code": "19147",
         "newsletter_opt_in": true,
+        "volunteer_opt_in": true,
         "location": "SRID=4326;POINT (-75.1584926 39.9341118)"
     }
 },

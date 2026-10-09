@@ -48,7 +48,6 @@ class ScheduledEvent(models.Model):
     start_datetime = models.DateTimeField()
     end_datetime = models.DateTimeField(null=True, blank=True)
 
-    districts = models.ManyToManyField(District, related_name="+", null=True, blank=True)
     registered_community_organizations = models.ManyToManyField(
         RegisteredCommunityOrganization, related_name="+", null=True, blank=True
     )
@@ -116,19 +115,8 @@ class EventSignIn(models.Model):
     first_name = models.CharField(max_length=64, null=False, blank=False)
     last_name = models.CharField(max_length=64, null=False, blank=False)
     email = models.EmailField(null=False, blank=False)
-    council_district = models.IntegerField(null=False, blank=False, choices=District.choices)
-    zip_code = models.CharField(
-        max_length=10,
-        validators=[
-            RegexValidator(
-                regex=r"^(^[0-9]{5}(?:-[0-9]{4})?$|^$)",
-                message="Must be a valid zipcode in formats 19107 or 19107-3200",
-            )
-        ],
-        null=True,
-        blank=True,
-    )
     newsletter_opt_in = models.BooleanField(blank=False, default=False)
+    volunteer_opt_in = models.BooleanField(blank=False, default=False)
 
     def save(self, *args, **kwargs):
         if not self._state.adding:
