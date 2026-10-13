@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load i18n qr_code %}
+{% block header %}
+{% comment %}
+Do not show the header on signin page.
+{% endcomment %}
+{% endblock %}
+{% block footer %}
+{% comment %}
+Do not show the footer on signin page.
+{% endcomment %}
+{% endblock %}
+{% block content %}
+<div class="form-header">
+  <img src="https://bikeaction.org/wp-content/uploads/2023/07/Sticker_Print_Green.svg">
+  <h1>{% blocktrans %}Welcome to Philly Bike Action{% endblocktrans %}</h1>
+  <h2>{{ event.title }}</h2>
+  <p>{% translate "Sign in to let us know a little more about you!" %}</p>
+</div>
+<div class="form-container">
+  {% if quick_signin_identity %}
+  <form method="post" class="reimbursement-form">
+    {% csrf_token %}
+    <div class="button-holder">
+      <p class="quick-signin-greeting">
+        Hello {{ quick_signin_identity.first_name }}, would you like to sign in?
+      </p>
+      <button class="submit-button" type="submit" name="quick_signin" value="1">
+        {% translate "Sign me in!" %}
+      </button>
+    </div>
+  </form>
+  <hr>
+  {% endif %}
+
+  <form method="post">
+  {% csrf_token %}
+
+  {{ form.non_field_errors }}
+
+  {% for hidden_field in form.hidden_fields %}
+    {{ hidden_field.errors }}
+    {{ hidden_field }}
+  {% endfor %}
+
+  <div class="form-fields">
+  {% for field in form.visible_fields %}
+    <p>
+      {{ field.label_tag }}
+      {{ field.errors }}
+      {{ field }}
+      <p class="helptext">{{ field.help_text }}</p>
+    </p>
+  {% endfor %}
+  </div>
+
+
+<div class="event-qr-container">
+  <a href="{% qr_url_from_text request.build_absolute_uri image_format='png' %}" download="qr-code-{{ event.slug }}-signin.png">
+    <img class="event-signin-qr-code" src="{% qr_url_from_text request.build_absolute_uri image_format='png' %}">
+  </a>
+</div>
+{% endblock %}
