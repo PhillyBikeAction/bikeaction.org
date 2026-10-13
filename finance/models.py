@@ -1,13 +1,8 @@
 import uuid
 from pathlib import Path
 
-from django.conf import settings
-from django.contrib.auth.models import User
 from django.db import models
-from django.urls import reverse
 from django.utils.text import slugify
-
-from lib.slugify import unique_slugify
 
 
 def reimbursement_expense_support_upload_to(instance, filename):
