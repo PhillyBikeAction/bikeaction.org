@@ -18,6 +18,11 @@ class Reimbursement(models.Model):
         ZELLE = "zelle", "Zelle"
         PAYPAL = "paypal", "PayPal"
 
+    class Decision(models.TextChoices):
+        PENDING = "pending", "Pending"
+        APPROVED = "approved", "Approved"
+        DENIED = "denied", "Denied"
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -37,6 +42,11 @@ class Reimbursement(models.Model):
         max_length=16, choices=ReimbursementMethod.choices, null=False, blank=False
     )
     payment_contact = models.CharField(max_length=256, null=False, blank=False)
+
+    decision = models.CharField(
+        max_length=16, choices=Decision.choices, default=Decision.PENDING
+    )
+    completed = models.BooleanField(default=False)
 
     def __str__(self):
         return (
