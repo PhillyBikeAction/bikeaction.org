@@ -46,6 +46,8 @@ class Reimbursement(models.Model):
     decision = models.CharField(
         max_length=16, choices=Decision.choices, default=Decision.PENDING
     )
+    decided_at = models.DateTimeField(null=True, blank=True)
+    decided_by = models.CharField(max_length=64, null=True, blank=True)
     completed = models.BooleanField(default=False)
 
     def __str__(self):
