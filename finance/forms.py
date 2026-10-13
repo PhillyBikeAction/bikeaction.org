@@ -1,8 +1,5 @@
 from django import forms
-from django_recaptcha.fields import ReCaptchaField
-from django_recaptcha.widgets import ReCaptchaV2Invisible
 
-from events.models import EventRSVP, EventSignIn
 from finance.models import Reimbursement
 
 
@@ -36,7 +33,6 @@ class ReimbursementForm(forms.ModelForm):
         choices=[("zelle", "Zelle"), ("paypal", "PayPal")],
     )
     payment_contact = forms.CharField()
-    # TODO: Follow up with jesse on email for reimbursement not just discord
     help_texts = {
         "amount": "Expenses of $60 or more require approval by the PBA Board.",
         "discord": "Only required if you are in the PBA Discord.",
@@ -45,5 +41,3 @@ class ReimbursementForm(forms.ModelForm):
         "reimbursement_method": "If you would like to be reimbursed via check, please email finance@bikeaction.org or message Brian (briandelmore) on Discord to arrange payment.",
         "payment_contact": "What is the email address or phone number associated with Zelle or PayPal account?",
     }
-
-    captcha = ReCaptchaField(widget=ReCaptchaV2Invisible)
