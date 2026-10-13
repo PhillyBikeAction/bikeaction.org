@@ -23,7 +23,7 @@ class ReimbursementForm(forms.ModelForm):
     first_name = forms.CharField(required=True)
     last_name = forms.CharField(required=True)
     email = forms.EmailField(required=True, max_length=100)
-    discord_handle = forms.CharField()
+    discord_handle = forms.CharField(required=False)
     vendor_name = forms.CharField(required=True)
     amount = forms.DecimalField(required=True)
     expense_date = forms.DateField(required=True)
