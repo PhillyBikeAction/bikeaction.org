@@ -59,7 +59,7 @@
     "@angular-eslint/eslint-plugin-template": "^21.2.0",
     "@angular-eslint/schematics": "^21.2.0",
     "@angular-eslint/template-parser": "^21.2.0",
-    "@angular/cli": "21.2.24",
+    "@angular/cli": "21.2.26",
     "@angular/compiler-cli": "^21.2.23",
     "@angular/language-service": "^21.2.23",
     "@capacitor/cli": "7.6.8",
