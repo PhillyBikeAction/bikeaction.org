@@ -7,7 +7,7 @@ from django.utils.text import slugify
 
 
 def reimbursement_expense_support_upload_to(instance, filename):
-    id = instance.id
+    id = instance.application.id
     original_file = Path(filename)
     return (
         "reimbursement-expense-support/"
@@ -38,7 +38,6 @@ class Reimbursement(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2, null=False, blank=False)
     expense_date = models.DateField(null=False, blank=False)
     explanation = models.TextField(max_length=250, null=False, blank=False)
-    expense_support = models.FileField(upload_to=reimbursement_expense_support_upload_to)
 
     reimbursement_method = models.CharField(
         max_length=16, choices=ReimbursementMethod.choices, null=False, blank=False
