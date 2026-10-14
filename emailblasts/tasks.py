@@ -5,7 +5,7 @@ from django.utils import timezone
 
 from emailblasts.models import EmailBlast, EmailBlastDelivery
 from emailblasts.targeting import _email_blast_target_recipients
-from emailblasts.utils import email_blast_full_body
+from emailblasts.utils import email_blast_full_body, email_blast_sesame_url
 from pbaabp.email import send_email_message
 from profiles.models import DoNotEmail
 
@@ -64,6 +64,9 @@ def send_email_blast(email_blast_id):
                     "name": recipient.name,
                     "email": email_key,
                     "target_description": blast.target.description,
+                    "sesame_url": email_blast_sesame_url(
+                        recipient.profile.user if recipient.profile else None
+                    ),
                 },
                 subject=blast.subject,
                 message=body,
