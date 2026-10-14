@@ -7,11 +7,11 @@ from django.utils.text import slugify
 
 
 def reimbursement_expense_support_upload_to(instance, filename):
-    project_title = instance.application.data.get("project_title", {}).get("value", "project")
+    id = instance.application.id
     original_file = Path(filename)
     return (
         "reimbursement-expense-support/"
-        f"{slugify(project_title)}-{slugify(original_file.stem)}-"
+        f"{slugify(id)}-{slugify(original_file.stem)}-"
         f"{uuid.uuid4().hex[:8]}{original_file.suffix.lower()}"
     )
 
@@ -24,9 +24,6 @@ class Reimbursement(models.Model):
         PENDING = "pending", "Pending"
         APPROVED = "approved", "Approved"
         DENIED = "denied", "Denied"
-
-    def __str__(self):
-        return self.data.get("project_title", {}).get("value", "Reimbursement application")
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -55,9 +52,10 @@ class Reimbursement(models.Model):
     decided_by = models.CharField(max_length=64, null=True, blank=True)
     completed = models.BooleanField(default=False)
 
+    # How should we slugify files?
     def __str__(self):
         return (
-            f"{self.first_name} {self.last_name} - "
+            f"{self.id} - "
             f"{self.vendor_name} - ${self.amount} - "
             f"{self.expense_date.strftime('%Y-%m-%d')}"
         )
