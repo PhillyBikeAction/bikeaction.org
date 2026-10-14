@@ -1,15 +1,17 @@
 import uuid
 from pathlib import Path
+from os.path import basename
 
 from django.db import models
 from django.utils.text import slugify
 
 
 def reimbursement_expense_support_upload_to(instance, filename):
+    project_title = instance.application.data.get("project_title", {}).get("value", "project")
     original_file = Path(filename)
     return (
         "reimbursement-expense-support/"
-        f"{slugify(instance.vendor_name)}-{slugify(original_file.stem)}-"
+        f"{slugify(project_title)}-{slugify(original_file.stem)}-"
         f"{uuid.uuid4().hex[:8]}{original_file.suffix.lower()}"
     )
 
@@ -22,6 +24,9 @@ class Reimbursement(models.Model):
         PENDING = "pending", "Pending"
         APPROVED = "approved", "Approved"
         DENIED = "denied", "Denied"
+
+    def __str__(self):
+        return self.data.get("project_title", {}).get("value", "Reimbursement application")
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -56,3 +61,20 @@ class Reimbursement(models.Model):
             f"{self.vendor_name} - ${self.amount} - "
             f"{self.expense_date.strftime('%Y-%m-%d')}"
         )
+
+
+class ReimbursementSupportingMaterial(models.Model):
+    application = models.ForeignKey(
+        Reimbursement,
+        on_delete=models.CASCADE,
+        related_name="supporting_materials",
+    )
+    file = models.FileField(upload_to=reimbursement_expense_support_upload_to)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.file.name
+
+    @property
+    def filename(self):
+        return basename(self.file.name)
