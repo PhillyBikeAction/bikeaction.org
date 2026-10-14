@@ -23,21 +23,38 @@ class ReimbursementForm(forms.ModelForm):
     first_name = forms.CharField(required=True)
     last_name = forms.CharField(required=True)
     email = forms.EmailField(required=True, max_length=100)
-    discord_handle = forms.CharField(required=False)
+    discord_handle = forms.CharField(
+        required=False,
+        help_text="Only required if you are in the PBA Discord.",
+    )
     vendor_name = forms.CharField(required=True)
-    amount = forms.DecimalField(required=True)
+    amount = forms.DecimalField(
+        required=True,
+        help_text="Expenses of $60 or more require approval by the PBA Board.",
+    )
     expense_date = forms.DateField(required=True)
-    explanation = forms.CharField(required=True, widget=forms.Textarea, max_length=250)
-    expense_support = forms.FileField(required=True)
+    explanation = forms.CharField(
+        required=True,
+        widget=forms.Textarea,
+        max_length=250,
+        help_text=(
+            "Brief explanation of the expense. "
+            "If it is related to a specific project, please name the project."
+        ),
+    )
+    expense_support = forms.FileField(
+        required=True,
+        help_text="Attach any relevant invoices, receipts, etc. here.",
+    )
     reimbursement_method = forms.ChoiceField(
         choices=[("zelle", "Zelle"), ("paypal", "PayPal")],
+        help_text=(
+            "If you would like to be reimbursed via check, please email finance@bikeaction.org "
+            "or message Brian (briandelmore) on Discord to arrange payment."
+        ),
     )
-    payment_contact = forms.CharField()
-    help_texts = {
-        "amount": "Expenses of $60 or more require approval by the PBA Board.",
-        "discord": "Only required if you are in the PBA Discord.",
-        "explanation": "Brief explanation of the expense. If it is related to a specific project, please name the project.",
-        "expense_support": "Attach any relevent invoices, receipts, etc. here) ",
-        "reimbursement_method": "If you would like to be reimbursed via check, please email finance@bikeaction.org or message Brian (briandelmore) on Discord to arrange payment.",
-        "payment_contact": "What is the email address or phone number associated with Zelle or PayPal account?",
-    }
+    payment_contact = forms.CharField(
+        help_text=(
+            "What is the email address or phone number associated with Zelle or PayPal account?"
+        ),
+    )

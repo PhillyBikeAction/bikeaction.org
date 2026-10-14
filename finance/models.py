@@ -52,7 +52,7 @@ class Reimbursement(models.Model):
     decided_by = models.CharField(max_length=64, null=True, blank=True)
     completed = models.BooleanField(default=False)
 
-    # How should we slugify files?
+    # TODO: How should we slugify files?
     def __str__(self):
         return (
             f"{self.id} - "
