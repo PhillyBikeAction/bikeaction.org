@@ -13,6 +13,14 @@ def mark_completed(modeladmin, request, queryset):
 class ReimbursementSupportingMaterialInline(admin.TabularInline):
     model = ReimbursementSupportingMaterial
     extra = 0
+    fields = ("file", "uploaded_at")
+    readonly_fields = ("file", "uploaded_at")
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 class ReimbursementAdmin(admin.ModelAdmin):
