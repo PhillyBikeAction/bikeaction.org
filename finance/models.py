@@ -7,7 +7,7 @@ from django.utils.text import slugify
 
 
 def reimbursement_expense_support_upload_to(instance, filename):
-    id = instance.application.id
+    id = instance.id
     original_file = Path(filename)
     return (
         "reimbursement-expense-support/"
