@@ -2,7 +2,7 @@ from csvexport.actions import csvexport
 from django.contrib import admin
 from django.utils import timezone
 
-from finance.models import Reimbursement
+from finance.models import Reimbursement, ReimbursementSupportingMaterial
 
 
 @admin.action(description="Mark selected reimbursements as completed")
@@ -10,7 +10,13 @@ def mark_completed(modeladmin, request, queryset):
     queryset.update(completed=True)
 
 
+class ReimbursementSupportingMaterialInline(admin.TabularInline):
+    model = ReimbursementSupportingMaterial
+    extra = 0
+
+
 class ReimbursementAdmin(admin.ModelAdmin):
+    inlines = (ReimbursementSupportingMaterialInline,)
     actions = [csvexport, mark_completed]
     list_display = [
         "get_name",
@@ -35,7 +41,6 @@ class ReimbursementAdmin(admin.ModelAdmin):
         "amount",
         "expense_date",
         "explanation",
-        "expense_support",
         "reimbursement_method",
         "payment_contact",
         "decided_at",

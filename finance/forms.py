@@ -1,6 +1,9 @@
 from django import forms
 
+from community_fund.forms import MultipleFileField
 from finance.models import Reimbursement
+
+MAX_EXPENSE_SUPPORT_FILES = 5
 
 
 class ReimbursementForm(forms.ModelForm):
@@ -19,7 +22,6 @@ class ReimbursementForm(forms.ModelForm):
             "amount",
             "expense_date",
             "explanation",
-            "expense_support",
         ]
 
     first_name = forms.CharField(required=True)
@@ -59,7 +61,20 @@ class ReimbursementForm(forms.ModelForm):
             "If it is related to a specific project, please name the project."
         ),  
     )
-    expense_support = forms.FileField(
+    expense_support = MultipleFileField(
         required=True,
-        help_text="Attach any relevant invoices, receipts, etc. here.",
+        help_text=(
+            "Attach any relevant invoices, receipts, etc. here. "
+            f"Up to {MAX_EXPENSE_SUPPORT_FILES} files."
+        ),
     )
+
+    def clean_expense_support(self):
+        files = self.cleaned_data["expense_support"]
+        if not files:
+            raise forms.ValidationError("Please attach at least one file.")
+        if len(files) > MAX_EXPENSE_SUPPORT_FILES:
+            raise forms.ValidationError(
+                f"Please upload no more than {MAX_EXPENSE_SUPPORT_FILES} files."
+            )
+        return files
