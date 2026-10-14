@@ -715,6 +715,38 @@ form.application-form .form-errors {
   width: auto;
 }
 
+.reimbursement-request .selected-files {
+  list-style: none;
+  padding-inline-start: 0;
+  text-align: left;
+}
+
+.reimbursement-request .selected-files li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5em;
+  padding: .25em .5em;
+  margin-bottom: .25em;
+  background-color: #eeeeee;
+  border-radius: .25em;
+  overflow-wrap: anywhere;
+}
+
+.reimbursement-request .selected-files button {
+  flex: 0 0 auto;
+  border: none;
+  background: none;
+  font-size: 1.25em;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.reimbursement-request .selected-files .file-limit-error {
+  background: none;
+  color: red;
+}
+
 .button-holder {
   text-align: center;
   padding: 1em;
