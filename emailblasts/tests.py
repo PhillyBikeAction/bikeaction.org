@@ -3,8 +3,11 @@ import shutil
 import tempfile
 from datetime import timedelta
 from unittest.mock import Mock, patch
+from urllib.parse import parse_qs, urlsplit
 
+import sesame.utils
 from allauth.socialaccount.models import SocialAccount
+from bs4 import BeautifulSoup
 
 from django.contrib.auth.models import Permission
 from django.contrib.auth.models import User
@@ -36,6 +39,7 @@ from emailblasts.views import (
     _email_draft_profiles_for_targets,
     _email_draft_target_summary_items,
     _email_draft_target_name,
+    email_preview_context,
 )
 from events.models import EventRSVP, EventSignIn, ScheduledEvent
 from facets.models import District, ZipCode
@@ -116,6 +120,47 @@ class EmailBlastSendTaskTests(TestCase):
         blast.refresh_from_db()
         self.assertEqual(blast.status, EmailBlast.Status.SENT)
 
+    @override_settings(
+        SITE_URL="https://bikeaction.org/",
+        EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+    )
+    def test_magic_links_log_in_each_recipient_and_preserve_redirect(self):
+        profiles = [self.create_profile(f"{name}@example.com") for name in ("one", "two")]
+        blast = self.create_all_profiles_blast()
+        blast.body = (
+            '[Continue]({{ sesame_url }}&next={{ "/accounts/profile/?a=1&b=2"|urlencode }})'
+        )
+        blast.save()
+
+        send_email_blast(blast.id)
+
+        self.assertEqual(len(mail.outbox), 2)
+        for profile, message in zip(profiles, mail.outbox):
+            self.assertEqual(message.to, [profile.user.email])
+            html = BeautifulSoup(message.alternatives[0][0], "html.parser")
+            link = html.find("a", string="Continue")["href"]
+            parsed = urlsplit(link)
+            self.assertEqual(parsed.scheme, "https")
+            self.assertEqual(parsed.netloc, "bikeaction.org")
+            self.assertEqual(parsed.path, reverse("sesame_login"))
+            self.assertIn(link, message.body)
+            response = self.client.get(f"{parsed.path}?{parsed.query}")
+            self.assertRedirects(
+                response, "/accounts/profile/?a=1&b=2", fetch_redirect_response=False
+            )
+            self.assertEqual(int(self.client.session["_auth_user_id"]), profile.user_id)
+
+    @patch("emailblasts.tasks.send_email_message")
+    def test_inactive_account_has_no_magic_link(self, mock_send_email):
+        profile = self.create_profile("inactive@example.com")
+        profile.user.is_active = False
+        profile.user.save()
+        blast = self.create_all_profiles_blast()
+
+        send_email_blast(blast.id)
+
+        self.assertEqual(mock_send_email.call_args.kwargs["context"]["sesame_url"], "")
+
     @patch("emailblasts.tasks.send_email_message")
     def test_suppressed_recipient_is_skipped_case_insensitively(self, mock_send_email):
         self.create_profile("CaseSensitive@example.com")
@@ -166,6 +211,7 @@ class EmailBlastSendTaskTests(TestCase):
         self.assertEqual(mock_send_email.call_count, 1)
         self.assertEqual(mock_send_email.call_args.kwargs["to"], ["signer@example.com"])
         self.assertEqual(mock_send_email.call_args.kwargs["context"]["first_name"], "Signer")
+        self.assertEqual(mock_send_email.call_args.kwargs["context"]["sesame_url"], "")
         self.assertEqual(
             EmailBlastDelivery.objects.get(email_blast=blast).profile,
             None,
@@ -597,6 +643,26 @@ class EmailBlastExampleSendTests(TestCase):
         self.assertEqual(mock_send_email.call_args.kwargs["subject"], "[TEST] Test blast")
         self.assertEqual(mock_send_email.call_args.kwargs["reply_to"], ["reply@bikeaction.org"])
         self.assertIn("Hi {{ first_name }}", mock_send_email.call_args.kwargs["message"])
+        link = mock_send_email.call_args.kwargs["context"]["sesame_url"]
+        token = parse_qs(urlsplit(link).query)["sesame"][0]
+        self.assertEqual(sesame.utils.get_user(token), self.user)
+
+    @patch("emailblasts.utils.sesame.utils.get_query_string")
+    def test_previews_use_placeholder_without_generating_login_token(self, mock_get_query_string):
+        response = self.client.post(
+            reverse("email_draft_preview"),
+            self.form_data(body="[Log in]({{ sesame_url }})"),
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(email_preview_context()["sesame_url"], response.context["preview_html"])
+        mock_get_query_string.assert_not_called()
+
+    def test_writing_guide_documents_magic_link_and_guest_fallback(self):
+        response = self.client.get(reverse("email_draft"))
+
+        self.assertContains(response, "{{ sesame_url }}")
+        self.assertContains(response, "{% if sesame_url %}")
 
 
 class EmailBlastTargetingTests(TestCase):

@@ -9,6 +9,7 @@ from django.db import transaction
 from django.core.exceptions import PermissionDenied
 from django.http import FileResponse, Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 
 from emailblasts.forms import EmailDraftForm
 from emailblasts.models import EmailBlast, EmailBlastImage, EmailBlastTarget, EmailBlastTargetNode
@@ -20,7 +21,7 @@ from emailblasts.targeting import (
     _target_primitive_nodes,
 )
 from emailblasts.tasks import send_email_blast
-from emailblasts.utils import email_blast_full_body
+from emailblasts.utils import email_blast_full_body, email_blast_sesame_url
 from pbaabp.email import (
     EMAIL_IMAGE_PATH,
     render_email_html,
@@ -39,7 +40,11 @@ _EMAIL_PREVIEW_CONTEXT = {
 
 
 def email_preview_context(**overrides):
-    return {**_EMAIL_PREVIEW_CONTEXT, **overrides}
+    return {
+        **_EMAIL_PREVIEW_CONTEXT,
+        "sesame_url": f"{settings.SITE_URL.rstrip('/')}{reverse('sesame_login')}?sesame=preview",
+        **overrides,
+    }
 
 
 MUTABLE_EMAIL_BLAST_STATUSES = {
@@ -323,6 +328,7 @@ def _send_email_blast_example(subject, body, target_description, reply_to, user)
             "name": user.get_full_name(),
             "email": user.email,
             "target_description": target_description,
+            "sesame_url": email_blast_sesame_url(user),
         },
         subject=f"[TEST] {subject}",
         message=full_body,

@@ -314,6 +314,18 @@
         <li><code>{% templatetag openvariable %} {{ key }} {% templatetag closevariable %}</code> &rarr; "{{ value }}"</li>
         {% endfor %}
       </ul>
+      <details style="margin-top: 1rem;">
+        <summary style="cursor: pointer; font-weight: bold;">{% translate "Magic login links" %}</summary>
+        <p>{% translate "Use sesame_url to log each recipient into their own account. Add next to send them to a page after login:" %}</p>
+        <pre style="white-space: pre-wrap; overflow-wrap: anywhere;">{% verbatim %}[Update your profile]({{ sesame_url }}&next={{ "/accounts/profile/"|urlencode }}){% endverbatim %}</pre>
+        <p>{% translate "Recipients without an active account have an empty sesame_url. For mixed audiences, include a fallback:" %}</p>
+        <pre style="white-space: pre-wrap; overflow-wrap: anywhere;">{% verbatim %}{% if sesame_url %}
+[Update your profile]({{ sesame_url }}&next={{ "/accounts/profile/"|urlencode }})
+{% else %}
+[Visit Philly Bike Action](https://bikeaction.org/)
+{% endif %}{% endverbatim %}</pre>
+        <p>{% translate "Preview links are placeholders. Test emails contain your own login link. Links use the site's normal login expiration; recipients should not share them." %}</p>
+      </details>
     </div>
   </div>
 </details>
