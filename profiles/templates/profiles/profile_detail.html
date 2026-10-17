@@ -228,7 +228,7 @@
           <td>{{ nomination.created_at|date:"M d, Y" }}</td>
           <td>
             {% if not nomination.nominee.election.is_acceptance_period_closed %}
-            <a href="{% url 'nomination_respond' nomination.nominee.election.slug nomination.id %}" class="homepage-button">Respond</a>
+            <a href="{% url 'nomination_respond' nomination.nominee.election.slug nomination.id %}" class="smol-button smol-green">Respond</a>
             {% else %}
             <span style="color: #999;">Acceptance Period Closed</span>
             {% endif %}

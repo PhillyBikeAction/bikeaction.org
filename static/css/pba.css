@@ -724,6 +724,55 @@ form.application-form .form-errors {
   padding-top: 1.5em;
 }
 
+.nomination-response-form {
+  padding: 1.5rem 0 .5rem;
+}
+
+.nomination-response-form textarea {
+  box-sizing: border-box;
+  padding: .75rem;
+}
+
+.nomination-response-form .formfield {
+  margin-bottom: 2rem;
+}
+
+.nomination-response-form .self-nomination-instructions {
+  margin-bottom: 1.5rem;
+  text-align: left;
+  line-height: 1.5;
+}
+
+.nomination-response-form .button-holder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .75rem;
+  padding: 0 0 1rem;
+}
+
+.nomination-response-form .button-holder > * {
+  margin: 0;
+  max-width: 100%;
+  white-space: normal;
+}
+
+.election-info .election-dates th,
+.election-info .election-dates td {
+  text-align: left;
+  vertical-align: top;
+  padding: .35rem 0;
+}
+
+.election-info .election-dates th {
+  padding-right: 1rem;
+}
+
+.election-info .action-buttons {
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
 .quick-signin-greeting {
   font-size: 1.6em;
   font-weight: 700;
@@ -872,6 +921,10 @@ body {
   border-radius: .15em;
   text-decoration: none;
   margin: .2em;
+}
+
+.table-container .smol-button.smol-green {
+  background-color: rgb(131, 189, 86);
 }
 
 .table-container .table-action-form {

@@ -27,6 +27,11 @@
     </div>
   </div>
 
+  {% if nomination.acceptance_note %}
+  <h3>Note from {{ nomination.nominee.get_display_name }}</h3>
+  {{ nomination.acceptance_note|linebreaks }}
+  {% endif %}
+
   <div class="button-holder">
     <a href="{% url 'election_detail' election.slug %}" class="secondary-button">Back to Election</a>
   </div>

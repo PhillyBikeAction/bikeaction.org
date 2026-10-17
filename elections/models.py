@@ -137,10 +137,10 @@ class Election(models.Model):
         return timezone.now() >= self.nominations_close
 
     def is_acceptance_period_closed(self):
-        """Check if the acceptance period has closed (7 days after nominations close)."""
+        """Check if the acceptance period has closed (24 hours after nominations close)."""
         import datetime
 
-        acceptance_deadline = self.nominations_close + datetime.timedelta(days=7)
+        acceptance_deadline = self.nominations_close + datetime.timedelta(hours=24)
         return timezone.now() >= acceptance_deadline
 
     def is_voting_open(self):

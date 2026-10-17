@@ -39,6 +39,19 @@ class NominationModelTests(TestCase):
             voting_closes=now + timedelta(days=21),
         )
 
+    def test_acceptance_window_closes_exactly_24_hours_after_nominations(self):
+        deadline = self.election.nominations_close + timedelta(hours=24)
+        for moment, closed in (
+            (deadline - timedelta(seconds=1), False),
+            (deadline, True),
+            (deadline + timedelta(seconds=1), True),
+        ):
+            with (
+                self.subTest(moment=moment),
+                patch("django.utils.timezone.now", return_value=moment),
+            ):
+                self.assertEqual(self.election.is_acceptance_period_closed(), closed)
+
     @patch("elections.models.Nominee.send_notification_email")
     def test_self_nomination_auto_accepts(self, mock_send_email):
         """Self-nominations should automatically be accepted."""
@@ -1243,3 +1256,234 @@ class VotingTests(TestCase):
 
         # Verify all 3 ballots exist in database
         self.assertEqual(Ballot.objects.filter(election=self.election).count(), 3)
+
+
+@patch("elections.models.Nominee.send_notification_email")
+class NominationTrackerAndAcceptanceTests(TestCase):
+    def setUp(self):
+        from django.contrib.gis.geos import MultiPolygon, Point, Polygon
+
+        from facets.models import District
+        from profiles.models import Profile
+
+        now = timezone.now()
+        self.election = Election.objects.create(
+            title="Tracker election",
+            membership_eligibility_deadline=now - timedelta(days=30),
+            nominations_open=now - timedelta(days=7),
+            nominations_close=now + timedelta(days=7),
+            voting_opens=now + timedelta(days=14),
+            voting_closes=now + timedelta(days=21),
+        )
+        District.objects.create(
+            name="District 1",
+            mpoly=MultiPolygon(Polygon.from_bbox((0, 0, 2, 2)), srid=4326),
+            properties={},
+        )
+        self.user = User.objects.create_user(username="candidate", first_name="PrivateName")
+        Profile.objects.create(
+            user=self.user, street_address="123 Test", zip_code="19123", location=Point(1, 1)
+        )
+        self.nominator = User.objects.create_user(username="nominator")
+        self.nominee = Nominee.objects.create(
+            user=self.user,
+            election=self.election,
+            photo="nominee_photos/test.jpg",
+            board_responsibilities_acknowledged=True,
+        )
+        self.detail_url = reverse("election_detail", args=[self.election.slug])
+
+    def nominate(self, **kwargs):
+        return Nomination.objects.create(nominee=self.nominee, nominator=self.nominator, **kwargs)
+
+    def respond(self, nomination, **data):
+        self.client.force_login(self.user)
+        return self.client.post(
+            reverse("nomination_respond", args=[self.election.slug, nomination.pk]), data
+        )
+
+    def test_tracker_counts_people_and_excludes_drafts(self, _email):
+        self.nominate(acceptance_status=Nomination.AcceptanceStatus.ACCEPTED)
+        Nomination.objects.create(nominee=self.nominee, nominator=self.user, draft=False)
+        draft_user = User.objects.create_user(username="draft")
+        draft_nominee = Nominee.objects.create(user=draft_user, election=self.election)
+        Nomination.objects.create(
+            nominee=draft_nominee,
+            nominator=draft_user,
+            draft=True,
+            acceptance_status=Nomination.AcceptanceStatus.ACCEPTED,
+        )
+        response = self.client.get(self.detail_url)
+        self.assertContains(response, "Total: 1 nominated, <strong>1 accepted</strong>")
+        self.assertContains(response, "District 1: 1 nominated, <strong>1 accepted</strong>")
+        self.assertContains(response, "District 2: 0 nominated, <strong>0 accepted</strong>")
+        self.assertNotContains(response, "PrivateName")
+        self.assertNotContains(response, "No district identified")
+
+    def test_tracker_pending_declined_and_missing_district(self, _email):
+        self.nominate()
+        unknown = User.objects.create_user(username="unknown")
+        nominee = Nominee.objects.create(user=unknown, election=self.election)
+        Nomination.objects.create(
+            nominee=nominee,
+            nominator=self.nominator,
+            acceptance_status=Nomination.AcceptanceStatus.DECLINED,
+        )
+        # An accepted draft for an otherwise nominated candidate must not count as accepted.
+        Nomination.objects.create(
+            nominee=self.nominee,
+            nominator=self.user,
+            draft=True,
+            acceptance_status=Nomination.AcceptanceStatus.ACCEPTED,
+        )
+        response = self.client.get(self.detail_url)
+        self.assertContains(response, "Total: 2 nominated, <strong>0 accepted</strong>")
+        self.assertContains(response, "No district identified: 1 nominated")
+
+    def test_tracker_empty_and_time_boundaries(self, _email):
+        self.assertContains(self.client.get(self.detail_url), "Total: 0 nominated")
+        for moment, visible in (
+            (self.election.nominations_open - timedelta(seconds=1), False),
+            (self.election.nominations_open, True),
+            (self.election.nominations_close, False),
+        ):
+            with (
+                self.subTest(moment=moment),
+                patch("django.utils.timezone.now", return_value=moment),
+            ):
+                response = self.client.get(self.detail_url)
+                self.assertEqual("Nominations Tracker" in response.content.decode(), visible)
+
+    def test_acceptance_redirects_to_self_nomination(self, _email):
+        nomination = self.nominate()
+        response = self.respond(nomination, action="accept", nomination_statement="Not used")
+        self.assertRedirects(
+            response,
+            reverse("nomination_form", args=[self.election.slug]),
+            fetch_redirect_response=False,
+        )
+        nomination.refresh_from_db()
+        self.assertEqual(nomination.acceptance_status, Nomination.AcceptanceStatus.PENDING)
+        self.assertFalse(self.nominee.nominations.filter(nominator=self.user).exists())
+
+    @patch("profiles.models.Profile.eligible_as_of", return_value={"eligible": True})
+    def test_self_nomination_during_acceptance_period(self, _eligible, _email):
+        nomination = self.nominate()
+        draft = Nomination.objects.create(nominee=self.nominee, nominator=self.user, draft=True)
+        self.election.nominations_close = timezone.now() - timedelta(hours=12)
+        self.election.save()
+        response = self.respond(nomination, action="accept")
+        self.assertEqual(
+            response.url,
+            reverse("nomination_edit", args=[self.election.slug, draft.pk]),
+        )
+        form_url = response.url
+        self.assertContains(self.client.get(form_url), "Nomination Statement")
+        response = self.client.post(
+            form_url,
+            {
+                "nominee": self.user.pk,
+                "nomination_statement": "My public statement",
+                "submit-nomination": "Submit",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        draft.refresh_from_db()
+        self.assertFalse(draft.draft)
+        self.assertEqual(draft.nomination_statement, "My public statement")
+        nomination.refresh_from_db()
+        self.assertEqual(nomination.acceptance_status, Nomination.AcceptanceStatus.PENDING)
+        self.respond(nomination, action="accept")
+        nomination.refresh_from_db()
+        self.assertEqual(nomination.acceptance_status, Nomination.AcceptanceStatus.ACCEPTED)
+
+    def test_existing_submitted_statement_satisfies_acceptance(self, _email):
+        nomination = self.nominate()
+        own = Nomination.objects.create(
+            nominee=self.nominee, nominator=self.user, nomination_statement="Existing statement"
+        )
+        response = self.respond(nomination, action="accept")
+        self.assertEqual(response.status_code, 302)
+        nomination.refresh_from_db()
+        own.refresh_from_db()
+        self.assertEqual(nomination.acceptance_status, Nomination.AcceptanceStatus.ACCEPTED)
+        self.assertEqual(own.nomination_statement, "Existing statement")
+
+    @patch("profiles.models.Profile.eligible_as_of", return_value={"eligible": True})
+    def test_existing_self_nomination_form_requires_statement(self, _eligible, _email):
+        nomination = self.nominate()
+        response = self.respond(nomination, action="accept")
+        form_url = response.url
+        for statement in ("", "   "):
+            response = self.client.post(
+                form_url,
+                {
+                    "nominee": self.user.pk,
+                    "nomination_statement": statement,
+                    "submit-nomination": "Submit",
+                },
+            )
+            self.assertContains(response, "Please provide your own nomination statement.")
+        response = self.client.post(
+            form_url,
+            {
+                "nominee": self.user.pk,
+                "nomination_statement": "My statement",
+                "submit-nomination": "Submit",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        own = self.nominee.nominations.get(nominator=self.user)
+        self.assertEqual(own.nomination_statement, "My statement")
+        self.assertFalse(own.draft)
+        self.assertFalse(Nominee.objects.filter(user=self.nominator).exists())
+
+    @patch("profiles.models.Profile.eligible_as_of", return_value={"eligible": True})
+    def test_closed_nominations_exception_requires_existing_nomination(self, _eligible, _email):
+        self.election.nominations_close = timezone.now() - timedelta(hours=12)
+        self.election.save()
+        self.client.force_login(self.user)
+        url = reverse("nomination_form", args=[self.election.slug])
+        self.assertRedirects(self.client.get(url), self.detail_url)
+        self.nominate()
+        self.assertRedirects(
+            self.client.post(
+                url,
+                {
+                    "nominee": self.nominator.pk,
+                    "nomination_statement": "Other candidate",
+                    "submit-nomination": "Submit",
+                },
+            ),
+            self.detail_url,
+        )
+        self.election.nominations_close = timezone.now() - timedelta(hours=25)
+        self.election.save()
+        self.assertRedirects(self.client.get(url), self.detail_url)
+
+    def test_response_page_links_to_existing_form(self, _email):
+        nomination = self.nominate()
+        self.client.force_login(self.user)
+        response = self.client.get(
+            reverse("nomination_respond", args=[self.election.slug, nomination.pk])
+        )
+        self.assertContains(response, "Nominate Yourself First")
+        self.assertNotContains(response, 'name="nomination_statement"')
+        self.assertNotContains(response, 'value="accept"')
+
+    def test_decline_needs_no_statement(self, _email):
+        nomination = self.nominate()
+        response = self.respond(nomination, action="decline")
+        self.assertEqual(response.status_code, 302)
+        nomination.refresh_from_db()
+        self.assertEqual(nomination.acceptance_status, Nomination.AcceptanceStatus.DECLINED)
+        self.assertFalse(self.nominee.nominations.filter(nominator=self.user).exists())
+
+    def test_acceptance_closed_does_not_submit_statement(self, _email):
+        nomination = self.nominate()
+        self.election.nominations_close = timezone.now() - timedelta(hours=25)
+        self.election.save()
+        self.respond(nomination, action="accept", nomination_statement="Too late")
+        nomination.refresh_from_db()
+        self.assertEqual(nomination.acceptance_status, Nomination.AcceptanceStatus.PENDING)
+        self.assertFalse(self.nominee.nominations.filter(nominator=self.user).exists())

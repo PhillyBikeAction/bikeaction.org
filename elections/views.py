@@ -1,7 +1,9 @@
+import re
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -43,8 +45,17 @@ def nomination_form(request, election_slug, pk=None):
         )
         return redirect("election_detail", election_slug=election.slug)
 
-    # Check if nominations are open
-    if not election.is_nominations_open():
+    # Existing nominees may complete their self-nomination during the acceptance window.
+    completing_nomination = (
+        election.is_nominations_closed()
+        and not election.is_acceptance_period_closed()
+        and Nomination.objects.filter(
+            nominee__election=election, nominee__user=request.user, draft=False
+        )
+        .exclude(nominator=request.user)
+        .exists()
+    )
+    if not election.is_nominations_open() and not completing_nomination:
         if timezone.now() < election.nominations_open:
             messages.error(request, "Nominations are not yet open for this election.")
         else:
@@ -68,6 +79,15 @@ def nomination_form(request, election_slug, pk=None):
             if nomination.acceptance_status == Nomination.AcceptanceStatus.DECLINED:
                 messages.error(request, "You cannot edit a withdrawn nomination.")
                 return redirect("nomination_view", election_slug=election.slug, pk=nomination.id)
+
+    if completing_nomination:
+        if nomination and nomination.nominee.user_id != request.user.id:
+            return redirect("election_detail", election_slug=election.slug)
+        if request.method == "POST" and request.POST.get("nominee") != str(request.user.pk):
+            messages.error(
+                request, "Only your own nomination can be completed after nominations close."
+            )
+            return redirect("election_detail", election_slug=election.slug)
 
     # Handle form submission
     if request.method == "POST":
@@ -193,12 +213,20 @@ def nomination_form(request, election_slug, pk=None):
                 label_suffix="",
             )
         else:
-            form = NominationForm(election=election, nominator=request.user, label_suffix="")
+            form = NominationForm(
+                election=election,
+                nominator=request.user,
+                label_suffix="",
+            )
 
     return render(
         request,
         "elections/nomination_form.html",
-        {"form": form, "election": election, "nomination": nomination},
+        {
+            "form": form,
+            "election": election,
+            "nomination": nomination,
+        },
     )
 
 
@@ -232,6 +260,36 @@ def election_detail(request, election_slug):
     user_nominations = []
     can_vote = False
     voting_closed = timezone.now() >= election.voting_closes
+    nomination_tracker = None
+    if election.is_nominations_open():
+        districts = {
+            number: {"label": f"District {number}", "nominated": 0, "accepted": 0}
+            for number in range(1, 11)
+        }
+        no_district = {"label": "No district identified", "nominated": 0, "accepted": 0}
+        total = {"label": "Total", "nominated": 0, "accepted": 0}
+        nominees = (
+            election.nominees.filter(nominations__draft=False)
+            .annotate(
+                accepted_count=Count(
+                    "nominations",
+                    filter=Q(nominations__acceptance_status=Nomination.AcceptanceStatus.ACCEPTED),
+                )
+            )
+            .select_related("user__profile")
+        )
+        for nominee in nominees:
+            profile = getattr(nominee.user, "profile", None)
+            district = profile.district if profile else None
+            match = re.search(r"\d+", district.name) if district else None
+            row = districts.get(int(match.group()), no_district) if match else no_district
+            for counts in (total, row):
+                counts["nominated"] += 1
+                counts["accepted"] += bool(nominee.accepted_count)
+        rows = list(districts.values())
+        if no_district["nominated"]:
+            rows.append(no_district)
+        nomination_tracker = {"total": total, "districts": rows}
 
     if request.user.is_authenticated:
         user_nominations = Nomination.objects.filter(
@@ -252,6 +310,7 @@ def election_detail(request, election_slug):
             "can_nominate": request.user.is_authenticated and election.is_nominations_open(),
             "can_vote": can_vote,
             "voting_closed": voting_closed,
+            "nomination_tracker": nomination_tracker,
         },
     )
 
@@ -374,8 +433,20 @@ def nomination_respond(request, election_slug, pk):
     )
 
     is_self_nomination = nomination.nominator == nomination.nominee.user
+    own_nomination = nomination.nominee.nominations.filter(nominator=request.user).first()
+    has_own_statement = bool(
+        own_nomination
+        and not own_nomination.draft
+        and own_nomination.acceptance_status == Nomination.AcceptanceStatus.ACCEPTED
+        and own_nomination.nomination_statement.strip()
+    )
+    self_nomination_url = (
+        reverse("nomination_edit", args=[election.slug, own_nomination.pk])
+        if own_nomination
+        else reverse("nomination_form", args=[election.slug])
+    )
 
-    # Check if acceptance period has closed (7 days after nominations close)
+    # Check if acceptance period has closed (24 hours after nominations close)
     if election.is_acceptance_period_closed():
         messages.error(
             request,
@@ -421,6 +492,13 @@ def nomination_respond(request, election_slug, pk):
         else:
             # For nominations from others
             if action == "accept":
+                if not has_own_statement:
+                    messages.info(
+                        request,
+                        "Please submit your self-nomination with your own statement, "
+                        "then return to accept this nomination.",
+                    )
+                    return redirect(self_nomination_url)
                 nomination.acceptance_status = Nomination.AcceptanceStatus.ACCEPTED
                 nomination.acceptance_date = timezone.now()
                 nomination.acceptance_note = note
@@ -449,7 +527,13 @@ def nomination_respond(request, election_slug, pk):
     return render(
         request,
         "elections/nomination_respond.html",
-        {"nomination": nomination, "election": election, "is_self_nomination": is_self_nomination},
+        {
+            "nomination": nomination,
+            "election": election,
+            "is_self_nomination": is_self_nomination,
+            "self_nomination_url": self_nomination_url,
+            "has_own_statement": has_own_statement,
+        },
     )
 
 

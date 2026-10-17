@@ -13,8 +13,21 @@
     </div>
     {% endif %}
 
-    <h2>Important Dates</h2>
-    <table>
+    {% if nomination_tracker %}
+    <section aria-labelledby="nomination-tracker-heading">
+      <h2 id="nomination-tracker-heading">Nominations Tracker</h2>
+      <p>Each candidate is counted once, excluding drafts. Accepted means the candidate has accepted at least one nomination. Names remain private while nominations are open.</p>
+      <p>Total: {{ nomination_tracker.total.nominated }} nominated, <strong>{{ nomination_tracker.total.accepted }} accepted</strong></p>
+      <ul>
+        {% for row in nomination_tracker.districts %}
+        <li>{{ row.label }}: {{ row.nominated }} nominated, <strong>{{ row.accepted }} accepted</strong></li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
+
+    <h2 id="election-dates-heading">Important Dates</h2>
+    <table class="election-dates" aria-labelledby="election-dates-heading">
       <tr>
         <th>Membership Eligibility Deadline:</th>
         <td>{{ election.membership_eligibility_deadline|date:"F j, Y g:i A" }}</td>
