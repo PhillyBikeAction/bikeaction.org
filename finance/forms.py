@@ -43,7 +43,7 @@ class ReimbursementForm(forms.ModelForm):
                 "What is the email address or phone number associated with Zelle or PayPal account?"
             ),
         )
-    vendor_name = forms.CharField(required=True)
+    vendor_name = forms.CharField(required=True, max_length=250)
     amount = forms.DecimalField(
         required=True,
         help_text="Expenses of $60 or more require approval by the PBA Board.",
