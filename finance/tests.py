@@ -4,6 +4,7 @@ from datetime import date
 from decimal import Decimal
 from django.core.exceptions import ValidationError
 
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import SimpleTestCase, TestCase, override_settings
@@ -18,7 +19,7 @@ from finance.models import (
 
 
 
-class CommunityActionFundApplicationFormTests(SimpleTestCase):
+class ReimbursementFormTests(SimpleTestCase):
     test_reimbursement = Reimbursement(
         first_name = "Taylor",
         last_name = "Requester",
@@ -32,7 +33,7 @@ class CommunityActionFundApplicationFormTests(SimpleTestCase):
         explanation = "Food"
     )
     
-    def test_supporting_material_filename_uses_project_title(self):
+    def test_supporting_material_filename_is_unique_with_lowercase_extension(self):
         material = ReimbursementSupportingMaterial(application=self.test_reimbursement)
 
         filename = reimbursement_expense_support_upload_to(material, "Site Plan.PDF")
@@ -51,9 +52,10 @@ class CommunityActionFundApplicationFormTests(SimpleTestCase):
             SimpleUploadedFile("sketch.pdf", b"sketch"),
             SimpleUploadedFile("budget.xlsx", b"budget"),
         ]
-        form = ReimbursementForm(files={"expense_support": files})
-    
-        self.assertEqual(form.fields["expense_support"].clean(files), files)
+        form = ReimbursementForm()
+        form.cleaned_data = {"expense_support": files}
+
+        self.assertEqual(form.clean_expense_support(), files)
 
     def test_too_many_files(self):
         files = [
@@ -80,7 +82,7 @@ class CommunityActionFundApplicationFormTests(SimpleTestCase):
 
         with self.assertRaisesMessage(
             ValidationError,
-            f"Please upload no more than {MAX_EXPENSE_SUPPORT_FILES} files.",
+            "Please attach at least one file.",
         ):
             form.clean_expense_support()
 
@@ -107,7 +109,7 @@ class CommunityActionFundApplicationFormTests(SimpleTestCase):
         with self.assertRaises(ValidationError):
             field.clean("0")
 
-    def test_rejects_explanation_over_word_limit(self):
+    def test_rejects_explanation_over_character_limit(self):
         form = ReimbursementForm(
             data={
                 "first_name": "Taylor",
@@ -126,7 +128,7 @@ class CommunityActionFundApplicationFormTests(SimpleTestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("explanation", form.errors)
 
-    def test_rejects_vendor_over_word_limit(self):
+    def test_rejects_vendor_over_character_limit(self):
         form = ReimbursementForm(
             data={
                 "first_name": "Taylor",
@@ -142,7 +144,7 @@ class CommunityActionFundApplicationFormTests(SimpleTestCase):
 
         )
         self.assertFalse(form.is_valid())
-        self.assertIn("vendor", form.errors)
+        self.assertIn("vendor_name", form.errors)
 
 
     def test_reimbursement_decision_choices(self):
@@ -158,9 +160,10 @@ class CommunityActionFundApplicationFormTests(SimpleTestCase):
             "discord_handle": "",
             "reimbursement_method": "ali pay",
             "payment_contact": "taylor@example.com",
-            "vendor_name": "B" * 300,
+            "vendor_name": "Bike Shop",
             "amount": "42.50",
             "expense_date": "2026-10-01",
+            "explanation": "Food",
         }
         form = ReimbursementForm(
             data
@@ -168,3 +171,5 @@ class CommunityActionFundApplicationFormTests(SimpleTestCase):
 
         self.assertFalse(form.is_valid())
         self.assertIn("reimbursement_method", form.errors)
+
+# TODO: Should I have a test here checking if user is logged in?

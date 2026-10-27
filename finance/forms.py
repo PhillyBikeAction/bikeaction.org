@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django import forms
 
 from community_fund.forms import MultipleFileField
@@ -47,6 +49,7 @@ class ReimbursementForm(forms.ModelForm):
     amount = forms.DecimalField(
         required=True,
         help_text="Expenses of $60 or more require approval by the PBA Board.",
+        min_value=Decimal("0.01"),
     )
     expense_date = forms.DateField(
         required=True,
@@ -55,7 +58,7 @@ class ReimbursementForm(forms.ModelForm):
     explanation = forms.CharField(
         required=True,
         widget=forms.Textarea,
-        max_length=250,
+        max_length=1000,
         help_text=(
             "Brief explanation of the expense. "
             "If it is related to a specific project, please name the project."
