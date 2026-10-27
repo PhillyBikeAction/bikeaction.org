@@ -1,14 +1,8 @@
-import shutil
-import tempfile
-from datetime import date
 from decimal import Decimal
 from django.core.exceptions import ValidationError
 
-from django.conf import settings
-from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import SimpleTestCase, TestCase, override_settings
-from django.urls import reverse
+from django.test import SimpleTestCase
 
 from finance.forms import MAX_EXPENSE_SUPPORT_FILES, ReimbursementForm
 from finance.models import (
@@ -18,29 +12,26 @@ from finance.models import (
 )
 
 
-
 class ReimbursementFormTests(SimpleTestCase):
     test_reimbursement = Reimbursement(
-        first_name = "Taylor",
-        last_name = "Requester",
-        email = "taylor@example.com",
-        discord_handle = "",
-        reimbursement_method = "zelle",
-        payment_contact = "taylor@example.com",
-        vendor_name = "Bike Shop",
-        amount = "42.50",
-        expense_date = "2026-10-01",
-        explanation = "Food"
+        first_name="Taylor",
+        last_name="Requester",
+        email="taylor@example.com",
+        discord_handle="",
+        reimbursement_method="zelle",
+        payment_contact="taylor@example.com",
+        vendor_name="Bike Shop",
+        amount="42.50",
+        expense_date="2026-10-01",
+        explanation="Food",
     )
-    
+
     def test_supporting_material_filename_is_unique_with_lowercase_extension(self):
         material = ReimbursementSupportingMaterial(application=self.test_reimbursement)
 
         filename = reimbursement_expense_support_upload_to(material, "Site Plan.PDF")
 
-        self.assertTrue(
-            filename.startswith("reimbursement-expense-support/")
-        )
+        self.assertTrue(filename.startswith("reimbursement-expense-support/"))
         self.assertTrue(filename.endswith(".pdf"))
         self.assertNotEqual(
             filename,
@@ -74,9 +65,9 @@ class ReimbursementFormTests(SimpleTestCase):
             f"Please upload no more than {MAX_EXPENSE_SUPPORT_FILES} files.",
         ):
             form.clean_expense_support()
+
     def test_attachment_required(self):
-        files = [
-        ]
+        files = []
         form = ReimbursementForm()
         form.cleaned_data = {"expense_support": files}
 
@@ -87,10 +78,10 @@ class ReimbursementFormTests(SimpleTestCase):
             form.clean_expense_support()
 
     def test_requires_explanation(self):
-        data={
-             "first_name": "Taylor",
+        data = {
+            "first_name": "Taylor",
             "last_name": "Requester",
-            "email":"taylor@example.com",
+            "email": "taylor@example.com",
             "discord_handle": "",
             "reimbursement_method": "zelle",
             "payment_contact": "taylor@example.com",
@@ -101,7 +92,7 @@ class ReimbursementFormTests(SimpleTestCase):
         form = ReimbursementForm(data)
         self.assertFalse(form.is_valid())
         self.assertIn("explanation", form.errors)
-    
+
     def test_amount_requested_must_be_positive(self):
         field = ReimbursementForm.base_fields["amount"]
 
@@ -114,7 +105,7 @@ class ReimbursementFormTests(SimpleTestCase):
             data={
                 "first_name": "Taylor",
                 "last_name": "Requester",
-                "email":"taylor@example.com",
+                "email": "taylor@example.com",
                 "discord_handle": "",
                 "reimbursement_method": "zelle",
                 "payment_contact": "taylor@example.com",
@@ -123,7 +114,6 @@ class ReimbursementFormTests(SimpleTestCase):
                 "expense_date": "2026-10-01",
                 "explanation": "word " * 301,
             }
-
         )
         self.assertFalse(form.is_valid())
         self.assertIn("explanation", form.errors)
@@ -133,7 +123,7 @@ class ReimbursementFormTests(SimpleTestCase):
             data={
                 "first_name": "Taylor",
                 "last_name": "Requester",
-                "email":"taylor@example.com",
+                "email": "taylor@example.com",
                 "discord_handle": "",
                 "reimbursement_method": "zelle",
                 "payment_contact": "taylor@example.com",
@@ -141,11 +131,9 @@ class ReimbursementFormTests(SimpleTestCase):
                 "amount": "42.50",
                 "expense_date": "2026-10-01",
             }
-
         )
         self.assertFalse(form.is_valid())
         self.assertIn("vendor_name", form.errors)
-
 
     def test_reimbursement_decision_choices(self):
         self.assertEqual(Reimbursement.Decision.APPROVED, "approved")
@@ -153,10 +141,10 @@ class ReimbursementFormTests(SimpleTestCase):
         self.assertEqual(Reimbursement.Decision.DENIED, "denied")
 
     def test_rejects_unknown_reimbursement_method(self):
-        data={
+        data = {
             "first_name": "Taylor",
             "last_name": "Requester",
-            "email":"taylor@example.com",
+            "email": "taylor@example.com",
             "discord_handle": "",
             "reimbursement_method": "ali pay",
             "payment_contact": "taylor@example.com",
@@ -165,11 +153,10 @@ class ReimbursementFormTests(SimpleTestCase):
             "expense_date": "2026-10-01",
             "explanation": "Food",
         }
-        form = ReimbursementForm(
-            data
-        )
+        form = ReimbursementForm(data)
 
         self.assertFalse(form.is_valid())
         self.assertIn("reimbursement_method", form.errors)
+
 
 # TODO: Should I have a test here checking if user is logged in?

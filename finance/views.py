@@ -42,4 +42,3 @@ class ReimbursementCreateView(LoginRequiredMixin, CreateView):
             "Reimbursement request submitted!",
         )
         return HttpResponseRedirect(reverse("profile"))
-

@@ -15,6 +15,7 @@ def reimbursement_expense_support_upload_to(instance, filename):
         f"{uuid.uuid4().hex[:8]}{original_file.suffix.lower()}"
     )
 
+
 class Reimbursement(models.Model):
     class ReimbursementMethod(models.TextChoices):
         ZELLE = "zelle", "Zelle"
@@ -44,9 +45,7 @@ class Reimbursement(models.Model):
     )
     payment_contact = models.CharField(max_length=256, null=False, blank=False)
 
-    decision = models.CharField(
-        max_length=16, choices=Decision.choices, default=Decision.PENDING
-    )
+    decision = models.CharField(max_length=16, choices=Decision.choices, default=Decision.PENDING)
     decided_at = models.DateTimeField(null=True, blank=True)
     decided_by = models.CharField(max_length=64, null=True, blank=True)
     completed = models.BooleanField(default=False)

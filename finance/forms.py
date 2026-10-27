@@ -34,17 +34,17 @@ class ReimbursementForm(forms.ModelForm):
         help_text="Only required if you are in the PBA Discord.",
     )
     reimbursement_method = forms.ChoiceField(
-            choices=[("zelle", "Zelle"), ("paypal", "PayPal")],
-            help_text=(
-                "If you would like to be reimbursed via check, please email finance@bikeaction.org "
-                "or message Brian (briandelmore) on Discord to arrange payment."
-            ),
-        )
+        choices=[("zelle", "Zelle"), ("paypal", "PayPal")],
+        help_text=(
+            "If you would like to be reimbursed via check, please email finance@bikeaction.org "
+            "or message Brian (briandelmore) on Discord to arrange payment."
+        ),
+    )
     payment_contact = forms.CharField(
-            help_text=(
-                "What is the email address or phone number associated with Zelle or PayPal account?"
-            ),
-        )
+        help_text=(
+            "What is the email address or phone number associated with Zelle or PayPal account?"
+        ),
+    )
     vendor_name = forms.CharField(required=True, max_length=250)
     amount = forms.DecimalField(
         required=True,
@@ -62,7 +62,7 @@ class ReimbursementForm(forms.ModelForm):
         help_text=(
             "Brief explanation of the expense. "
             "If it is related to a specific project, please name the project."
-        ),  
+        ),
     )
     expense_support = MultipleFileField(
         required=True,
