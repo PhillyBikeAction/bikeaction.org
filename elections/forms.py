@@ -46,6 +46,14 @@ class NominationForm(forms.ModelForm):
         if "nominee" not in self.fields:
             self.fields = {"nominee": self.fields.pop("nominee"), **self.fields}
 
+    def clean(self):
+        cleaned_data = super().clean()
+        if cleaned_data.get("nominee") == self.nominator and not cleaned_data.get(
+            "nomination_statement"
+        ):
+            self.add_error("nomination_statement", "Please provide your own nomination statement.")
+        return cleaned_data
+
     def clean_nominee(self):
         """Validate that the nominee is eligible."""
         nominee = self.cleaned_data.get("nominee")

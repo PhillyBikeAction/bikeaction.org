@@ -34,19 +34,24 @@ class ProfileDetailView(LoginRequiredMixin, DetailView):
 
         context = super().get_context_data(**kwargs)
         context["today"] = timezone.now().date()
-        upcoming_election = Election.get_upcoming()
-        if upcoming_election:
-            context["upcoming_election"] = upcoming_election
-            context["current_eligibility"] = self.request.user.profile.eligible_as_of(
-                timezone.now()
+        dashboard_election = (
+            Election.objects.filter(voting_closes__gt=timezone.now())
+            .order_by("voting_closes", "pk")
+            .first()
+        )
+        if dashboard_election:
+            deadline = dashboard_election.membership_eligibility_deadline
+            context["dashboard_election"] = dashboard_election
+            context["eligibility_deadline_passed"] = timezone.now() >= deadline
+            context["election_eligibility"] = self.request.user.profile.eligible_as_of(deadline)
+            # Use the voting check for the displayed election status, including historical payments.
+            context["eligible_for_election"] = (
+                dashboard_election.get_eligible_voters()
+                .filter(pk=self.request.user.profile.pk)
+                .exists()
             )
-            context["election_eligibility"] = self.request.user.profile.eligible_as_of(
-                upcoming_election.membership_eligibility_deadline
-            )
-            # Calculate the earliest date for Discord activity to be valid
-            context["discord_activity_start_date"] = (
-                upcoming_election.membership_eligibility_deadline - datetime.timedelta(days=30)
-            )
+            context["discord_activity_start_date"] = deadline.date() - datetime.timedelta(days=30)
+            context["discord_activity_end_date"] = deadline.date()
 
         # Get nomination data (with social accounts prefetched for Discord handles)
         context["nominations_given"] = (

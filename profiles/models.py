@@ -187,22 +187,18 @@ class Profile(models.Model):
 
         if subscriptions.exists():
             latest_sub = subscriptions.first()
-            # Check if subscription is active at target datetime
-            if (
-                latest_sub.current_period_end
-                and latest_sub.current_period_end.date() >= target_date
-            ):
-                donor_sufficient_alone = True
-                # Check if renewal is needed before target
-                if latest_sub.current_period_end.date() > now.date():
-                    if latest_sub.current_period_end.date() >= target_date:
-                        if now.date() < latest_sub.current_period_end.date() < target_date:
-                            donor_status = "active_renewal_required"
-                            donor_next_renewal = latest_sub.current_period_end
-                        else:
-                            donor_status = "active_stable"
-                else:
-                    donor_status = "expiring"
+            if latest_sub.current_period_end:
+                period_end = latest_sub.current_period_end.date()
+                if period_end >= target_date:
+                    donor_sufficient_alone = True
+                    donor_status = "active_stable" if period_end > now.date() else "expiring"
+                elif period_end > now.date():
+                    donor_next_renewal = latest_sub.current_period_end
+                    donor_status = (
+                        "expiring"
+                        if latest_sub.cancel_at_period_end or latest_sub.cancel_at
+                        else "active_renewal_required"
+                    )
 
         # Check Discord activity
         discord_active = False

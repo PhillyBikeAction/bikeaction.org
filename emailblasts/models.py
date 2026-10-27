@@ -28,6 +28,11 @@ class EmailBlastTargetNode(models.Model):
         EVENT_SIGNIN = "event_signin", "Event sign-ins"
         LEGACY = "legacy", "Legacy/custom targeting"
         VOLUNTEERS = "volunteers", "Volunteering Opt Ins"
+        ELECTION_ELIGIBLE = "election_eligible", "Current election: eligible voters"
+        ELECTION_NOT_VOTED = (
+            "election_not_voted",
+            "Current election: eligible voters who haven't voted",
+        )
 
     class Operator(models.TextChoices):
         AND = "and", "All of these"

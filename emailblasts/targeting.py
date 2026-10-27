@@ -1,11 +1,14 @@
 import json
 from dataclasses import dataclass
+from datetime import timedelta
 
 from django.contrib.gis.geos import GEOSGeometry
 from django.db.models.functions import Lower
 from django.db.models.functions import Trim
+from django.utils import timezone
 
 from campaigns.models import PetitionSignature
+from elections.models import Ballot, Election
 from emailblasts.forms import EmailDraftForm
 from emailblasts.models import EmailBlastTargetNode
 from events.models import EventRSVP, EventSignIn
@@ -45,6 +48,24 @@ def _email_draft_target_profiles(target):
         return Profile.objects.all()
     if target["target_type"] == EmailBlastTargetNode.TargetType.VOLUNTEERS:
         return Profile.objects.filter(volunteer_opt_in=True)
+    if target["target_type"] in {
+        EmailBlastTargetNode.TargetType.ELECTION_ELIGIBLE,
+        EmailBlastTargetNode.TargetType.ELECTION_NOT_VOTED,
+    }:
+        # Keep the just-closed election available for results emails for ten days.
+        election = (
+            Election.objects.filter(voting_closes__gt=timezone.now() - timedelta(days=10))
+            .order_by("voting_closes", "pk")
+            .first()
+        )
+        if election is None:
+            return Profile.objects.none()
+        profiles = election.get_eligible_voters()
+        if target["target_type"] == EmailBlastTargetNode.TargetType.ELECTION_NOT_VOTED:
+            profiles = profiles.exclude(
+                user_id__in=Ballot.objects.filter(election=election).values("voter_id")
+            )
+        return profiles
     if target["target_type"] == EmailBlastTargetNode.TargetType.GEOJSON:
         return _email_draft_geojson_profiles(json.dumps(target["target_geojson"]))
     if target["target_type"] == EmailBlastTargetNode.TargetType.PETITION:

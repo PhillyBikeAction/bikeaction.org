@@ -1,0 +1,7 @@
+Hi {{ first_name|default:"there" }},
+
+I'm debugging some deliverability issues and am using organizers as guinea pigs.
+ 
+You don't have to do anything!
+
+-Ee

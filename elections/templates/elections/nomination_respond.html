@@ -41,18 +41,26 @@
     <h3>Your Response:</h3>
     <p>Please decide whether you would like to accept or decline this nomination.</p>
 
-    <form method="post">
+    <form method="post" class="nomination-response-form">
       {% csrf_token %}
 
       <div class="formfield">
-        <label for="acceptance_note">Optional Note:</label>
-        <textarea name="acceptance_note" id="acceptance_note" rows="4" placeholder="Add a note about your decision (optional)"></textarea>
-        <span class="helptext">You can add a brief note explaining your decision.</span>
+        <label for="acceptance_note">Note to the person who nominated you (optional)</label>
+        <textarea name="acceptance_note" id="acceptance_note" rows="4" aria-describedby="acceptance-note-help" placeholder="Thank them or explain your decision…">{{ request.POST.acceptance_note }}</textarea>
+        <span class="helptext" id="acceptance-note-help">This note will be visible to {{ nomination.nominator.first_name }} {{ nomination.nominator.last_name|slice:":1" }}. when you accept or decline their nomination.</span>
       </div>
 
+      {% if not has_own_statement %}
+      <p class="self-nomination-instructions">Before accepting, <a href="{{ self_nomination_url }}">nominate yourself</a> and submit your own nomination statement. Then return here to accept this nomination.</p>
+      {% endif %}
+
       <div class="button-holder">
+        {% if has_own_statement %}
         <button type="submit" name="action" value="accept" class="submit-button">Accept Nomination</button>
-        <button type="submit" name="action" value="decline" class="secondary-button">Decline Nomination</button>
+        {% else %}
+        <a href="{{ self_nomination_url }}" class="submit-button">Nominate Yourself First</a>
+        {% endif %}
+        <button type="submit" name="action" value="decline" class="secondary-button" onclick="return confirm('Are you sure you want to decline this nomination?');">Decline Nomination</button>
       </div>
     </form>
     {% endif %}

@@ -168,6 +168,16 @@ class ProfileEligibilityTestCase(TestCase):
         # Subscription doesn't cover target date
         self.assertFalse(result["eligible"])
         self.assertFalse(result["donor"])
+        self.assertEqual(result["donor_status"], "active_renewal_required")
+        self.assertIsNotNone(result["donor_next_renewal"])
+
+    def test_scheduled_cancellation_is_not_described_as_renewal(self):
+        subscription = self._create_subscription(days_until_period_end=15)
+        subscription.cancel_at_period_end = True
+        subscription.save()
+        result = self.profile.eligible_as_of(timezone.now() + datetime.timedelta(days=30))
+        self.assertFalse(result["eligible"])
+        self.assertEqual(result["donor_status"], "expiring")
 
     def test_at_risk_renewal_with_subscription_covering_target(self):
         """Test renewal before target but subscription still covers target"""
@@ -702,3 +712,93 @@ class ProfileEligibilityTestCase(TestCase):
         after_end = end_date + datetime.timedelta(days=1)
         result = self.profile.eligible_as_of(after_end)
         self.assertFalse(result["membership_sufficient_alone"])
+
+
+class ElectionDashboardTestCase(TestCase):
+    def setUp(self):
+        from elections.models import Election
+
+        self.user = User.objects.create_user(username="dashboard", email="dashboard@example.com")
+        self.profile = Profile.objects.create(
+            user=self.user, street_address="123 Test St", zip_code="19123"
+        )
+        self.client.force_login(self.user)
+        now = timezone.now()
+        self.election = Election.objects.create(
+            title="Upcoming election",
+            slug="upcoming-election",
+            membership_eligibility_deadline=now + datetime.timedelta(days=5),
+            nominations_open=now + datetime.timedelta(days=6),
+            nominations_close=now + datetime.timedelta(days=10),
+            voting_opens=now + datetime.timedelta(days=11),
+            voting_closes=now + datetime.timedelta(days=15),
+        )
+
+    def dashboard(self):
+        from django.urls import reverse
+
+        return self.client.get(reverse("profile"))
+
+    def test_nonmember_sees_deadline_and_qualification_options(self):
+        response = self.dashboard()
+        self.assertContains(response, "Election eligibility: Upcoming election")
+        self.assertContains(response, "You do not yet have qualifying membership activity")
+        self.assertContains(response, "Set up or manage a recurring donation")
+
+    def test_eligible_member_sees_confirmation(self):
+        SocialAccount.objects.create(user=self.user, provider="discord", uid="dashboard-discord")
+        DiscordActivity.objects.create(profile=self.profile, date=timezone.now().date(), count=1)
+        response = self.dashboard()
+        self.assertContains(response, "Your recorded membership activity covers")
+        self.assertNotContains(response, "You do not yet have qualifying membership activity")
+
+    def test_after_deadline_card_remains_without_qualification_instructions(self):
+        self.election.membership_eligibility_deadline = timezone.now() - datetime.timedelta(days=1)
+        self.election.save()
+        response = self.dashboard()
+        self.assertContains(response, "You did not qualify for this election")
+        self.assertNotContains(response, "You can qualify through either")
+
+    def test_historical_paid_invoice_matches_voting_eligibility(self):
+        from djstripe.models import Invoice
+
+        now = timezone.now()
+        self.election.membership_eligibility_deadline = now - datetime.timedelta(days=10)
+        self.election.save()
+        customer = Customer.objects.create(id="cus_dashboard", subscriber=self.user, livemode=False)
+        subscription = Subscription.objects.create(
+            id="sub_dashboard",
+            customer=customer,
+            status="canceled",
+            livemode=False,
+            current_period_start=now - datetime.timedelta(days=4),
+            current_period_end=now - datetime.timedelta(days=1),
+        )
+        Invoice.objects.create(
+            id="in_dashboard",
+            customer=customer,
+            subscription=subscription,
+            status="paid",
+            livemode=False,
+            currency="usd",
+            amount_due=10,
+            amount_paid=10,
+            subtotal=10,
+            total=10,
+            starting_balance=0,
+            attempt_count=1,
+            period_start=now - datetime.timedelta(days=30),
+            period_end=now - datetime.timedelta(days=5),
+        )
+        self.assertTrue(self.election.get_eligible_voters().filter(pk=self.profile.pk).exists())
+        response = self.dashboard()
+        self.assertContains(response, "You qualified for this election at the membership deadline")
+
+    def test_closed_election_has_no_eligibility_card(self):
+        self.election.voting_closes = timezone.now()
+        self.election.save()
+        self.assertNotContains(self.dashboard(), "Election eligibility:")
+
+    def test_no_election_has_no_eligibility_card(self):
+        self.election.delete()
+        self.assertNotContains(self.dashboard(), "Election eligibility:")
