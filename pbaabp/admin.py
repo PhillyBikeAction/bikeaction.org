@@ -51,6 +51,18 @@ class OrganizerPerms:
     def has_view_permission(self, request, obj=None):
         return self.has_module_permission(request)
 
+    def lookup_allowed(self, lookup, value, request=None):
+        # The hidden reverse relations on the join tables can also identify affiliated people.
+        private_lookups = {
+            "affiliation",
+            "affiliations",
+            "Profile_affiliations+",
+            "PetitionSignature_affiliations+",
+        }
+        if private_lookups.intersection(lookup.split("__")):
+            return False
+        return super().lookup_allowed(lookup, value, request)
+
 
 class OrganizerAuthenticationForm(AuthenticationForm):
     """

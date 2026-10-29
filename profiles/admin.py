@@ -25,7 +25,8 @@ from campaigns.admin import randomize_lat_long
 from facets.models import District, RegisteredCommunityOrganization
 from membership.models import Membership
 from pbaabp.admin import OrganizerPerms, ReadOnlyLeafletGeoAdminMixin, organizer_admin
-from profiles.models import DiscordActivity, DoNotEmail, Profile, ShirtOrder
+from profiles.admin_filters import AffiliationFilter
+from profiles.models import Affiliation, DiscordActivity, DoNotEmail, Profile, ShirtOrder
 from profiles.tasks import add_user_to_connected_role
 
 
@@ -454,6 +455,7 @@ class ProfileAdmin(ExtraButtonsMixin, ReadOnlyLeafletGeoAdminMixin, admin.ModelA
         GeolocatedFilter,
         DistrictFilter,
         RCOFilter,
+        AffiliationFilter,
     ]
     search_fields = [
         "user__first_name",
@@ -464,6 +466,7 @@ class ProfileAdmin(ExtraButtonsMixin, ReadOnlyLeafletGeoAdminMixin, admin.ModelA
     ]
     inlines = [OrganizesDistrictInline]
     autocomplete_fields = ("user",)
+    filter_horizontal = ("affiliations",)
     actions = [heatmap, "resync_apps_connected"]
 
     def _enqueue_connected_role_sync(self, profile):
@@ -963,7 +966,7 @@ class ProfileAdmin(ExtraButtonsMixin, ReadOnlyLeafletGeoAdminMixin, admin.ModelA
         ),
         (
             "Internal",
-            {"fields": ["mailjet_contact_id"]},
+            {"fields": ["mailjet_contact_id", "affiliations"]},
         ),
         (
             "Donations",
@@ -985,7 +988,7 @@ class ProfileAdmin(ExtraButtonsMixin, ReadOnlyLeafletGeoAdminMixin, admin.ModelA
         ),
         (
             "Internal",
-            {"fields": ["mailjet_contact_id"]},
+            {"fields": ["mailjet_contact_id", "affiliations"]},
         ),
     ]
 
@@ -1307,6 +1310,13 @@ class OrganizerProfileAdmin(OrganizerPerms, ProfileAdmin):
         for district in districts:
             q_objects |= Q(location__within=district.mpoly)
         return qs.filter(q_objects)
+
+
+@admin.register(Affiliation)
+class AffiliationAdmin(admin.ModelAdmin):
+    list_display = ["name", "targetable"]
+    list_filter = ["targetable"]
+    search_fields = ["name"]
 
 
 admin.site.register(Profile, ProfileAdmin)

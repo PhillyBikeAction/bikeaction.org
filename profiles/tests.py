@@ -1,13 +1,39 @@
 import datetime
 
 from allauth.socialaccount.models import SocialAccount
+from django.contrib import admin
 from django.contrib.auth.models import User
-from django.test import TestCase
+from django.test import RequestFactory, TestCase
 from django.utils import timezone
 from djstripe.models import Customer, Price, Product, Subscription
 
 from membership.models import Membership
-from profiles.models import DiscordActivity, Profile
+from pbaabp.admin import organizer_admin
+from profiles.forms import ProfileUpdateForm
+from profiles.models import Affiliation, DiscordActivity, Profile
+
+
+class ProfileAffiliationTests(TestCase):
+    def test_assignment_is_only_available_in_the_main_admin(self):
+        member = User.objects.create_user(username="member", email="member@example.com")
+        profile = Profile.objects.create(user=member)
+        affiliation = Affiliation.objects.create(name="Bike Club")
+        request = RequestFactory().get("/")
+        request.user = User.objects.create_superuser(username="admin")
+
+        profile_admin = admin.site.get_model_admin(Profile)
+        form = profile_admin.get_form(request, profile)(
+            {"street_address": "1 Main St", "zip_code": "19103", "affiliations": [affiliation.pk]},
+            instance=profile,
+        )
+        self.assertTrue(form.is_valid(), form.errors)
+        form.save()
+        self.assertQuerySetEqual(profile.affiliations.all(), [affiliation])
+
+        self.assertNotIn("affiliations", ProfileUpdateForm(instance=profile).fields)
+        organizer_profiles = organizer_admin.get_model_admin(Profile)
+        self.assertNotIn("affiliations", organizer_profiles.get_form(request, profile).base_fields)
+        self.assertFalse(organizer_profiles.lookup_allowed("affiliations__id", affiliation.pk))
 
 
 class ProfileEligibilityTestCase(TestCase):
