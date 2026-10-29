@@ -10,6 +10,7 @@ from campaigns.models import Campaign, Petition, PetitionCheckbox, PetitionSigna
 from campaigns.tasks import geocode_signature
 from facets.models import District, RegisteredCommunityOrganization
 from pbaabp.admin import OrganizerPerms, ReadOnlyLeafletGeoAdminMixin, organizer_admin
+from profiles.admin_filters import AffiliationFilter
 
 
 def _organizer_petitions(user):
@@ -113,6 +114,7 @@ class PetitionCheckboxInline(admin.TabularInline):
 
 class PetitionAdmin(admin.ModelAdmin):
     actions = [pretty_report]
+    filter_horizontal = ["affiliation_options"]
     readonly_fields = ["petition_report"]
     inlines = [PetitionCheckboxInline]
 
@@ -253,7 +255,7 @@ class PetitionSignatureAdmin(admin.ModelAdmin, ReadOnlyLeafletGeoAdminMixin):
         "visible",
         "get_petition",
     ]
-    list_filter = ["petition", "visible", DistrictFilter, CheckboxResponseFilter]
+    list_filter = ["petition", "visible", DistrictFilter, AffiliationFilter, CheckboxResponseFilter]
     ordering = ["-created_at"]
     search_fields = ["first_name", "last_name", "comment", "email", "zip_code"]
     readonly_fields = [
@@ -269,6 +271,7 @@ class PetitionSignatureAdmin(admin.ModelAdmin, ReadOnlyLeafletGeoAdminMixin):
         "petition",
         "created_at",
         "checkbox_responses_display",
+        "affiliations",
     ]
 
     def checkbox_responses_display(self, obj):
