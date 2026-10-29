@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 from asgiref.sync import async_to_sync
 from celery import shared_task
 from django.contrib.gis.geos import Point
@@ -5,6 +7,18 @@ from django.template import engines
 
 from facets.utils import geocode_address
 from pbaabp.email import send_email_message
+
+
+@dataclass(frozen=True)
+class PetitionOrCampaignReference:
+    """Public values an organizer can use in a petition confirmation."""
+
+    title: str
+    slug: str | None
+    id: str
+
+    def __str__(self):
+        return self.title
 
 
 @shared_task
@@ -47,12 +61,15 @@ def send_post_sign_email(signature_id):
     if not signature.email:
         return
 
+    campaign = petition.campaign
     context = {
         "first_name": signature.first_name,
         "last_name": signature.last_name,
         "email": signature.email,
-        "petition": petition,
-        "campaign": petition.campaign,
+        "petition": PetitionOrCampaignReference(petition.title, petition.slug, str(petition.pk)),
+        "campaign": PetitionOrCampaignReference(campaign.title, campaign.slug, str(campaign.pk))
+        if campaign
+        else None,
     }
 
     # Render the subject as a Django template
