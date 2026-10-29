@@ -1,19 +1,61 @@
+import logging
+
+from allauth.socialaccount.models import SocialAccount
 from asgiref.sync import async_to_sync
 from celery import shared_task
 from django.conf import settings
 from django.contrib.gis.geos import Point
+from interactions.api.http.http_client import HTTPClient
+from interactions.client.errors import NotFound
 
 from facets.utils import geocode_address
 from pba_discord.bot import bot
 from pbaabp.integrations.mailjet import Mailjet
 
+logger = logging.getLogger(__name__)
+
+
+async def _sync_connected_roles(progress=None):
+    # Keep one session and rate limiter for the entire sync. The role endpoint
+    # accepts IDs directly, so no guild, role, or member fetches are needed.
+    client = HTTPClient()
+    updated = skipped = 0
+    try:
+        await client.login(settings.DISCORD_BOT_TOKEN)
+        uids = SocialAccount.objects.filter(provider="discord").values_list("uid", flat=True)
+        async for uid in uids.aiterator(chunk_size=1000):
+            try:
+                await client.add_guild_member_role(
+                    settings.DISCORD_GUILD_ID, uid, settings.DISCORD_CONNECTED_ROLE_ID
+                )
+            except NotFound as exc:
+                if exc.code != 10007:  # Unknown Member: the user has left the guild.
+                    raise
+                skipped += 1
+                logger.info("Skipping Discord account %s: no longer a guild member", uid)
+            else:
+                updated += 1
+            if progress is not None:
+                progress(updated, skipped)
+    finally:
+        await client.close()
+    logger.info("Connected role sync complete: %s updated, %s skipped", updated, skipped)
+    return {"updated": updated, "skipped": skipped}
+
+
+def sync_connected_roles(progress=None):
+    return async_to_sync(_sync_connected_roles)(progress=progress)
+
 
 async def _add_user_to_connected_role(uid):
-    await bot.login(settings.DISCORD_BOT_TOKEN)
-    guild = await bot.fetch_guild(settings.DISCORD_GUILD_ID)
-    role = await guild.fetch_role(settings.DISCORD_CONNECTED_ROLE_ID)
-    member = await guild.fetch_member(uid)
-    await member.add_role(role.id)
+    client = HTTPClient()
+    try:
+        await client.login(settings.DISCORD_BOT_TOKEN)
+        await client.add_guild_member_role(
+            settings.DISCORD_GUILD_ID, uid, settings.DISCORD_CONNECTED_ROLE_ID
+        )
+    finally:
+        await client.close()
 
 
 @shared_task
