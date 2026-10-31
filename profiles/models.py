@@ -20,12 +20,27 @@ from profiles.tasks import geocode_profile, sync_to_mailjet
 from projects.models import ProjectApplication
 
 
+class Affiliation(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+    targetable = models.BooleanField(
+        default=False,
+        help_text="Show this organization in profile and petition signature admin filters.",
+    )
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+
 class Profile(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     mailjet_contact_id = models.BigIntegerField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     user = models.OneToOneField(User, related_name="profile", on_delete=models.CASCADE)
+    affiliations = models.ManyToManyField(Affiliation, blank=True, related_name="profiles")
 
     pronouns = models.CharField(
         max_length=64,

@@ -10,7 +10,7 @@
   <div class="petition-letter">{{ form.petition.letter|linebreaks }}</div>
   {% endif %}
 
-  <form method="post" action="{% url 'sign_petition' petition_slug_or_id=petition.slug %}">
+  <form class="petition-form" method="post" action="{% url 'sign_petition' petition_slug_or_id=petition.slug %}">
 
     {% csrf_token %}
 
@@ -22,14 +22,19 @@
     {% endfor %}
 
     {% for field in form.visible_fields %}
-    <p>
-      {{ field.label_tag }}
+      {% if field.use_fieldset %}
+      <fieldset class="petition-affiliations">
+        {{ field.legend_tag }}
+      {% else %}
+      <p>
+        {{ field.label_tag }}
+      {% endif %}
       {{ field.errors }}
       {{ field }}
       {% if field.help_text %}
       <span class="helptext">{{ field.help_text|safe }}</span>
       {% endif %}
-    </p>
+      {% if field.use_fieldset %}</fieldset>{% else %}</p>{% endif %}
     {% endfor %}
 
     <div class="button-holder">

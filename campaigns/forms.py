@@ -1,5 +1,3 @@
-import copy
-
 from django import forms
 from django_recaptcha.fields import ReCaptchaField
 from django_recaptcha.widgets import ReCaptchaV2Invisible
@@ -13,6 +11,7 @@ class PetitionSignatureForm(forms.ModelForm):
         fields = Petition.PetitionSignatureChoices.values + [
             "newsletter_opt_in",
             "create_account_opt_in",
+            "affiliations",
         ]
         help_texts = {
             "comment": "Your comment, which will be displayed on the campaign page",
@@ -32,7 +31,9 @@ class PetitionSignatureForm(forms.ModelForm):
             "zip_code": "Zip Code",
             "newsletter_opt_in": "Newsletter opt in",
             "create_account_opt_in": "Create PBA Account",
+            "affiliations": "Are you affiliated with any of the following organizations:",
         }
+        widgets = {"affiliations": forms.CheckboxSelectMultiple}
 
     send_email = forms.BooleanField(
         required=False,
@@ -46,11 +47,17 @@ class PetitionSignatureForm(forms.ModelForm):
         retained_fields = ["newsletter_opt_in"]
         if self.petition.create_account_opt_in:
             retained_fields += ["create_account_opt_in"]
-        super().__init__(*args, *kwargs)
-        required_fields = copy.deepcopy(self.petition.signature_fields)
+        super().__init__(*args, **kwargs)
+        affiliation_options = self.petition.affiliation_options.all()
+        if affiliation_options.exists():
+            retained_fields.append("affiliations")
+            field = self.fields["affiliations"]
+            field.queryset = affiliation_options
+            field.widget.attrs["id"] = f"id_affiliations_{self.petition.pk}"
+        required_fields = list(self.petition.signature_fields or [])
         to_remove = []
         for field in self.fields.keys():
-            if field not in self.petition.signature_fields:
+            if field not in required_fields:
                 to_remove.append(field)
         if self.petition.send_email:
             required_fields.append("send_email")
@@ -109,3 +116,5 @@ class PetitionSignatureForm(forms.ModelForm):
                 help_text=checkbox.help_text,
                 required=checkbox.required,
             )
+
+        self.fields["newsletter_opt_in"] = self.fields.pop("newsletter_opt_in")

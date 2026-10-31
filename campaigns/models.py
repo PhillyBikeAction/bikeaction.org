@@ -179,6 +179,12 @@ class Petition(models.Model):
         blank=True,
         null=True,
     )
+    affiliation_options = models.ManyToManyField(
+        "profiles.Affiliation",
+        blank=True,
+        related_name="petitions",
+        help_text="Choose the organizations signers can select. Leave empty to hide the question.",
+    )
 
     create_account_opt_in = models.BooleanField(default=False, blank=False)
 
@@ -288,6 +294,9 @@ class PetitionSignature(models.Model):
     location = models.PointField(blank=True, null=True, srid=4326)
 
     checkbox_responses = models.JSONField(default=dict, blank=True)
+    affiliations = models.ManyToManyField(
+        "profiles.Affiliation", blank=True, related_name="signatures"
+    )
 
     newsletter_opt_in = models.BooleanField(
         blank=False, default=True, verbose_name=_("Newsletter Opt-In")

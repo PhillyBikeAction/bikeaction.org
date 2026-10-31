@@ -1116,6 +1116,24 @@ body {
   background-color: #F8F8F8;
 }
 
+.petition-affiliations {
+  clear: both;
+  min-inline-size: 0;
+  margin: 1em 0 0;
+  border: 0;
+  padding: 0;
+}
+
+.petition-affiliations legend {
+  padding: 0;
+  margin-bottom: .25em;
+}
+
+.petition-form > p > label,
+.petition-affiliations legend {
+  font-weight: 500;
+}
+
 .signature-card {
   border: 1px solid grey;
   border-radius: 1em;
