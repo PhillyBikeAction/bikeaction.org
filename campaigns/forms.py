@@ -117,5 +117,7 @@ class PetitionSignatureForm(forms.ModelForm):
                 required=checkbox.required,
             )
 
-        self.fields["create_account_opt_in"] = self.fields.pop("create_account_opt_in")
-        self.fields["newsletter_opt_in"] = self.fields.pop("newsletter_opt_in")
+        if field := self.fields.get("create_account_opt_in"):
+            self.fields["create_account_opt_in"] = field
+        if field := self.fields.get("newsletter_opt_in"):
+            self.fields["newsletter_opt_in"] = field
