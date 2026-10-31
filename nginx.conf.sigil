@@ -1,3 +1,5 @@
+{{/* Preserve upstream API, webhook, payment, and admin/AJAX error responses. */}}
+{{ $api_paths := "^/(lazer/api(/|$)|stripe(/|$)|mailjet(/|$)|tools/laser/map_data(/|$)|donations/(add_card|checkout)(/|$)|accounts/profile/tshirt/[^/]+/pay(/|$)|email-draft/upload-image(/|$)|admin(/|$)|organizer(/|$)|cms(/|$))" }}
 {{ range $port_map := .PROXY_PORT_MAP | split " " }}
 {{ $port_map_list := $port_map | split ":" }}
 {{ $scheme := index $port_map_list 0 }}
@@ -25,7 +27,14 @@ server {
     return 301 https://$host:{{ $.PROXY_SSL_PORT }}$request_uri;
   }
 {{ else }}
-  location    / {
+  {{ range $request_kind := "website api" | split " " }}
+  {{ if eq $request_kind "api" }}
+  location ~ {{ $api_paths }} {
+    proxy_intercept_errors off;
+  {{ else }}
+  location / {
+    proxy_intercept_errors on;
+  {{ end }}
 
     gzip on;
     gzip_min_length  1100;
@@ -52,24 +61,31 @@ server {
     proxy_set_header X-Request-Start $msec;
     {{ if $.PROXY_X_FORWARDED_SSL }}proxy_set_header X-Forwarded-Ssl {{ $.PROXY_X_FORWARDED_SSL }};{{ end }}
   }
+  {{ end }}
 
   {{ if $.CLIENT_MAX_BODY_SIZE }}client_max_body_size {{ $.CLIENT_MAX_BODY_SIZE }};{{ end }}
 
   error_page 400 401 402 403 405 406 407 408 409 410 411 412 413 414 415 416 417 418 420 422 423 424 426 428 429 431 444 449 450 451 /400-error.html;
-  location /400-error.html {
-    root {{ $.DOKKU_LIB_ROOT }}/data/nginx-vhosts/dokku-errors;
+  location = /400-error.html {
+    root {{ $.DOKKU_LIB_ROOT }}/data/nginx-vhosts/{{ $.APP }}-errors;
     internal;
   }
 
   error_page 404 /404-error.html;
-  location /404-error.html {
-    root {{ $.DOKKU_LIB_ROOT }}/data/nginx-vhosts/dokku-errors;
+  location = /404-error.html {
+    root {{ $.DOKKU_LIB_ROOT }}/data/nginx-vhosts/{{ $.APP }}-errors;
     internal;
   }
 
-  error_page 500 501 502 503 504 505 506 507 508 509 510 511 /500-error.html;
-  location /500-error.html {
-    root {{ $.DOKKU_LIB_ROOT }}/data/nginx-vhosts/dokku-errors;
+  error_page 500 501 503 504 505 506 507 508 509 510 511 /500-error.html;
+  location = /500-error.html {
+    root {{ $.DOKKU_LIB_ROOT }}/data/nginx-vhosts/{{ $.APP }}-errors;
+    internal;
+  }
+
+  error_page 502 /502-error.html;
+  location = /502-error.html {
+    root {{ $.DOKKU_LIB_ROOT }}/data/nginx-vhosts/{{ $.APP }}-errors;
     internal;
   }
   include {{ $.DOKKU_ROOT }}/{{ $.APP }}/nginx.conf.d/*.conf;
@@ -108,7 +124,14 @@ server {
     proxy_pass https://{{ var "AWS_S3_CUSTOM_DOMAIN" }};
   }
 
-  location    / {
+  {{ range $request_kind := "website api" | split " " }}
+  {{ if eq $request_kind "api" }}
+  location ~ {{ $api_paths }} {
+    proxy_intercept_errors off;
+  {{ else }}
+  location / {
+    proxy_intercept_errors on;
+  {{ end }}
 
     gzip on;
     gzip_min_length  1100;
@@ -136,30 +159,31 @@ server {
     proxy_set_header X-Request-Start $msec;
     {{ if $.PROXY_X_FORWARDED_SSL }}proxy_set_header X-Forwarded-Ssl {{ $.PROXY_X_FORWARDED_SSL }};{{ end }}
   }
+  {{ end }}
 
   {{ if $.CLIENT_MAX_BODY_SIZE }}client_max_body_size {{ $.CLIENT_MAX_BODY_SIZE }};{{ end }}
 
   error_page 400 401 402 403 405 406 407 408 409 410 411 412 413 414 415 416 417 418 420 422 423 424 426 428 429 431 444 449 450 451 /400-error.html;
-  location /400-error.html {
-    root {{ $.DOKKU_LIB_ROOT }}/data/nginx-vhosts/dokku-errors;
+  location = /400-error.html {
+    root {{ $.DOKKU_LIB_ROOT }}/data/nginx-vhosts/{{ $.APP }}-errors;
     internal;
   }
 
   error_page 404 /404-error.html;
-  location /404-error.html {
-    root {{ $.DOKKU_LIB_ROOT }}/data/nginx-vhosts/dokku-errors;
+  location = /404-error.html {
+    root {{ $.DOKKU_LIB_ROOT }}/data/nginx-vhosts/{{ $.APP }}-errors;
     internal;
   }
 
   error_page 500 501 503 504 505 506 507 508 509 510 511 /500-error.html;
-  location /500-error.html {
-    root {{ $.DOKKU_LIB_ROOT }}/data/nginx-vhosts/dokku-errors;
+  location = /500-error.html {
+    root {{ $.DOKKU_LIB_ROOT }}/data/nginx-vhosts/{{ $.APP }}-errors;
     internal;
   }
 
   error_page 502 /502-error.html;
-  location /502-error.html {
-    root {{ $.DOKKU_LIB_ROOT }}/data/nginx-vhosts/dokku-errors;
+  location = /502-error.html {
+    root {{ $.DOKKU_LIB_ROOT }}/data/nginx-vhosts/{{ $.APP }}-errors;
     internal;
   }
   include {{ $.DOKKU_ROOT }}/{{ $.APP }}/nginx.conf.d/*.conf;

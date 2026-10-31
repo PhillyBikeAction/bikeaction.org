@@ -105,3 +105,19 @@ Deployments to [bikeaction.org](https://bikeaction.org) occur on merge to `main`
 
 You can watch the progress of the deploy to our [dokku](https://dokku.com) instance
 in the GitHub Actions output.
+
+### Static nginx error pages
+
+The release script requires this one-time host setup to publish error pages for nginx:
+
+```sh
+sudo install -d -m 755 /var/lib/dokku/data/nginx-vhosts/apps-bikeaction-org-errors
+dokku storage:mount apps-bikeaction-org /var/lib/dokku/data/nginx-vhosts/apps-bikeaction-org-errors:/nginx-error-pages
+```
+
+Keep `$api_paths` in [nginx.conf.sigil](nginx.conf.sigil) updated so API error
+responses aren't replaced with HTML.
+
+Dokku docs: [storage mounts](https://dokku.com/docs/advanced-usage/persistent-storage/),
+[release tasks](https://dokku.com/docs/advanced-usage/deployment-tasks/),
+[nginx configuration](https://dokku.com/docs/networking/proxies/nginx/).
