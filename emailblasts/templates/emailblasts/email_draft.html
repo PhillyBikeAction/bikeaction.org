@@ -652,9 +652,18 @@ We are excited to have you involved. More details are below.`;
 
   function targetValueOptions(targetType, selectedValue) {
     let html = '<option value="">{% translate "Select target" %}</option>';
-    (TARGET_CHOICES[targetType] || []).forEach(function(choice) {
+    function optionHtml(choice) {
       const selected = String(choice[0]) === String(selectedValue) ? ' selected' : '';
-      html += '<option value="' + escapeHtml(choice[0]) + '"' + selected + '>' + escapeHtml(choice[1]) + '</option>';
+      return '<option value="' + escapeHtml(choice[0]) + '"' + selected + '>' + escapeHtml(choice[1]) + '</option>';
+    }
+    (TARGET_CHOICES[targetType] || []).forEach(function(choice) {
+      if (Array.isArray(choice[1])) {
+        html += '<optgroup label="' + escapeHtml(choice[0]) + '">';
+        choice[1].forEach(function(eventChoice) { html += optionHtml(eventChoice); });
+        html += '</optgroup>';
+      } else {
+        html += optionHtml(choice);
+      }
     });
     return html;
   }

@@ -8,6 +8,7 @@ from ordered_model.admin import OrderedModelAdmin
 
 from campaigns.models import Campaign, Petition, PetitionCheckbox, PetitionSignature
 from campaigns.tasks import geocode_signature
+from events.choices import grouped_event_choices
 from facets.models import District, RegisteredCommunityOrganization
 from pbaabp.admin import OrganizerPerms, ReadOnlyLeafletGeoAdminMixin, organizer_admin
 from profiles.admin_filters import AffiliationFilter
@@ -23,10 +24,16 @@ def _organizer_petitions(user):
 
 class CampaignAdmin(OrderedModelAdmin):
     readonly_fields = ["wordpress_id", "donation_total"]
-    autocomplete_fields = ["events", "districts", "registered_community_organizations"]
+    autocomplete_fields = ["districts", "registered_community_organizations"]
     list_display = ("__str__", "status", "visible", "get_districts", "move_up_down_links")
     list_filter = ["status", "visible"]
     ordering = ("status", "order")
+
+    def formfield_for_manytomany(self, db_field, request, **kwargs):
+        field = super().formfield_for_manytomany(db_field, request, **kwargs)
+        if db_field.name == "events" and field is not None:
+            field.choices = grouped_event_choices(field.queryset)
+        return field
 
     def get_districts(self, obj):
         return ", ".join(d.name.lstrip("District ") for d in obj.districts.all())
