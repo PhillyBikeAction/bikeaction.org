@@ -4,6 +4,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
+from django.db.models import Min
 from django.http import HttpResponseRedirect, JsonResponse
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -11,6 +12,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import CreateView, DeleteView, DetailView, UpdateView
 from djstripe.models import Customer, Price
 
+from campaigns.models import Petition
 from organizers.models import OrganizerApplication
 from community_fund.models import CommunityActionFundApplication
 from pbaabp.integrations.mailjet import Mailjet
@@ -33,6 +35,14 @@ class ProfileDetailView(LoginRequiredMixin, DetailView):
         from elections.models import Ballot, Election, Nomination, Nominee
 
         context = super().get_context_data(**kwargs)
+        email = self.request.user.email.strip()
+        context["signed_petitions"] = (
+            Petition.objects.filter(signatures__email__iexact=email)
+            .annotate(signed_at=Min("signatures__created_at"))
+            .order_by("-signed_at", "title", "pk")
+            if email
+            else Petition.objects.none()
+        )
         context["today"] = timezone.now().date()
         dashboard_election = (
             Election.objects.filter(voting_closes__gt=timezone.now())

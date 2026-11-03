@@ -596,4 +596,31 @@
 {% endif %}
 </div>
 
+<hr>
+<div class="form-header">
+  <h2 id="petitions">{% translate "Your Petitions" %}</h2>
+  {% if signed_petitions %}
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">{% translate "Petition" %}</th>
+          <th scope="col">{% translate "Date signed" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for petition in signed_petitions %}
+        <tr>
+          <td><a href="{% url 'sign_petition' petition.slug|default:petition.pk %}">{{ petition.title }}</a></td>
+          <td>{{ petition.signed_at|date:"M j, Y" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p>{% translate "No petition signatures were found for your account's email address." %}</p>
+  {% endif %}
+</div>
+
 {% endblock %}
