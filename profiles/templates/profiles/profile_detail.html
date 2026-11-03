@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 {% load socialaccount %}
 {% load i18n %}
+{% block content_container %}
+<div class="content-container profile-page">
 {% block content %}
 <div class="form-header">
   <h1>{% blocktranslate with first_name=profile.user.first_name %}Welcome to Philly Bike Action, {{ first_name }}{% endblocktranslate %}</h1>
@@ -623,4 +625,7 @@
   {% endif %}
 </div>
 
+{% endblock %}
+
+</div>
 {% endblock %}

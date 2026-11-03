@@ -361,6 +361,29 @@ summary:hover {
   padding-bottom: 1em;
 }
 
+/* Profile tables and long labels must not widen the page's grid column. */
+.profile-page {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.profile-page .table-container {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.profile-page .table-container table {
+  min-width: 0;
+  width: 100%;
+}
+
+.profile-page .submit-button,
+.profile-page .secondary-button,
+.profile-page .homepage-button {
+  max-width: calc(100% - 5px);
+  white-space: normal;
+}
+
 /* Footer */
 .footer {
   margin: 0 auto;
