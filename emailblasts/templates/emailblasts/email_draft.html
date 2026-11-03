@@ -176,6 +176,26 @@
     text-align: left;
   }
 
+  .email-draft-form .email-draft-markdown-tip {
+    margin: 0.5rem 0 0.75rem;
+    padding: 0.65rem 0.8rem;
+    border-left: 3px solid #83bd56;
+    border-radius: 4px;
+    background-color: #f3f7ef;
+    color: #4b5843;
+    font-size: 0.85rem;
+    font-weight: 400;
+    line-height: 1.5;
+  }
+
+  .email-draft-markdown-tip strong {
+    color: #365225;
+  }
+
+  .email-draft-markdown-tip-path {
+    font-weight: 600;
+  }
+
   .email-draft-geojson-help {
     color: #666;
     display: none;
@@ -365,11 +385,14 @@
         {{ form.reply_to }}
       </p>
 
-      <p class="field-row field-body">
+      <div class="field-row field-body">
         {{ form.body.label_tag }}
+        <p class="email-draft-markdown-tip">
+          {% blocktranslate %}<strong>Hot Tip!</strong> You can copy as markdown by enabling it with <span class="email-draft-markdown-tip-path">Tool &rsaquo; Preferences &rsaquo; Enable Markdown</span> in Google Docs{% endblocktranslate %}
+        </p>
         {{ form.body.errors }}
         {{ form.body }}
-      </p>
+      </div>
       <div class="email-draft-image-tools">
         <label for="email-draft-image-upload">{% translate "Embed Image" %}</label>
         <div class="email-draft-image-row">
