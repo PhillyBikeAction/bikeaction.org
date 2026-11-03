@@ -120,12 +120,60 @@ class PetitionCheckboxInline(admin.TabularInline):
 
 
 class PetitionAdmin(admin.ModelAdmin):
+    change_form_template = "admin/campaigns/petition/change_form.html"
     actions = [pretty_report]
     filter_horizontal = ["affiliation_options"]
     readonly_fields = ["petition_report"]
     inlines = [PetitionCheckboxInline]
+    fieldsets = (
+        ("Petition", {"fields": ("title", "slug", "campaign", "active", "letter")}),
+        (
+            "Display",
+            {
+                "fields": (
+                    "call_to_action",
+                    "call_to_action_header",
+                    "display_on_campaign_page",
+                    "signature_goal",
+                    "show_submissions",
+                )
+            },
+        ),
+        (
+            "Signature form",
+            {"fields": ("signature_fields", "affiliation_options", "create_account_opt_in")},
+        ),
+        (
+            "Email to petition recipients",
+            {
+                "fields": (
+                    "mailto_send",
+                    "send_email",
+                    "email_to",
+                    "email_cc",
+                    "email_subject",
+                    "email_body",
+                    "email_include_comment",
+                )
+            },
+        ),
+        (
+            "After signing",
+            {
+                "fields": (
+                    "redirect_after",
+                    "post_sign_email_enabled",
+                    "post_sign_email_subject",
+                    "post_sign_email_body",
+                )
+            },
+        ),
+        ("Report", {"fields": ("petition_report",), "classes": ("collapse", "petition-report")}),
+    )
 
     def petition_report(self, obj):
+        if obj is None or obj._state.adding:
+            return "Save the petition to view its report."
         report = ""
         totalsigs = obj.signatures.count()
         report += f"Total signatures: {totalsigs}\n"
