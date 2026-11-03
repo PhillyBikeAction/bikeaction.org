@@ -1,0 +1,18 @@
+{% extends "admin/change_form.html" %}
+
+{% block field_sets %}
+  {% for fieldset in adminform %}
+    {% if 'petition-report' not in fieldset.classes %}
+      {% include "admin/includes/fieldset.html" with heading_level=2 prefix="fieldset" id_prefix=0 id_suffix=forloop.counter0 %}
+    {% endif %}
+  {% endfor %}
+{% endblock %}
+
+{% block after_related_objects %}
+  {{ block.super }}
+  {% for fieldset in adminform %}
+    {% if 'petition-report' in fieldset.classes %}
+      {% include "admin/includes/fieldset.html" with heading_level=2 prefix="fieldset" id_prefix=0 id_suffix=forloop.counter0 %}
+    {% endif %}
+  {% endfor %}
+{% endblock %}

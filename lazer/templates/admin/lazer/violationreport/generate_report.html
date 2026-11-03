@@ -1,0 +1,84 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrahead %}{{ block.super }}{{ media }}{% endblock %}
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static 'admin/css/forms.css' %}">{% endblock %}
+{% block coltype %}colM{% endblock %}
+{% block bodyclass %}{{ block.super }} app-{{ opts.app_label }} model-{{ opts.model_name }} change-form{% endblock %}
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">{% translate "Home" %}</a>
+  &rsaquo; <a href="{{ changelist_url }}">Violation reports</a>
+  &rsaquo; Generate Lazer Vision report
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+<p>Generate an HTML report with a map, chart, and data table. Choose a location and capture date range to find matching violations across all reports you can access.</p>
+<form method="post">
+  {% csrf_token %}
+
+  {% if step == "area" %}
+    <h2>Step 1 of 3: Choose the area</h2>
+    <p>Choose a street and optional blocks, or paste a GeoJSON boundary. Only the fields for your chosen area type are used.</p>
+    {{ area_form.non_field_errors }}
+    {% for fieldset in area_admin_form %}
+      {% include "admin/includes/fieldset.html" %}
+    {% endfor %}
+    {% for field in comparison_form %}{{ field.as_hidden }}{% endfor %}
+    <div class="submit-row">
+      <button type="submit" class="button default" name="report_step" value="comparison">Continue to dates and comparison</button>
+      <a class="closelink" href="{{ changelist_url }}">Cancel</a>
+    </div>
+  {% elif step == "comparison" %}
+    <h2>Step 2 of 3: Dates and comparison</h2>
+    {% for field in area_form %}{{ field.as_hidden }}{% endfor %}
+    {{ comparison_form.non_field_errors }}
+    {% for fieldset in comparison_admin_form %}
+      {% include "admin/includes/fieldset.html" %}
+    {% endfor %}
+    <div class="submit-row">
+      <button type="submit" class="button" name="report_step" value="area">Back to area</button>
+      <button type="submit" class="button default" name="report_step" value="review">Review report</button>
+      <a class="closelink" href="{{ changelist_url }}">Cancel</a>
+    </div>
+  {% else %}
+    <h2>Step 3 of 3: Review and download</h2>
+    {% for field in area_form %}{{ field.as_hidden }}{% endfor %}
+    {% for field in comparison_form %}{{ field.as_hidden }}{% endfor %}
+    <dl>
+      <dt>Area</dt>
+      <dd>{% if area_form.cleaned_data.filter_mode == "street" %}{{ area_form.cleaned_data.street_name }}{% if area_form.cleaned_data.block_range %}, blocks {{ area_form.cleaned_data.block_range }}{% endif %}{% else %}GeoJSON boundary{% endif %}</dd>
+      <dt>Matching violations</dt><dd>{{ matching_count }}</dd>
+      <dt>Capture date range</dt>
+      <dd>{{ comparison_form.cleaned_data.start_date|date:"Y-m-d"|default:"Beginning" }} through {{ comparison_form.cleaned_data.end_date|date:"Y-m-d"|default:"Present" }} ({{ comparison_form.cleaned_data.timezone }})</dd>
+      <dt>Comparison date</dt>
+      <dd>{% if comparison_form.cleaned_data.comparison_date %}{{ comparison_form.cleaned_data.comparison_date|date:"Y-m-d" }} ({{ comparison_form.cleaned_data.timezone }}) — {{ before_count }} before, {{ after_count }} on or after{% else %}None — include all matching violations in one timeline{% endif %}</dd>
+    </dl>
+    {% if not matching_count %}<p>No violations match these parameters. You can go back to adjust them or download an empty report.</p>{% endif %}
+    <p>The download contains the same report as the <code>violation_report</code> management command, including precise locations and capture times.</p>
+    <div class="submit-row">
+      <button type="submit" class="button" name="report_step" value="comparison">Back to dates and comparison</button>
+      <button type="submit" class="button default" name="report_step" value="download">Download HTML report</button>
+      <a class="closelink" href="{{ changelist_url }}">Cancel</a>
+    </div>
+  {% endif %}
+</form>
+</div>
+{% if step == "area" %}
+<script>
+  const areaType = document.getElementById('id_filter_mode');
+  function updateAreaFields() {
+    ['street_name', 'block_range', 'geojson'].forEach(function(name) {
+      const row = document.querySelector('.field-' + name);
+      const show = name === 'geojson' ? areaType.value === 'geojson' : areaType.value === 'street';
+      row.classList.toggle('hidden', !show);
+      document.getElementById('id_' + name).disabled = !show;
+    });
+  }
+  areaType.addEventListener('change', updateAreaFields);
+  updateAreaFields();
+</script>
+{% endif %}
+{% endblock %}

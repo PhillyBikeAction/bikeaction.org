@@ -3,15 +3,22 @@ import csv
 
 from admin_extra_buttons.api import ExtraButtonsMixin, button
 from django.contrib import admin
+from django.contrib.admin.helpers import AdminForm
+from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.http import HttpResponse
+from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
+from django.views.decorators.cache import never_cache
+from django.views.decorators.csrf import csrf_protect
 
 from campaigns.admin import randomize_lat_long
 from facets.utils import reverse_geocode_point
 from lazer.models import Banner, ViolationReport, ViolationSubmission
+from lazer.report_forms import ReportAreaForm, ReportComparisonForm
+from lazer.reports import filter_violation_reports, generate_html_report
 from lazer.tasks import submit_violation_report_to_ppa
 from pbaabp.admin import ReadOnlyLeafletGeoAdminMixin
 
@@ -130,6 +137,113 @@ class ViolationReportAdmin(ExtraButtonsMixin, admin.ModelAdmin):
         """Optimize queries by prefetching related submission and user."""
         qs = super().get_queryset(request)
         return qs.select_related("submission", "submission__created_by")
+
+    @button(
+        label="Generate Lazer Vision report",
+        change_list=True,
+        change_form=False,
+        permission=lambda request, obj, handler: (
+            handler.model_admin.admin_site.has_permission(request)
+            and handler.model_admin.has_view_permission(request)
+        ),
+        decorators=[never_cache, csrf_protect],
+    )
+    def generate_report(self, request):
+        if not self.has_view_permission(request):
+            raise PermissionDenied
+        queryset = self.get_queryset(request)
+
+        step = request.POST.get("report_step", "area")
+        area_form = ReportAreaForm(request.POST if step != "area" else None)
+        comparison_form = ReportComparisonForm(
+            request.POST if step in ("review", "download") else None
+        )
+        # Preserve values when returning to an earlier step.
+        if step == "area" and "filter_mode" in request.POST:
+            area_form = ReportAreaForm(request.POST)
+            comparison_form = ReportComparisonForm(request.POST)
+        if step == "comparison":
+            comparison_form = ReportComparisonForm(
+                initial={
+                    "comparison_date": request.POST.get("comparison_date", ""),
+                    "start_date": request.POST.get("start_date", ""),
+                    "end_date": request.POST.get("end_date", ""),
+                    "timezone": request.POST.get("timezone", "America/New_York"),
+                }
+            )
+
+        matching_count = before_count = after_count = None
+        if step not in ("area", "comparison", "review", "download"):
+            step = "area"
+        if step != "area":
+            if not area_form.is_valid():
+                step = "area"
+            elif step in ("review", "download"):
+                if not comparison_form.is_valid():
+                    step = "comparison"
+                else:
+                    data = area_form.cleaned_data
+                    violations = filter_violation_reports(
+                        queryset,
+                        polygon=area_form.polygon,
+                        street_name=data["street_name"],
+                        block_range=data["block_range"],
+                        start_date=comparison_form.cleaned_data["start_date"],
+                        end_date=comparison_form.cleaned_data["end_date"],
+                        timezone_name=comparison_form.cleaned_data["timezone"],
+                    )
+                    comparison_date = comparison_form.comparison_datetime()
+                    matching_count = violations.count()
+                    before_count = (
+                        violations.filter(submission__captured_at__lt=comparison_date).count()
+                        if comparison_date
+                        else 0
+                    )
+                    after_count = matching_count - before_count
+                    if step == "download":
+                        html = generate_html_report(
+                            violations,
+                            area_form.polygon,
+                            comparison_date,
+                            comparison_date.strftime("%Y-%m-%d") if comparison_date else None,
+                            before_count,
+                            after_count,
+                            data["geojson"],
+                            data["filter_mode"],
+                            data["street_name"],
+                            data["block_range"],
+                            start_date=comparison_form.cleaned_data["start_date"],
+                            end_date=comparison_form.cleaned_data["end_date"],
+                            timezone_name=comparison_form.cleaned_data["timezone"],
+                        )
+                        response = HttpResponse(html, content_type="text/html; charset=utf-8")
+                        response["Content-Disposition"] = (
+                            'attachment; filename="lazer-vision-report.html"'
+                        )
+                        return response
+
+        context = {
+            **self.admin_site.each_context(request),
+            "title": "Generate Lazer Vision report",
+            "opts": self.model._meta,
+            "step": step,
+            "area_form": area_form,
+            "comparison_form": comparison_form,
+            "area_admin_form": AdminForm(
+                area_form, [(None, {"fields": list(area_form.fields)})], {}
+            ),
+            "comparison_admin_form": AdminForm(
+                comparison_form, [(None, {"fields": list(comparison_form.fields)})], {}
+            ),
+            "matching_count": matching_count,
+            "before_count": before_count,
+            "after_count": after_count,
+            "changelist_url": reverse("admin:lazer_violationreport_changelist"),
+            "media": self.media + area_form.media + comparison_form.media,
+        }
+        return TemplateResponse(
+            request, "admin/lazer/violationreport/generate_report.html", context
+        )
 
     @button(
         label="Resubmit",

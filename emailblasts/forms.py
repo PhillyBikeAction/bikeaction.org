@@ -9,6 +9,7 @@ from django.utils.translation import gettext_lazy as _
 from campaigns.models import Petition
 from emailblasts.models import EmailBlastTargetNode
 from emailblasts.utils import email_blast_full_body
+from events.choices import grouped_event_choices
 from events.models import ScheduledEvent
 from facets.models import District, Division, RegisteredCommunityOrganization, Ward, ZipCode
 from pbaabp.email import template_from_string
@@ -98,6 +99,7 @@ class EmailDraftForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        event_choices = grouped_event_choices(ScheduledEvent.objects.all())
         self.target_choices = {
             "district": self._model_choices(District.objects.all(), key=self._facet_number),
             "rco": self._model_choices(
@@ -111,12 +113,8 @@ class EmailDraftForm(forms.Form):
             "petition": self._model_choices(
                 Petition.objects.all(), key=lambda petition: petition.title
             ),
-            "event_rsvp": self._model_choices(
-                ScheduledEvent.objects.all(), key=lambda event: event.start_datetime
-            ),
-            "event_signin": self._model_choices(
-                ScheduledEvent.objects.all(), key=lambda event: event.start_datetime
-            ),
+            "event_rsvp": event_choices,
+            "event_signin": event_choices,
         }
         self.cleaned_target_rows = []
 

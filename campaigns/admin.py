@@ -8,6 +8,7 @@ from ordered_model.admin import OrderedModelAdmin
 
 from campaigns.models import Campaign, Petition, PetitionCheckbox, PetitionSignature
 from campaigns.tasks import geocode_signature
+from events.choices import grouped_event_choices
 from facets.models import District, RegisteredCommunityOrganization
 from pbaabp.admin import OrganizerPerms, ReadOnlyLeafletGeoAdminMixin, organizer_admin
 from profiles.admin_filters import AffiliationFilter
@@ -23,10 +24,16 @@ def _organizer_petitions(user):
 
 class CampaignAdmin(OrderedModelAdmin):
     readonly_fields = ["wordpress_id", "donation_total"]
-    autocomplete_fields = ["events", "districts", "registered_community_organizations"]
+    autocomplete_fields = ["districts", "registered_community_organizations"]
     list_display = ("__str__", "status", "visible", "get_districts", "move_up_down_links")
     list_filter = ["status", "visible"]
     ordering = ("status", "order")
+
+    def formfield_for_manytomany(self, db_field, request, **kwargs):
+        field = super().formfield_for_manytomany(db_field, request, **kwargs)
+        if db_field.name == "events" and field is not None:
+            field.choices = grouped_event_choices(field.queryset)
+        return field
 
     def get_districts(self, obj):
         return ", ".join(d.name.lstrip("District ") for d in obj.districts.all())
@@ -113,12 +120,60 @@ class PetitionCheckboxInline(admin.TabularInline):
 
 
 class PetitionAdmin(admin.ModelAdmin):
+    change_form_template = "admin/campaigns/petition/change_form.html"
     actions = [pretty_report]
     filter_horizontal = ["affiliation_options"]
     readonly_fields = ["petition_report"]
     inlines = [PetitionCheckboxInline]
+    fieldsets = (
+        ("Petition", {"fields": ("title", "slug", "campaign", "active", "letter")}),
+        (
+            "Display",
+            {
+                "fields": (
+                    "call_to_action",
+                    "call_to_action_header",
+                    "display_on_campaign_page",
+                    "signature_goal",
+                    "show_submissions",
+                )
+            },
+        ),
+        (
+            "Signature form",
+            {"fields": ("signature_fields", "affiliation_options", "create_account_opt_in")},
+        ),
+        (
+            "Email to petition recipients",
+            {
+                "fields": (
+                    "mailto_send",
+                    "send_email",
+                    "email_to",
+                    "email_cc",
+                    "email_subject",
+                    "email_body",
+                    "email_include_comment",
+                )
+            },
+        ),
+        (
+            "After signing",
+            {
+                "fields": (
+                    "redirect_after",
+                    "post_sign_email_enabled",
+                    "post_sign_email_subject",
+                    "post_sign_email_body",
+                )
+            },
+        ),
+        ("Report", {"fields": ("petition_report",), "classes": ("collapse", "petition-report")}),
+    )
 
     def petition_report(self, obj):
+        if obj is None or obj._state.adding:
+            return "Save the petition to view its report."
         report = ""
         totalsigs = obj.signatures.count()
         report += f"Total signatures: {totalsigs}\n"
