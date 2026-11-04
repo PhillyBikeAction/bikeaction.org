@@ -21,6 +21,7 @@ class EventRSVPForm(forms.ModelForm):
     captcha = ReCaptchaField(widget=ReCaptchaV2Invisible)
 
 
+# https://docs.djangoproject.com/en/6.1/topics/forms/modelforms/
 class EventSignInForm(forms.ModelForm):
     class Meta:
         model = EventSignIn
@@ -29,23 +30,14 @@ class EventSignInForm(forms.ModelForm):
             "last_name",
             "email",
             "newsletter_opt_in",
-            "council_district",
-            "zip_code",
+            "volunteer_opt_in",
         ]
         labels = {
-            "council_district": "What Philadelphia City Council District do you live in?",
-            "newsletter_opt_in": "Receive our Newsletter?",
+            "newsletter_opt_in": "Newsletter opt in:",
+            "volunteer_opt_in": "Volunteer opt in:",
         }
         help_texts = {
-            "council_district": (
-                "Philly Bike Action is organized by city council district. "
-                "This information will help you connect with "
-                "work we are doing in *your* community!"
-            ),
-            "zip_code": (
-                "Optionally provide your Postal / Zip Code "
-                "If you're unsure of your district, "
-                "or just to help us get a better idea of "
-                "the distribution of our attendees throughout the city."
-            ),
+            "newsletter_opt_in": "Subscribe to Philly Bike Action's monthly newsletter.",
+            "volunteer_opt_in": "Receive news about volunteer opportunities with Philly Bike Action.",
         }
+        
