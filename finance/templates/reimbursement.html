@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block content %}
+<div class="form-header">
+  <h1>{% translate "Reimbursement Request" %}</h1>
+</div>
+<div class="form-container reimbursement-request">
+  <form class="application-form" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% if form.errors %}<div class="form-errors"><p><b>Form invalid!</b> Please correct the errors below.</p></div>{% endif %}
+    {{ form.non_field_errors }}
+
+    {% for hidden_field in form.hidden_fields %}
+      {{ hidden_field.errors }}
+      {{ hidden_field }}
+    {% endfor %}
+
+    {% for field in form.visible_fields %}
+      {% include "snippets/field.html" with field=field %}
+    {% endfor %}
+
+    <div class="button-holder">
+      <button class="submit-button" type="submit">{% translate "Submit" %}</button>
+    </div>
+  </form>
+</div>
+
+<script>
+(function() {
+  const maxFiles = {{ max_expense_support_files }};
+  const input = document.getElementById('id_expense_support');
+  if (!input) return;
+
+  // Keep every chosen file here, so picking more files adds to the list
+  // instead of replacing it.
+  let selectedFiles = [];
+
+  const list = document.createElement('ul');
+  list.className = 'selected-files';
+  input.insertAdjacentElement('afterend', list);
+
+  function sameFile(a, b) {
+    return a.name === b.name && a.size === b.size && a.lastModified === b.lastModified;
+  }
+
+  function syncInput() {
+    const dataTransfer = new DataTransfer();
+    selectedFiles.forEach(function(file) { dataTransfer.items.add(file); });
+    input.files = dataTransfer.files;
+  }
+
+  function render(limitReached) {
+    list.innerHTML = '';
+    selectedFiles.forEach(function(file, index) {
+      const item = document.createElement('li');
+      const name = document.createElement('span');
+      name.textContent = file.name;
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.textContent = '×';
+      remove.setAttribute('aria-label', 'Remove ' + file.name);
+      remove.addEventListener('click', function() {
+        selectedFiles.splice(index, 1);
+        syncInput();
+        render(false);
+      });
+      item.append(name, remove);
+      list.append(item);
+    });
+    if (limitReached) {
+      const error = document.createElement('li');
+      error.className = 'file-limit-error';
+      error.textContent = 'You can attach up to ' + maxFiles + ' files.';
+      list.append(error);
+    }
+  }
+
+  input.addEventListener('change', function() {
+    let limitReached = false;
+    Array.from(input.files).forEach(function(file) {
+      if (selectedFiles.some(function(existing) { return sameFile(existing, file); })) return;
+      if (selectedFiles.length >= maxFiles) {
+        limitReached = true;
+        return;
+      }
+      selectedFiles.push(file);
+    });
+    syncInput();
+    render(limitReached);
+  });
+})();
+</script>
+{% endblock %}
