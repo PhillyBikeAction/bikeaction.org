@@ -46,6 +46,7 @@ def _event_signin_data_from_signin(signin):
         "volunteer_opt_in": signin.volunteer_opt_in,
     }
 
+
 def _event_signin_data_from_user(user):
     try:
         profile = user.profile
@@ -138,17 +139,16 @@ def _save_event_signin(event, signin_data):
     existing_signin.save()
     return existing_signin
 
-def _save_event_signin_profile(user, signin_data):
-    user = User.objects.filter(id=user.id).first()
-    if user is None:
-        return None
-    
-    profile = user.profile
-    profile.newsletter_opt_in = signin_data['newsletter_opt_in']
-    profile.volunteer_opt_in = signin_data['volunteer_opt_in']
-    profile.save()
 
-    return profile
+def _save_event_signin_profile(user, signin_data):
+    try:
+        user = User.objects.filter(id=user.id).first()
+        profile = user.profile
+        profile.newsletter_opt_in = signin_data["newsletter_opt_in"]
+        profile.volunteer_opt_in = signin_data["volunteer_opt_in"]
+        profile.save()
+    except (ObjectDoesNotExist, AttributeError):
+        return None
 
 
 def _set_event_signin_identity_cookie(response, request, signin):

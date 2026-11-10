@@ -4,15 +4,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('profiles', '0026_affiliation_profile_affiliations'),
+        ("profiles", "0026_affiliation_profile_affiliations"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='profile',
-            name='volunteer_opt_in',
-            field=models.BooleanField(default=False, help_text='Receive news about volunteer opportunities with Philly Bike Action.', verbose_name='Volunteering'),
+            model_name="profile",
+            name="volunteer_opt_in",
+            field=models.BooleanField(
+                default=False,
+                help_text="Receive news about volunteer opportunities with Philly Bike Action.",
+                verbose_name="Volunteering",
+            ),
         ),
     ]

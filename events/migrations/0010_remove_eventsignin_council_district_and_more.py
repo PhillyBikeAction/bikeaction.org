@@ -4,23 +4,22 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('events', '0009_scheduledevent_districts_and_more'),
+        ("events", "0009_scheduledevent_districts_and_more"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='eventsignin',
-            name='council_district',
+            model_name="eventsignin",
+            name="council_district",
         ),
         migrations.RemoveField(
-            model_name='eventsignin',
-            name='zip_code',
+            model_name="eventsignin",
+            name="zip_code",
         ),
         migrations.AddField(
-            model_name='eventsignin',
-            name='volunteer_opt_in',
+            model_name="eventsignin",
+            name="volunteer_opt_in",
             field=models.BooleanField(default=False),
         ),
     ]

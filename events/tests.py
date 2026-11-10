@@ -80,6 +80,7 @@ class EventSignInRememberedIdentityTests(TestCase):
             email="grace@example.com",
             password="password",
             first_name="Grace",
+            profile=None,
         )
         self.client.force_login(user)
 
@@ -115,6 +116,7 @@ class EventSignInRememberedIdentityTests(TestCase):
             password="password",
             first_name="Grace",
             last_name="Hopper",
+            profile=None,
         )
         self.client.force_login(user)
 
@@ -134,6 +136,7 @@ class EventSignInRememberedIdentityTests(TestCase):
             email="grace@example.com",
             password="password",
             first_name="Grace",
+            profile=None,
         )
         self.client.cookies[EVENT_SIGNIN_COOKIE_NAME] = encrypt_event_signin_payload(
             {"type": EVENT_SIGNIN_COOKIE_TYPE_USER, "id": user.id}
@@ -151,6 +154,7 @@ class EventSignInRememberedIdentityTests(TestCase):
             email="grace@example.com",
             password="password",
             last_name="Hopper",
+            profile=None,
         )
         self.client.cookies[EVENT_SIGNIN_COOKIE_NAME] = encrypt_event_signin_payload(
             {"type": EVENT_SIGNIN_COOKIE_TYPE_USER, "id": user.id}
@@ -175,6 +179,7 @@ class EventSignInRememberedIdentityTests(TestCase):
             password="password",
             first_name="Grace",
             last_name="Hopper",
+            profile=None,
         )
         self.client.force_login(user)
         self.client.cookies[EVENT_SIGNIN_COOKIE_NAME] = "existing-cookie"
@@ -191,6 +196,7 @@ class EventSignInRememberedIdentityTests(TestCase):
             password="password",
             first_name="Grace",
             last_name="Hopper",
+            profile=None,
         )
 
         response = self.client.get(reverse("sesame_login") + sesame.utils.get_query_string(user))
