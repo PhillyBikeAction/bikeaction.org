@@ -1,5 +1,4 @@
 import datetime
-import re
 import uuid
 from urllib.parse import quote_plus
 
@@ -138,6 +137,18 @@ def _save_event_signin(event, signin_data):
     existing_signin.volunteer_opt_in = signin_data["volunteer_opt_in"]
     existing_signin.save()
     return existing_signin
+
+def _save_event_signin_profile(user, signin_data):
+    user = User.objects.filter(id=user.id).first()
+    if user is None:
+        return None
+    
+    profile = user.profile
+    profile.newsletter_opt_in = signin_data['newsletter_opt_in']
+    profile.volunteer_opt_in = signin_data['volunteer_opt_in']
+    profile.save()
+
+    return profile
 
 
 def _set_event_signin_identity_cookie(response, request, signin):
@@ -324,7 +335,10 @@ def event_signin(request, event_slug_or_id):
 
         form = EventSignInForm(request.POST)
         if form.is_valid():
-            signin = _save_event_signin(event, _event_signin_data_from_signin(form.instance))
+            signin_data = _event_signin_data_from_signin(form.instance)
+            signin = _save_event_signin(event, signin_data)
+            _save_event_signin_profile(request.user, signin_data)
+
             response = _event_signin_redirect(request, event)
             _set_event_signin_identity_cookie(response, request, signin)
             return response
