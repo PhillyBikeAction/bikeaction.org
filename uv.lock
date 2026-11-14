@@ -265,7 +265,6 @@ dependencies = [
     { name = "pillow" },
     { name = "psycopg2-binary" },
     { name = "pyap2" },
-    { name = "pygit2" },
     { name = "pynliner" },
     { name = "redis-lock-py" },
     { name = "reportlab" },
@@ -274,7 +273,6 @@ dependencies = [
     { name = "wagtail" },
     { name = "wagtail-link-block" },
     { name = "wagtail-localize" },
-    { name = "wagtail-localize-git" },
     { name = "wagtailset" },
     { name = "whitenoise" },
 ]
@@ -332,7 +330,6 @@ requires-dist = [
     { name = "pillow", specifier = ">=13.0.0" },
     { name = "psycopg2-binary", specifier = ">=2.9.10" },
     { name = "pyap2", specifier = ">=0.1.14" },
-    { name = "pygit2", specifier = ">=1.17.0" },
     { name = "pynliner", specifier = ">=0.8.0" },
     { name = "redis-lock-py", specifier = ">=1.1.1" },
     { name = "reportlab", specifier = ">=4.4.5" },
@@ -341,7 +338,6 @@ requires-dist = [
     { name = "wagtail", specifier = ">=7.3.4" },
     { name = "wagtail-link-block", specifier = ">=1.1.7" },
     { name = "wagtail-localize", specifier = ">=1.11.3" },
-    { name = "wagtail-localize-git", specifier = ">=0.15.0" },
     { name = "wagtailset", specifier = ">=1.1.2" },
     { name = "whitenoise", specifier = ">=6.9.0" },
 ]
@@ -1314,30 +1310,6 @@ wheels = [
 ]
 
 [[package]]
-name = "gitdb"
-version = "4.0.12"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "smmap" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/72/94/63b0fc47eb32792c7ba1fe1b694daec9a63620db1e313033d18140c2320a/gitdb-4.0.12.tar.gz", hash = "sha256:5ef71f855d191a3326fcfbc0d5da835f26b13fbcba60c32c21091c349ffdb571", size = 394684, upload-time = "2025-01-02T07:20:46.413Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/a0/61/5c78b91c3143ed5c14207f463aecfc8f9dbb5092fb2869baf37c273b2705/gitdb-4.0.12-py3-none-any.whl", hash = "sha256:67073e15955400952c6565cc3e707c554a4eea2e428946f7a4c162fab9bd9bcf", size = 62794, upload-time = "2025-01-02T07:20:43.624Z" },
-]
-
-[[package]]
-name = "gitpython"
-version = "3.1.59"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "gitdb" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/ca/dc/126b28e76b24a9268ba931ad3e012f71ebdadf62fd9f17758f7074bb0b20/gitpython-3.1.59.tar.gz", hash = "sha256:0a1475cfdc38a5bfba1a3e9a4a9da52a39749ecec322b772915c019f94e5b7e4", size = 230445, upload-time = "2026-08-10T12:03:20.271Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/ef/ed/ae57eb7d344f43f87b74b3a281ead6ec7d6394eef72a7b1dcb28dd089550/gitpython-3.1.59-py3-none-any.whl", hash = "sha256:67a82f537384578643624c8b2c531938a9b82be431663e575dcf638526631d4c", size = 220996, upload-time = "2026-08-10T12:03:18.804Z" },
-]
-
-[[package]]
 name = "gunicorn"
 version = "23.0.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1851,24 +1823,6 @@ wheels = [
 ]
 
 [[package]]
-name = "pygit2"
-version = "1.17.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "cffi" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/b7/ea/17aa8ca38750f1ba69511ceeb41d29961f90eb2e0a242b668c70311efd4e/pygit2-1.17.0.tar.gz", hash = "sha256:fa2bc050b2c2d3e73b54d6d541c792178561a344f07e409f532d5bb97ac7b894", size = 769002, upload-time = "2025-01-08T15:39:10.014Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/3d/09/d79f99cc25b895a891eab10697fecde3c2552fdfd467b9b72b388f9a1ad9/pygit2-1.17.0-cp313-cp313-macosx_10_13_universal2.whl", hash = "sha256:ce938e7a4fdfc816ffceb62babad65fb62e1a5ad261e880b9a072e8da144ccca", size = 5465211, upload-time = "2025-01-08T14:28:48.347Z" },
-    { url = "https://files.pythonhosted.org/packages/a6/85/74e786da47ee2face731fb892fe87c04ae257d3b5136966f8f839727d130/pygit2-1.17.0-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:61ff2c8b0fc96fdf45a7a5239cc262b0293a5171f68d67eea239a42c3b2226cb", size = 5687159, upload-time = "2025-01-08T14:28:52.014Z" },
-    { url = "https://files.pythonhosted.org/packages/58/61/b502b240ba91a3dec58e4936eb85c4c17d682dfb4872c197c2212fc13bc1/pygit2-1.17.0-cp313-cp313-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:8101aa723c292892ba46303b19487a9fb0de50d9e30f4c1c2a76e3383b6e4b6d", size = 5649303, upload-time = "2025-01-08T14:28:54.896Z" },
-    { url = "https://files.pythonhosted.org/packages/5a/33/e359c7c938df5b1cef2acb4dcf72cb153677f2185db8bfd0bb06a7ab96f9/pygit2-1.17.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:36e3e9225e3f01bb6a2d4589c126900bbc571cd0876ca9c01372a6e3d3693c0e", size = 5461433, upload-time = "2025-01-08T14:28:58.68Z" },
-    { url = "https://files.pythonhosted.org/packages/98/8e/6885fd4ce98aedb84fe4459a3c85f3b866577aec9343becfca4a0e50a1eb/pygit2-1.17.0-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:614cfddbf048900da19b016787f153d44ea9fd7ef80f9e03a77024aa1555d5f4", size = 5402395, upload-time = "2025-01-08T14:29:00.625Z" },
-    { url = "https://files.pythonhosted.org/packages/9f/62/51b84a6c80742e73ecd562f45234c6ef23e833864583bc759d8c6770f493/pygit2-1.17.0-cp313-cp313-win32.whl", hash = "sha256:1391762153af9715ed1d0586e3f207c518f03f5874e1f5b8e398697d006a0a82", size = 1219803, upload-time = "2025-01-08T10:20:14.839Z" },
-    { url = "https://files.pythonhosted.org/packages/7d/69/8dfe160c7166cec689d985e6efb52198c2c2fd5b722196e4beb920f9f460/pygit2-1.17.0-cp313-cp313-win_amd64.whl", hash = "sha256:d677d6fb85c426c5f5f8409bdc5a2e391016c99f73b97779b284c4ad25aa75fa", size = 1305156, upload-time = "2025-01-08T10:24:55.803Z" },
-]
-
-[[package]]
 name = "pynliner"
 version = "0.8.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2099,15 +2053,6 @@ wheels = [
 ]
 
 [[package]]
-name = "smmap"
-version = "5.0.2"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/44/cd/a040c4b3119bbe532e5b0732286f805445375489fceaec1f48306068ee3b/smmap-5.0.2.tar.gz", hash = "sha256:26ea65a03958fa0c8a1c7e8c7a58fdc77221b8910f6be2131affade476898ad5", size = 22329, upload-time = "2025-01-02T07:14:40.909Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/04/be/d09147ad1ec7934636ad912901c5fd7667e1c858e19d355237db0d0cd5e4/smmap-5.0.2-py3-none-any.whl", hash = "sha256:b30115f0def7d7531d22a0fb6502488d879e75b260a9db4d0819cfb25403af5e", size = 24303, upload-time = "2025-01-02T07:14:38.724Z" },
-]
-
-[[package]]
 name = "soupsieve"
 version = "2.9"
 source = { registry = "https://pypi.org/simple" }
@@ -2157,15 +2102,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/7a/fd/7a5ee21fd08ff70d3d33a5781c255cbe779659bd03278feb98b19ee550f4/tinycss2-1.4.0.tar.gz", hash = "sha256:10c0972f6fc0fbee87c3edb76549357415e94548c1ae10ebccdea16fb404a9b7", size = 87085, upload-time = "2024-10-24T14:58:29.895Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/e6/34/ebdc18bae6aa14fbee1a08b63c015c72b64868ff7dae68808ab500c492e2/tinycss2-1.4.0-py3-none-any.whl", hash = "sha256:3a49cf47b7675da0b15d0c6e1df8df4ebd96e9394bb905a5775adb0d884c5289", size = 26610, upload-time = "2024-10-24T14:58:28.029Z" },
-]
-
-[[package]]
-name = "toml"
-version = "0.10.2"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/be/ba/1f744cdc819428fc6b5084ec34d9b30660f6f9daaf70eead706e3203ec3c/toml-0.10.2.tar.gz", hash = "sha256:b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f", size = 22253, upload-time = "2020-11-01T01:40:22.204Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/44/6f/7120676b6d73228c96e17f1f794d8ab046fc910d781c8d151120c3f1569e/toml-0.10.2-py2.py3-none-any.whl", hash = "sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b", size = 16588, upload-time = "2020-11-01T01:40:20.672Z" },
 ]
 
 [[package]]
@@ -2346,23 +2282,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/e2/2d/43dc3e079e767257c7f41ce25cf786e0e8e5fca3156e9ed481948114d7ca/wagtail_localize-1.11.3.tar.gz", hash = "sha256:bd2e57b0afbeaff741d49e7de14bab9de96767273f8f3978076a0413dbe630f6", size = 285374, upload-time = "2025-02-08T11:18:17.981Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/f6/c7/ae2ef885e4517a368dbee4a964c2c1e04cdb94931e253b53ff91c906a955/wagtail_localize-1.11.3-py3-none-any.whl", hash = "sha256:60f17c110bf368489ef40e39ed1d65b82d2768052b69462c6cb2fac44c77f331", size = 512648, upload-time = "2025-02-08T11:18:15.708Z" },
-]
-
-[[package]]
-name = "wagtail-localize-git"
-version = "0.15.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "django" },
-    { name = "gitpython" },
-    { name = "pygit2" },
-    { name = "toml" },
-    { name = "wagtail" },
-    { name = "wagtail-localize" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/8a/cf/32af4ceb6fd76017ce2b5950fcc84795fb5857c1f9411bc9968710cea63f/wagtail_localize_git-0.15.0.tar.gz", hash = "sha256:73fbcebe7348899cb147e7f9542264f00f3eb63de0c98b4a284550365bd1a6cb", size = 14416, upload-time = "2024-11-25T21:29:33.708Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/de/82/1b77d11235a248892420b3a1285e9085edc83915f0adbcbbb72ee7f08252/wagtail_localize_git-0.15.0-py3-none-any.whl", hash = "sha256:0c9ce2b70a2626ba0a7c9dba409950bab5ad4e999c0d397a14c8da57f6136305", size = 16352, upload-time = "2024-11-25T21:29:30.186Z" },
 ]
 
 [[package]]

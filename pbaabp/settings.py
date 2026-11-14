@@ -265,10 +265,6 @@ WAGTAIL_CONTENT_LANGUAGES = LANGUAGES = [
     ("es", "Spanish"),
 ]
 
-if not DEBUG:
-    WAGTAILLOCALIZE_GIT_URL = "git@github.com:PhillyBikeAction/apps-bikeaction-org-content-pos.git"
-    WAGTAILLOCALIZE_GIT_CLONE_DIR = "/data/translations/wagtail-content-pos.git"
-
 USE_TZ = True
 
 

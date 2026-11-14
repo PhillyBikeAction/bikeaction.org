@@ -51,7 +51,6 @@ dependencies = [
     "pillow>=13.0.0",
     "psycopg2-binary>=2.9.10",
     "pyap2>=0.1.14",
-    "pygit2>=1.17.0",
     "pynliner>=0.8.0",
     "redis-lock-py>=1.1.1",
     "reportlab>=4.4.5",
@@ -60,7 +59,6 @@ dependencies = [
     "wagtail>=7.3.4",
     "wagtail-link-block>=1.1.7",
     "wagtail-localize>=1.11.3",
-    "wagtail-localize-git>=0.15.0",
     "wagtailset>=1.1.2",
     "whitenoise>=6.9.0",
 ]
