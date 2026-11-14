@@ -969,6 +969,77 @@ class VotingTests(TestCase):
         self.assertContains(response, "Should we do the thing?")
 
     @patch("elections.models.Election.get_eligible_voters")
+    def test_available_district_seats_require_ballot_candidates(self, mock_eligible):
+        from django.contrib.gis.geos import MultiPolygon, Point, Polygon
+
+        from facets.models import District
+
+        district1 = District.objects.create(
+            name="District 1",
+            mpoly=MultiPolygon(Polygon.from_bbox((0, 0, 2, 2)), srid=4326),
+            properties={},
+        )
+        district7 = District.objects.create(
+            name="District 7",
+            mpoly=MultiPolygon(Polygon.from_bbox((3, 3, 5, 5)), srid=4326),
+            properties={},
+        )
+        self.voter.profile.location = Point(4, 4)
+        self.voter.profile.save()
+        self.nominee1.profile.location = Point(1, 1)
+        self.nominee1.profile.save()
+        mock_eligible.return_value = [self.voter.profile, self.nominee1.profile]
+        self.client.force_login(self.voter)
+        url = reverse("election_vote", kwargs={"election_slug": self.election.slug})
+
+        # District 7 has an eligible voter, but only published, accepted
+        # candidates from that district should make its seat available.
+        cases = [
+            (None, Nomination.AcceptanceStatus.ACCEPTED, False, 1, [district1]),
+            (Point(4, 4), Nomination.AcceptanceStatus.PENDING, False, 1, [district1]),
+            (Point(4, 4), Nomination.AcceptanceStatus.DECLINED, False, 1, [district1]),
+            (Point(4, 4), Nomination.AcceptanceStatus.ACCEPTED, True, 1, [district1]),
+            (Point(4, 4), Nomination.AcceptanceStatus.ACCEPTED, False, 1, [district1, district7]),
+            (Point(4, 4), Nomination.AcceptanceStatus.ACCEPTED, False, 2, []),
+        ]
+        for location, status, draft, min_voters, expected_districts in cases:
+            self.nominee2.profile.location = location
+            self.nominee2.profile.save()
+            self.nominee_record2.nominations.update(acceptance_status=status, draft=draft)
+            self.election.district_seat_min_voters = min_voters
+            self.election.save()
+            for preview in (False, True):
+                with self.subTest(
+                    location=location,
+                    status=status,
+                    draft=draft,
+                    min_voters=min_voters,
+                    preview=preview,
+                ):
+                    response = self.client.get(url, {"preview": "true"} if preview else {})
+                    self.assertEqual(response.status_code, 200)
+                    self.assertEqual(response.context["activated_districts"], expected_districts)
+                    self.assertEqual(
+                        response.context["activated_district_seats"], len(expected_districts)
+                    )
+                    total_seats = len(expected_districts) + self.election.at_large_seats_count
+                    self.assertEqual(response.context["total_available_seats"], total_seats)
+                    self.assertContains(response, f"Board ({total_seats} seats available)")
+                    if expected_districts == [district1]:
+                        self.assertContains(response, "1 district reserved seat (District 1)")
+
+        # District identity must not depend on numbers in its display name.
+        district1.name = "North"
+        district1.save()
+        district7.name = "South"
+        district7.save()
+        self.election.district_seat_min_voters = 1
+        self.election.save()
+        response = self.client.get(url)
+        self.assertEqual(response.context["activated_districts"], [district1, district7])
+        self.assertContains(response, "2 district reserved seats (North, South)")
+
+    @patch("elections.models.Election.get_eligible_voters")
     def test_ballot_submission(self, mock_eligible):
         """Voters should be able to submit ballots."""
         from elections.models import Ballot, QuestionVote, Vote

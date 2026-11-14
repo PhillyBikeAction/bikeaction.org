@@ -39,7 +39,7 @@
       <b>Approval Voting:</b> Select all candidates you approve of. You may vote for as many or as few candidates as you like.
     </p>
     <p style="margin-bottom: 0.5rem; color: #666;">
-      {{ activated_district_seats }} district reserved seat{{ activated_district_seats|pluralize }}{% if activated_districts %} (District{{ activated_districts|length|pluralize }} {{ activated_districts|join:", " }}){% endif %} and {{ election.at_large_seats_count }} unreserved seat{{ election.at_large_seats_count|pluralize }} available.
+      {{ activated_district_seats }} district reserved seat{{ activated_district_seats|pluralize }}{% if activated_districts %} ({{ activated_districts|join:", " }}){% endif %} and {{ election.at_large_seats_count }} unreserved seat{{ election.at_large_seats_count|pluralize }} available.
     </p>
     <p style="margin-bottom: 1.5rem; color: #666;">
       Candidates are shown in random order. Click the icon to the right of each candidate's name to view all nominations made for that candidate.

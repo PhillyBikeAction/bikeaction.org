@@ -699,32 +699,29 @@ def vote(request, election_slug):
     # Get questions for this election
     questions = Question.objects.filter(election=election).order_by("order")
 
-    # Calculate available seats (district seats only count if district has enough voters)
-    # Use the already-fetched eligible_voters from above
-    eligible_voters_qs = eligible_voters
-
-    # Count voters per district (districts 1-10)
+    # District seats require enough eligible voters and a candidate on this ballot.
     from collections import Counter
 
     district_voter_counts = Counter()
-    for profile in eligible_voters_qs:
+    for profile in eligible_voters:
         district = profile.district
         if district:
-            # Extract district number from name (e.g., "District 5" -> 5)
-            import re
+            district_voter_counts[district] += 1
 
-            match = re.search(r"\d+", district.name)
-            if match:
-                district_num = int(match.group())
-                district_voter_counts[district_num] += 1
+    candidate_districts = set()
+    for nominee in nominees:
+        district = nominee.user.profile.district
+        if district:
+            candidate_districts.add(district)
 
-    # Get list of activated districts
+    # Get list of activated districts with candidates who can fill the seats
     activated_districts = sorted(
         [
-            district_num
-            for district_num, count in district_voter_counts.items()
-            if count >= election.district_seat_min_voters
-        ]
+            district
+            for district, count in district_voter_counts.items()
+            if count >= election.district_seat_min_voters and district in candidate_districts
+        ],
+        key=lambda district: district.name,
     )
     activated_district_seats = len(activated_districts)
     total_available_seats = activated_district_seats + election.at_large_seats_count
