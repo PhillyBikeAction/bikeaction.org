@@ -32,6 +32,14 @@ def mark_as_submitted(modeladmin, request, queryset):
 
 @admin.action(description="Approve selected email blasts")
 def mark_as_approved(modeladmin, request, queryset):
+    if not request.user.is_superuser and queryset.filter(submitter=request.user).exists():
+        modeladmin.message_user(
+            request,
+            "No email blasts approved. You cannot approve your own email blast; "
+            "remove your submissions from the selection and try again.",
+            level=messages.ERROR,
+        )
+        return
     _mark_email_blast_status(modeladmin, request, queryset, EmailBlast.Status.APPROVED)
 
 

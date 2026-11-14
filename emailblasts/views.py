@@ -199,6 +199,8 @@ def email_draft_review(request, draft_id):
                 messages.error(request, str(error))
         elif request.user.is_staff:
             if action == "approve" and draft.status == EmailBlast.Status.SUBMITTED:
+                if is_author and not request.user.is_superuser:
+                    raise PermissionDenied("You cannot approve your own email blast.")
                 draft.status = EmailBlast.Status.APPROVED
                 draft.save(update_fields=["status", "updated_at"])
                 messages.success(request, "Email blast approved.")

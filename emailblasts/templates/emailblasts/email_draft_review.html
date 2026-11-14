@@ -138,12 +138,16 @@
     </button>
   </form>
   {% if draft.status == "submitted" %}
+    {% if not is_author or request.user.is_superuser %}
     <form method="post">
       {% csrf_token %}
       <button type="submit" name="action" value="approve" class="email-review-button email-review-button-approve">
         {% translate "Approve" %}
       </button>
     </form>
+    {% else %}
+    <span>{% translate "Someone else must approve your email blast before you can send it." %}</span>
+    {% endif %}
     <form method="post">
       {% csrf_token %}
       <button type="submit" name="action" value="reject" class="email-review-button email-review-button-reject">

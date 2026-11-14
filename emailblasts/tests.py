@@ -21,7 +21,7 @@ from django.utils import timezone
 
 from campaigns.models import Petition, PetitionSignature
 from elections.models import Ballot, Election
-from emailblasts.admin import send_selected_email_blasts
+from emailblasts.admin import mark_as_approved, send_selected_email_blasts
 from emailblasts.forms import EmailDraftForm
 from emailblasts.models import (
     EmailBlast,
@@ -388,6 +388,62 @@ class EmailBlastSendTaskTests(TestCase):
         self.assertEqual(blast.status, EmailBlast.Status.SENT)
 
 
+class EmailBlastReviewPermissionTests(TestCase):
+    def setUp(self):
+        self.author = User.objects.create_user(username="author", is_staff=True)
+        self.reviewer = User.objects.create_user(username="reviewer", is_staff=True)
+        permission = Permission.objects.get(codename="can_organize")
+        for user in (self.author, self.reviewer):
+            user.user_permissions.add(permission)
+        self.blast = EmailBlast.objects.create(
+            subject="Review permissions",
+            body="Main message",
+            submitter=self.author,
+            status=EmailBlast.Status.SUBMITTED,
+        )
+        self.url = reverse("email_draft_review", args=[self.blast.id])
+        self.client.force_login(self.author)
+
+    def test_author_cannot_approve(self):
+        response = self.client.get(self.url)
+        self.assertNotContains(response, 'value="approve"')
+        response = self.client.post(self.url, {"action": "approve"})
+        self.assertEqual(response.status_code, 403)
+        self.blast.refresh_from_db()
+        self.assertEqual(self.blast.status, EmailBlast.Status.SUBMITTED)
+
+    def test_superuser_can_approve_own_blast(self):
+        self.author.is_superuser = True
+        self.author.save()
+        response = self.client.get(self.url)
+        self.assertContains(response, 'value="approve"')
+        self.assertNotContains(response, "Someone else must approve")
+        response = self.client.post(self.url, {"action": "approve"})
+        self.assertEqual(response.status_code, 302)
+        self.blast.refresh_from_db()
+        self.assertEqual(self.blast.status, EmailBlast.Status.APPROVED)
+
+    @patch("emailblasts.views.send_email_blast.delay")
+    def test_author_can_send_after_another_staff_member_approves(self, mock_delay):
+        self.client.force_login(self.reviewer)
+        self.assertContains(self.client.get(self.url), 'value="approve"')
+        self.client.post(self.url, {"action": "approve"})
+        self.blast.refresh_from_db()
+        self.assertEqual(self.blast.status, EmailBlast.Status.APPROVED)
+        self.client.force_login(self.author)
+        self.assertContains(self.client.get(self.url), 'id="send-blast-trigger"')
+        with self.captureOnCommitCallbacks(execute=True):
+            response = self.client.post(self.url, {"action": "send"})
+        self.assertEqual(response.status_code, 302)
+        mock_delay.assert_called_once_with(self.blast.id)
+
+    @patch("emailblasts.views.send_email_blast.delay")
+    def test_author_cannot_send_before_approval(self, mock_delay):
+        with self.captureOnCommitCallbacks(execute=True):
+            self.client.post(self.url, {"action": "send"})
+        mock_delay.assert_not_called()
+
+
 class EmailBlastAdminActionTests(TestCase):
     def create_blast(self, subject, status):
         return EmailBlast.objects.create(
@@ -397,11 +453,50 @@ class EmailBlastAdminActionTests(TestCase):
             status=status,
         )
 
+    def test_approval_blocks_entire_selection_containing_own_blast(self):
+        author = User.objects.create_user(username="author", is_staff=True)
+        own_blast = self.create_blast("Own blast", EmailBlast.Status.SUBMITTED)
+        own_blast.submitter = author
+        own_blast.save()
+        other_blast = self.create_blast("Other blast", EmailBlast.Status.SUBMITTED)
+        modeladmin = Mock()
+        mark_as_approved(modeladmin, Mock(user=author), EmailBlast.objects.all())
+        own_blast.refresh_from_db()
+        other_blast.refresh_from_db()
+        self.assertEqual(own_blast.status, EmailBlast.Status.SUBMITTED)
+        self.assertEqual(other_blast.status, EmailBlast.Status.SUBMITTED)
+        self.assertEqual(modeladmin.message_user.call_args.kwargs["level"], messages.ERROR)
+
+    def test_superuser_can_approve_selection_containing_own_blast(self):
+        author = User.objects.create_user(username="author", is_staff=True, is_superuser=True)
+        own_blast = self.create_blast("Own blast", EmailBlast.Status.SUBMITTED)
+        own_blast.submitter = author
+        own_blast.save()
+        other_blast = self.create_blast("Other blast", EmailBlast.Status.SUBMITTED)
+        mark_as_approved(Mock(), Mock(user=author), EmailBlast.objects.all())
+        own_blast.refresh_from_db()
+        other_blast.refresh_from_db()
+        self.assertEqual(own_blast.status, EmailBlast.Status.APPROVED)
+        self.assertEqual(other_blast.status, EmailBlast.Status.APPROVED)
+
+    def test_approval_allows_another_users_blast(self):
+        author = User.objects.create_user(username="author")
+        reviewer = User.objects.create_user(username="reviewer", is_staff=True)
+        blast = self.create_blast("Other blast", EmailBlast.Status.SUBMITTED)
+        blast.submitter = author
+        blast.save()
+        mark_as_approved(Mock(), Mock(user=reviewer), EmailBlast.objects.filter(pk=blast.pk))
+        blast.refresh_from_db()
+        self.assertEqual(blast.status, EmailBlast.Status.APPROVED)
+
     @patch("emailblasts.admin.send_email_blast.delay")
     def test_send_selected_email_blasts_queues_approved_blasts(self, mock_delay):
         blast = self.create_blast("Approved blast", EmailBlast.Status.APPROVED)
+        author = User.objects.create_user(username="author", is_staff=True)
+        blast.submitter = author
+        blast.save()
         modeladmin = Mock()
-        request = Mock()
+        request = Mock(user=author)
 
         with self.captureOnCommitCallbacks(execute=True):
             send_selected_email_blasts(
