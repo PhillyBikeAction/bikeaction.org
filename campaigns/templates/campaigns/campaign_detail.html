@@ -117,19 +117,6 @@
         {% include 'petition/form.html' with petition=petition form=petition.form %}
       </div>
       {% endif %}
-      {% if petition.signatures.all %}
-      <div id="signatures-container-{{ petition.id }}">
-        {% include 'campaigns/_partial_signatures.html' %}
-      </div>
-      <div id="signature-poller-{{ petition.id }}"
-           hx-get="{% url 'petition_signatures' petition_slug_or_id=petition.id %}"
-           hx-trigger="every 10s"
-           hx-target="#signature-cards-{{ petition.id }}"
-           hx-swap="afterbegin"
-           hx-vals='js:{"since": window.signatureTimestamps?.["{{ petition.id }}"] || (Date.now()/1000)}'
-           hx-on::after-request="window.signatureTimestamps = window.signatureTimestamps || {}; window.signatureTimestamps['{{ petition.id }}'] = Date.now()/1000;">
-      </div>
-      {% endif %}
     {% endfor %}
     </div>
   {% elif campaign.petitions.all and campaign.status == "completed" %}
@@ -139,11 +126,6 @@
       {% if petition.letter %}
       <div class="petition">
         <p>{{petition.letter|linebreaks}}</p>
-      </div>
-      {% endif %}
-      {% if petition.signatures.all %}
-      <div>
-        {% include 'campaigns/_partial_signatures.html' %}
       </div>
       {% endif %}
     {% endfor %}
@@ -164,6 +146,24 @@
     {% add_copy_script %}
   </div>
   {% endif %}
+
+  {% for petition in campaign.petitions.all %}
+      {% if petition.signatures.all %}
+      <div id="signatures-container-{{ petition.id }}">
+        {% include 'campaigns/_partial_signatures.html' %}
+      </div>
+      {% if not campaign.status == "completed" %}
+      <div id="signature-poller-{{ petition.id }}"
+           hx-get="{% url 'petition_signatures' petition_slug_or_id=petition.id %}"
+           hx-trigger="every 10s"
+           hx-target="#signature-cards-{{ petition.id }}"
+           hx-swap="afterbegin"
+           hx-vals='js:{"since": window.signatureTimestamps?.["{{ petition.id }}"] || (Date.now()/1000)}'
+           hx-on::after-request="window.signatureTimestamps = window.signatureTimestamps || {}; window.signatureTimestamps['{{ petition.id }}'] = Date.now()/1000;">
+      </div>
+      {% endif %}
+      {% endif %}
+  {% endfor %}
 
   </div>
 
