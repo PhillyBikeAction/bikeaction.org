@@ -20,7 +20,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from campaigns.models import Petition, PetitionSignature
-from elections.models import Ballot, Election
+from elections.models import Ballot, Election, Nominee, Question, QuestionVote, Vote
 from emailblasts.admin import mark_as_approved, send_selected_email_blasts
 from emailblasts.forms import EmailDraftForm
 from emailblasts.models import (
@@ -1174,15 +1174,42 @@ class ElectionEmailTargetTests(TestCase):
         self.election(self.now + timedelta(days=5))
         self.assertEqual(self.profiles(self.types.ELECTION_ELIGIBLE), set(self.members[:2]))
 
-    def test_reminder_excludes_blank_ballots_but_not_other_elections_ballots(self):
+    def test_reminder_includes_blank_ballots_and_other_elections_voters(self):
 
         election = self.election(self.now + timedelta(days=5))
         other = self.election(self.now + timedelta(days=20))
-        Ballot.objects.create(election=other, voter=self.members[1].user)
+        other_ballot = Ballot.objects.create(election=other, voter=self.members[1].user)
+        question = Question.objects.create(election=other, question_text="Approve?")
+        QuestionVote.objects.create(ballot=other_ballot, question=question, answer=True)
         self.assertEqual(self.profiles(self.types.ELECTION_NOT_VOTED), set(self.members[:2]))
         Ballot.objects.create(election=election, voter=self.members[0].user)
+        self.assertEqual(self.profiles(self.types.ELECTION_NOT_VOTED), set(self.members[:2]))
+        self.assertEqual(self.profiles(self.types.ELECTION_ELIGIBLE), set(self.members[:2]))
+
+    def test_reminder_excludes_candidate_votes(self):
+        election = self.election(self.now + timedelta(days=5))
+        ballot = Ballot.objects.create(election=election, voter=self.members[0].user)
+        nominee = Nominee.objects.create(election=election, user=self.members[1].user)
+        Vote.objects.create(ballot=ballot, nominee=nominee)
         self.assertEqual(self.profiles(self.types.ELECTION_NOT_VOTED), {self.members[1]})
         self.assertEqual(self.profiles(self.types.ELECTION_ELIGIBLE), set(self.members[:2]))
+
+    def test_reminder_excludes_yes_and_no_question_answers(self):
+        election = self.election(self.now + timedelta(days=5))
+        ballot = Ballot.objects.create(election=election, voter=self.members[0].user)
+        question = Question.objects.create(election=election, question_text="Approve?")
+        vote = QuestionVote.objects.create(ballot=ballot, question=question, answer=True)
+        for answer in (True, False):
+            with self.subTest(answer=answer):
+                vote.answer = answer
+                vote.save()
+                self.assertEqual(self.profiles(self.types.ELECTION_NOT_VOTED), {self.members[1]})
+
+    def test_reminder_excludes_anonymized_votes_but_includes_empty_ballots(self):
+        election = self.election(self.now - timedelta(days=1))
+        Ballot.objects.create(election=election, voter=self.members[0].user, had_votes=True)
+        Ballot.objects.create(election=election, voter=self.members[1].user, had_votes=False)
+        self.assertEqual(self.profiles(self.types.ELECTION_NOT_VOTED), {self.members[1]})
 
     def test_form_accepts_both_targets_without_an_election_id(self):
         for kind in (self.types.ELECTION_ELIGIBLE, self.types.ELECTION_NOT_VOTED):
@@ -1213,9 +1240,16 @@ class ElectionEmailTargetTests(TestCase):
             self.members[0].user,
         )
         self.assertEqual(len(_email_blast_target_recipients(target)), 2)
-        Ballot.objects.create(election=election, voter=self.members[0].user)
+        ballot = Ballot.objects.create(election=election, voter=self.members[0].user)
+        self.assertEqual(len(_email_blast_target_recipients(target)), 2)
+        question = Question.objects.create(election=election, question_text="Approve?")
+        vote = QuestionVote.objects.create(ballot=ballot, question=question, answer=False)
         self.assertEqual(
             [r.email for r in _email_blast_target_recipients(target)], [self.members[1].user.email]
         )
         DoNotEmail.objects.create(email=self.members[1].user.email)
         self.assertEqual(_email_blast_target_recipients(target), [])
+        vote.delete()
+        self.assertEqual(
+            [r.email for r in _email_blast_target_recipients(target)], [self.members[0].user.email]
+        )

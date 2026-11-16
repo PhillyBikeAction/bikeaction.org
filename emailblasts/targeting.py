@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from datetime import timedelta
 
 from django.contrib.gis.geos import GEOSGeometry
+from django.db.models import Q
 from django.db.models.functions import Lower
 from django.db.models.functions import Trim
 from django.utils import timezone
@@ -62,9 +63,14 @@ def _email_draft_target_profiles(target):
             return Profile.objects.none()
         profiles = election.get_eligible_voters()
         if target["target_type"] == EmailBlastTargetNode.TargetType.ELECTION_NOT_VOTED:
-            profiles = profiles.exclude(
-                user_id__in=Ballot.objects.filter(election=election).values("voter_id")
+            # Opening the voting page creates an empty ballot; only choices count as voting.
+            # After anonymization, had_votes preserves whether the ballot contained choices.
+            voted_ballots = Ballot.objects.filter(election=election).filter(
+                Q(candidate_votes__isnull=False)
+                | Q(question_votes__isnull=False)
+                | Q(had_votes=True)
             )
+            profiles = profiles.exclude(user_id__in=voted_ballots.values("voter_id"))
         return profiles
     if target["target_type"] == EmailBlastTargetNode.TargetType.GEOJSON:
         return _email_draft_geojson_profiles(json.dumps(target["target_geojson"]))
