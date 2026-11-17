@@ -26,6 +26,13 @@ def project_application_view(request, pk=None):
         messages.add_message(request, messages.ERROR, message)
         return redirect("profile")
 
+    if not request.user.profile.pronouns:
+        message = (
+            "You must set the pronouns field in your profile to submit a project application."
+        )
+        messages.add_message(request, messages.ERROR, message)
+        return redirect("profile")
+
     application = get_object_or_404(ProjectApplication, id=pk)
 
     return render(request, "project_application_view.html", {"application": application})
@@ -47,6 +54,13 @@ def project_application(request, pk=None):
 
     if not apps_connected:
         message = "You must connect your discord account to submit a project application."
+        messages.add_message(request, messages.ERROR, message)
+        return redirect("profile")
+
+    if not request.user.profile.pronouns:
+        message = (
+            "You must set the pronouns field in your profile to submit a project application."
+        )
         messages.add_message(request, messages.ERROR, message)
         return redirect("profile")
 
