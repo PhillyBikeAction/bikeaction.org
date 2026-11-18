@@ -34,6 +34,7 @@ class EventSignInRememberedIdentityTests(TestCase):
             "council_district": EventSignIn.District.DISTRICT_3,
             "zip_code": "19107",
             "newsletter_opt_in": "on",
+            "volunteer_opt_in": "on",
         }
         data.update(overrides)
         return data
@@ -104,6 +105,8 @@ class EventSignInRememberedIdentityTests(TestCase):
         signin = EventSignIn.objects.get(event=event)
         self.assertEqual(signin.first_name, "Grace")
         self.assertEqual(signin.email, "grace@example.com")
+        self.assertEqual(signin.newsletter_opt_in, True)
+        self.assertEqual(signin.volunteer_opt_in, True)
         payload = decrypt_event_signin_payload(response.cookies[EVENT_SIGNIN_COOKIE_NAME].value)
         self.assertEqual(payload, {"type": EVENT_SIGNIN_COOKIE_TYPE_USER, "id": user.id})
 
@@ -115,6 +118,7 @@ class EventSignInRememberedIdentityTests(TestCase):
             password="password",
             first_name="Grace",
             last_name="Hopper",
+            profile=None,
         )
         self.client.force_login(user)
 
@@ -135,6 +139,7 @@ class EventSignInRememberedIdentityTests(TestCase):
             password="password",
             first_name="Grace",
             last_name="Hopper",
+            profile=None,
         )
         self.client.cookies[EVENT_SIGNIN_COOKIE_NAME] = encrypt_event_signin_payload(
             {"type": EVENT_SIGNIN_COOKIE_TYPE_USER, "id": user.id}

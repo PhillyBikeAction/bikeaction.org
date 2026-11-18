@@ -129,6 +129,7 @@ class EventSignIn(models.Model):
         blank=True,
     )
     newsletter_opt_in = models.BooleanField(blank=False, default=False)
+    volunteer_opt_in = models.BooleanField(blank=False, default=False)
 
     def save(self, *args, **kwargs):
         if not self._state.adding:

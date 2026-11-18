@@ -84,7 +84,7 @@ class Profile(models.Model):
         blank=False,
         default=False,
         verbose_name=_("Volunteering"),
-        help_text=_("Recieve news about volunteer opportunities with Philly Bike Action."),
+        help_text=_("Receive news about volunteer opportunities with Philly Bike Action."),
     )
 
     location = models.PointField(blank=True, null=True, srid=4326)

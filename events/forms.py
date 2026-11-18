@@ -29,12 +29,14 @@ class EventSignInForm(forms.ModelForm):
             "last_name",
             "email",
             "newsletter_opt_in",
+            "volunteer_opt_in",
             "council_district",
             "zip_code",
         ]
         labels = {
             "council_district": "What Philadelphia City Council District do you live in?",
-            "newsletter_opt_in": "Receive our Newsletter?",
+            "newsletter_opt_in": "Subscribe to Philly Bike Action's monthly newsletter.",
+            "volunteer_opt_in": "Receive news about volunteer opportunities with Philly Bike Action.",
         }
         help_texts = {
             "council_district": (

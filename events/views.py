@@ -46,6 +46,7 @@ def _event_signin_data_from_signin(signin):
         "council_district": signin.council_district,
         "zip_code": signin.zip_code,
         "newsletter_opt_in": signin.newsletter_opt_in,
+        "volunteer_opt_in": signin.volunteer_opt_in,
     }
 
 
@@ -79,6 +80,7 @@ def _event_signin_data_from_user(user):
         ),
         "zip_code": profile.zip_code if profile is not None else "",
         "newsletter_opt_in": profile.newsletter_opt_in if profile is not None else False,
+        "volunteer_opt_in": profile.volunteer_opt_in if profile is not None else False,
     }
 
 
@@ -158,6 +160,7 @@ def _save_event_signin(event, signin_data):
     existing_signin.council_district = signin_data["council_district"]
     existing_signin.zip_code = signin_data["zip_code"]
     existing_signin.newsletter_opt_in = signin_data["newsletter_opt_in"]
+    existing_signin.volunteer_opt_in = signin_data["volunteer_opt_in"]
     existing_signin.save()
     return existing_signin
 
@@ -346,7 +349,9 @@ def event_signin(request, event_slug_or_id):
 
         form = EventSignInForm(request.POST)
         if form.is_valid():
-            signin = _save_event_signin(event, _event_signin_data_from_signin(form.instance))
+            signin_data = _event_signin_data_from_signin(form.instance)
+            signin = _save_event_signin(event, signin_data)
+
             response = _event_signin_redirect(request, event)
             _set_event_signin_identity_cookie(response, request, signin)
             return response
