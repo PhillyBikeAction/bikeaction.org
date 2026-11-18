@@ -165,17 +165,6 @@ def _save_event_signin(event, signin_data):
     return existing_signin
 
 
-def _save_event_signin_profile(user, signin_data):
-    try:
-        user = User.objects.filter(id=user.id).first()
-        profile = user.profile
-        profile.newsletter_opt_in = signin_data["newsletter_opt_in"]
-        profile.volunteer_opt_in = signin_data["volunteer_opt_in"]
-        profile.save()
-    except (ObjectDoesNotExist, AttributeError):
-        return None
-
-
 def _set_event_signin_identity_cookie(response, request, signin):
     if request.user.is_authenticated and request.user.email.lower() == signin.email.lower():
         set_event_signin_cookie(
@@ -362,7 +351,6 @@ def event_signin(request, event_slug_or_id):
         if form.is_valid():
             signin_data = _event_signin_data_from_signin(form.instance)
             signin = _save_event_signin(event, signin_data)
-            _save_event_signin_profile(request.user, signin_data)
 
             response = _event_signin_redirect(request, event)
             _set_event_signin_identity_cookie(response, request, signin)
