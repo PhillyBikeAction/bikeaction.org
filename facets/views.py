@@ -122,23 +122,26 @@ def report(request):
     return render(request, "facets_report.html", context=context)
 
 
+EMAIL_REPORT_DAYSBACK_OPTIONS = [30, 90, 365]
+
+
 @staff_member_required
 def email_report(request):
     start_date = timezone.now() - timedelta(days=30)
     end_date = timezone.now()
 
     try:
-        if request.GET.get('start_date'):
-            start_date = datetime.fromisoformat(request.GET.get('start_date'))
-    except Exception as e:
+        if request.GET.get("start_date"):
+            start_date = datetime.fromisoformat(request.GET.get("start_date"))
+    except Exception:
         pass
 
     try:
-        if request.GET.get('end_date'):
-            end_date = datetime.fromisoformat(request.GET.get('end_date'))
-    except Exception as e:
+        if request.GET.get("end_date"):
+            end_date = datetime.fromisoformat(request.GET.get("end_date"))
+    except Exception:
         pass
-    
+
     all_profiles = Profile.objects.filter(
         user__email__isnull=False, location__isnull=False
     ).select_related("user")
@@ -147,9 +150,9 @@ def email_report(request):
 
     email_counts = {}
 
-    recent_emails = Email.objects.filter(date_sent__gte=start_date, date_sent__lte=end_date).values_list(
-        "recipients", flat=True
-    )
+    recent_emails = Email.objects.filter(
+        date_sent__gte=start_date, date_sent__lte=end_date
+    ).values_list("recipients", flat=True)
 
     for recipients_field in recent_emails:
         if recipients_field:
@@ -204,12 +207,21 @@ def email_report(request):
 
     rcos_data.sort(key=lambda x: x["avg_emails"], reverse=True)
 
+    date_options = map(
+        lambda daysback: {
+            "daysback": daysback,
+            "start_date": (timezone.now() - timedelta(days=daysback)).strftime("%F"),
+        },
+        EMAIL_REPORT_DAYSBACK_OPTIONS,
+    )
+
     context = {
         "districts": districts_data,
         "rcos": rcos_data,
-        "start_date": start_date.strftime('%F'),
-        "end_date": end_date.strftime('%F'),
+        "start_date": start_date.strftime("%F"),
+        "end_date": end_date.strftime("%F"),
         "date_range": f"from {start_date.strftime('%x')} to {end_date.strftime('%x')}",
+        "date_options": date_options,
     }
 
     return render(request, "facets_email_report.html", context=context)

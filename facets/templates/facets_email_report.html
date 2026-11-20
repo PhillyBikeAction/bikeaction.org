@@ -3,6 +3,12 @@
 {% block content %}
 
 <style>
+  .top_layout {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
   .form_layout {
     display: inline-flex;
     padding: 0;
@@ -19,12 +25,17 @@
     font-size: 1rem;
     padding: 5px 10px;
   }
+
+  .link_layout {
+    display: flex;
+    gap: 8px;
+  }
 </style>
 
 <h1>Email Report by Geography</h1>
 <p>{{ date_range }}</p>
 
-<div class="">
+<div class="top_layout">
   <form method="GET" class="form_layout">
     <label class="date_field">
       <span>Start Date</span>
@@ -36,6 +47,13 @@
     </label>
     <button type="submit" class="go_button">Go</button>
   </form>
+
+  <div class="link_layout">
+    {% for date_option in date_options %}
+    <a href="?start_date={{ date_option.start_date }}">Last {{date_option.daysback}} days</a>
+    {% endfor %}
+    <a href="?start_date=2000-01-01">All time</a>
+  </div>
 </div>
 
 <h2>Districts by Average Emails Received</h2>
