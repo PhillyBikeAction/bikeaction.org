@@ -1,5 +1,4 @@
-import datetime
-import date
+from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
@@ -8,6 +7,7 @@ from django.db import transaction
 from django.db.models import Count
 from django.http import HttpResponse
 from django.shortcuts import render
+from django.utils import timezone
 from django.utils.html import mark_safe
 from email_log.models import Email
 
@@ -124,21 +124,20 @@ def report(request):
 
 @staff_member_required
 def email_report(request):
+    date_gte = timezone.now() - timedelta(days=30)
+    date_lte = timezone.now()
+
     try:
         if request.GET.get('start_date'):
-            date_lte = date.fromisoformat(request.GET.get('start_date'))
-        else:
-            date_lte = date.now() - datetime.timedelta(days=30)
-    except Exception:
-        date_lte = date.now() - datetime.timedelta(days=30)
+            date_gte = datetime.fromisoformat(request.GET.get('start_date'))
+    except Exception as e:
+        pass
 
     try:
         if request.GET.get('end_date'):
-            date_gte = date.fromisoformat(request.GET.get('end_date'))
-        else:
-            date_gte = date.now()
-    except Exception:
-        date_gte = date.now()
+            date_lte = datetime.fromisoformat(request.GET.get('end_date'))
+    except Exception as e:
+        pass
     
     all_profiles = Profile.objects.filter(
         user__email__isnull=False, location__isnull=False
