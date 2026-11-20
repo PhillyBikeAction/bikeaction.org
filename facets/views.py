@@ -124,18 +124,18 @@ def report(request):
 
 @staff_member_required
 def email_report(request):
-    date_gte = timezone.now() - timedelta(days=30)
-    date_lte = timezone.now()
+    start_date = timezone.now() - timedelta(days=30)
+    end_date = timezone.now()
 
     try:
         if request.GET.get('start_date'):
-            date_gte = datetime.fromisoformat(request.GET.get('start_date'))
+            start_date = datetime.fromisoformat(request.GET.get('start_date'))
     except Exception as e:
         pass
 
     try:
         if request.GET.get('end_date'):
-            date_lte = datetime.fromisoformat(request.GET.get('end_date'))
+            end_date = datetime.fromisoformat(request.GET.get('end_date'))
     except Exception as e:
         pass
     
@@ -147,7 +147,7 @@ def email_report(request):
 
     email_counts = {}
 
-    recent_emails = Email.objects.filter(date_sent__gte=date_gte, date_sent__lte=date_lte).values_list(
+    recent_emails = Email.objects.filter(date_sent__gte=start_date, date_sent__lte=end_date).values_list(
         "recipients", flat=True
     )
 
@@ -207,7 +207,9 @@ def email_report(request):
     context = {
         "districts": districts_data,
         "rcos": rcos_data,
-        "date_range": f"from {date_lte.strftime('%x')} to {date_gte.strftime('%x')}",
+        "start_date": start_date.strftime('%F'),
+        "end_date": end_date.strftime('%F'),
+        "date_range": f"from {start_date.strftime('%x')} to {end_date.strftime('%x')}",
     }
 
     return render(request, "facets_email_report.html", context=context)

@@ -1,8 +1,42 @@
 {% extends 'base.html' %}
 
 {% block content %}
+
+<style>
+  .form_layout {
+    display: inline-flex;
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .date_field {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 0;
+  }
+
+  .go_button {
+    font-size: 1rem;
+    padding: 5px 10px;
+  }
+</style>
+
 <h1>Email Report by Geography</h1>
 <p>{{ date_range }}</p>
+
+<div class="">
+  <form method="GET" class="form_layout">
+    <label class="date_field">
+      <span>Start Date</span>
+      <input type="date" value="{{start_date}}" name="start_date" />
+    </label>
+    <label class="date_field">
+      <span>End Date</span>
+      <input type="date" value="{{end_date}}" name="end_date" />
+    </label>
+    <button type="submit" class="go_button">Go</button>
+  </form>
+</div>
 
 <h2>Districts by Average Emails Received</h2>
 
