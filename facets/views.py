@@ -1,4 +1,5 @@
 import datetime
+import date
 
 from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
@@ -7,7 +8,6 @@ from django.db import transaction
 from django.db.models import Count
 from django.http import HttpResponse
 from django.shortcuts import render
-from django.utils import timezone
 from django.utils.html import mark_safe
 from email_log.models import Email
 
@@ -124,8 +124,22 @@ def report(request):
 
 @staff_member_required
 def email_report(request):
-    thirty_days_ago = timezone.now() - datetime.timedelta(days=30)
+    try:
+        if request.GET.get('start_date'):
+            date_lte = date.fromisoformat(request.GET.get('start_date'))
+        else:
+            date_lte = date.now() - datetime.timedelta(days=30)
+    except Exception:
+        date_lte = date.now() - datetime.timedelta(days=30)
 
+    try:
+        if request.GET.get('end_date'):
+            date_gte = date.fromisoformat(request.GET.get('end_date'))
+        else:
+            date_gte = date.now()
+    except Exception:
+        date_gte = date.now()
+    
     all_profiles = Profile.objects.filter(
         user__email__isnull=False, location__isnull=False
     ).select_related("user")
@@ -134,7 +148,7 @@ def email_report(request):
 
     email_counts = {}
 
-    recent_emails = Email.objects.filter(date_sent__gte=thirty_days_ago).values_list(
+    recent_emails = Email.objects.filter(date_sent__gte=date_gte, date_sent__lte=date_lte).values_list(
         "recipients", flat=True
     )
 
@@ -194,7 +208,7 @@ def email_report(request):
     context = {
         "districts": districts_data,
         "rcos": rcos_data,
-        "date_range": f"Last 30 days (since {thirty_days_ago.date()})",
+        "date_range": f"from {date_lte.strftime('%x')} to {date_gte.strftime('%x')}",
     }
 
     return render(request, "facets_email_report.html", context=context)
