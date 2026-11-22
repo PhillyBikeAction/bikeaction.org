@@ -795,7 +795,6 @@ def vote(request, election_slug):
     )
 
 
-@login_required
 def election_results(request, election_slug):
     """View election results (only after voting closes)."""
     election = get_object_or_404(Election, slug=election_slug)
