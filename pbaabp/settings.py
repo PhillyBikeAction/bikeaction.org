@@ -122,6 +122,7 @@ INSTALLED_APPS = [
     "campaigns",
     "release",
     "maillinks",
+    "finance",
     "facets",
     "projects",
     "organizers",

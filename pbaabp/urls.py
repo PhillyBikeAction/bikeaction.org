@@ -45,6 +45,7 @@ urlpatterns = [
     path("email-draft/", include("emailblasts.urls")),
     path("maillink/", include("maillinks.urls")),
     path("rcos/", include("facets.urls")),
+    path("finance/", include("finance.urls")),
     path("projects/", include("projects.urls")),
     path("organizers/", include("organizers.urls")),
     path("community-fund/", include("community_fund.urls")),
