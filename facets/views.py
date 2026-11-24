@@ -1,11 +1,11 @@
-import datetime
+from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.gis.geos import Point as GEOPoint
 from django.db import transaction
 from django.db.models import Count
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import render
 from django.utils import timezone
 from django.utils.html import mark_safe
@@ -122,9 +122,25 @@ def report(request):
     return render(request, "facets_report.html", context=context)
 
 
+EMAIL_REPORT_DAYSBACK_OPTIONS = [30, 90, 365]
+
+
 @staff_member_required
 def email_report(request):
-    thirty_days_ago = timezone.now() - datetime.timedelta(days=30)
+    start_date = timezone.now() - timedelta(days=30)
+    end_date = timezone.now()
+
+    try:
+        if request.GET.get("start_date"):
+            start_date = datetime.fromisoformat(request.GET.get("start_date"))
+    except Exception:
+        return HttpResponseBadRequest()
+
+    try:
+        if request.GET.get("end_date"):
+            end_date = datetime.fromisoformat(request.GET.get("end_date"))
+    except Exception:
+        return HttpResponseBadRequest()
 
     all_profiles = Profile.objects.filter(
         user__email__isnull=False, location__isnull=False
@@ -134,9 +150,9 @@ def email_report(request):
 
     email_counts = {}
 
-    recent_emails = Email.objects.filter(date_sent__gte=thirty_days_ago).values_list(
-        "recipients", flat=True
-    )
+    recent_emails = Email.objects.filter(
+        date_sent__gte=start_date, date_sent__lte=end_date
+    ).values_list("recipients", flat=True)
 
     for recipients_field in recent_emails:
         if recipients_field:
@@ -191,10 +207,21 @@ def email_report(request):
 
     rcos_data.sort(key=lambda x: x["avg_emails"], reverse=True)
 
+    date_options = map(
+        lambda daysback: {
+            "daysback": daysback,
+            "start_date": (timezone.now() - timedelta(days=daysback)).strftime("%F"),
+        },
+        EMAIL_REPORT_DAYSBACK_OPTIONS,
+    )
+
     context = {
         "districts": districts_data,
         "rcos": rcos_data,
-        "date_range": f"Last 30 days (since {thirty_days_ago.date()})",
+        "start_date": start_date.strftime("%F"),
+        "end_date": end_date.strftime("%F"),
+        "date_range": f"from {start_date.strftime('%x')} to {end_date.strftime('%x')}",
+        "date_options": date_options,
     }
 
     return render(request, "facets_email_report.html", context=context)
