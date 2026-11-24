@@ -5,7 +5,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.gis.geos import Point as GEOPoint
 from django.db import transaction
 from django.db.models import Count
-from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseServerError
+from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import render
 from django.utils import timezone
 from django.utils.html import mark_safe
@@ -133,18 +133,14 @@ def email_report(request):
     try:
         if request.GET.get("start_date"):
             start_date = datetime.fromisoformat(request.GET.get("start_date"))
-    except ValueError:
-        return HttpResponseBadRequest()
     except Exception:
-        return HttpResponseServerError()
+        return HttpResponseBadRequest()
 
     try:
         if request.GET.get("end_date"):
             end_date = datetime.fromisoformat(request.GET.get("end_date"))
-    except ValueError:
-        return HttpResponseBadRequest()
     except Exception:
-        return HttpResponseServerError()
+        return HttpResponseBadRequest()
 
     all_profiles = Profile.objects.filter(
         user__email__isnull=False, location__isnull=False
