@@ -229,12 +229,15 @@ def randomize_lat_long(salt, lat, long):
 
 def heatmap(modeladmin, request, queryset):
     pins = []
-    for signature in queryset:
-        if signature.location:
-            lat, lng = randomize_lat_long(
-                signature.petition.id, signature.location.y, signature.location.x
-            )
-            pins.append([lat, lng, 1])
+    locations = (
+        queryset.filter(location__isnull=False)
+        .prefetch_related(None)
+        .order_by()
+        .values_list("petition_id", "location")
+    )
+    for petition_id, location in locations.iterator():
+        lat, lng = randomize_lat_long(petition_id, location.y, location.x)
+        pins.append([lat, lng, 1])
     return render(request, "petition/heatmap.html", {"pins_json": json.dumps(pins)})
 
 
